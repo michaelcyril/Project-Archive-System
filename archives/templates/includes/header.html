@@ -1,0 +1,395 @@
+{%load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROJECT ARCHIVES </title>
+    <!-- GLOBAL MAINLY STYLES-->
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/css/dataTables.bootstrap.min.css'>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,500" rel="stylesheet"/>
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css" rel="stylesheet">
+
+    <link href="{% static 'assets/vendors/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'assets/vendors/font-awesome/css/font-awesome.min.css '%}" rel="stylesheet" />
+    <link href="{% static 'assets/vendors/themify-icons/css/themify-icons.css' %}" rel="stylesheet" />
+    <link href="{% static 'assets/vendors/DataTables/datatables.min.css' %}" rel="stylesheet" />
+    <!-- PLUGINS STYLES-->
+    <link href="{% static 'assets/vendors/jvectormap/jquery-jvectormap-2.0.3.css' %}" rel="stylesheet" />
+    <!-- THEME STYLES-->
+    <link href="{% static 'assets/css/main.min.css' %}" rel="stylesheet" />
+
+    
+    {% comment %} <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> {% endcomment %}
+    
+    {% comment %} <script src="https://kit.fontawesome.com/a076d05399.js"></script> {% endcomment %}
+
+    <style>
+        {% comment %} * {
+            box-sizing: border-box;
+          }
+          
+          :root {
+            --color-primary: #2e4a40;
+            --color-secondary: #e6efa3;
+            --color-tertiary: rgba(0, 0, 0, 0.2);
+          
+            --font-body: "Switzer", sans-serif;
+            --font-headings: "Gambarino", sans-serif;
+          } {% endcomment %}
+          
+          
+          {% comment %} figure {
+            width: 100%;
+            max-width: 800px;
+          } {% endcomment %}
+          
+          {% comment %} table {
+            text-align: left;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            table-layout: fixed;
+            white-space: nowrap;
+            border-radius: 3rem;
+            width: min(auto, 100%);
+          }
+          
+          table tbody {
+              border:  2px solid var(--color-tertiary);
+          }
+          
+          tbody td {
+            vertical-align: top;
+          }
+          
+          th {
+            font-family: var(--font-headings);
+            font-weight: bold;
+          }
+          
+          tr > * {
+            padding: 0.75rem 1rem;
+          }
+          
+          tr > *:nth-child(even) {
+            background-color: var(--color-tertiary);
+          }
+          
+          tr:first-child > td {
+            font-family: var(--font-headings);
+            font-weight: bold;
+          }
+          
+          thead {
+            border-bottom: 1px solid var(--color-primary);
+            font-size: var(--step-1);
+          }
+          
+          tr > * {
+            border-bottom: 2px solid var(--color-tertiary);
+              border-top: 2px solid var(--color-tertiary);
+          } {% endcomment %}
+          
+          .table-wrapper {
+            overflow: auto;
+          }
+          
+          .force-mobile {
+            background-color: var(--color-secondary);
+            min-height: calc(100vh - 6rem);
+            width: 100%;
+            max-width: 720px; margin: 0 auto;
+          }
+          
+          ::-webkit-scrollbar {
+            height: 1rem;
+            z-index: 100;
+            position: relative;
+          }
+          
+          ::-webkit-scrollbar-thumb {
+            background: var(--color-primary);
+          }
+          
+          ::-webkit-scrollbar-track {
+            background: var(--color-tertiary);
+          }
+          
+          {% comment %} caption {
+            text-align: left;
+            margin-bottom: 1rem;
+          }
+          
+          h1 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-family: var(--font-headings);
+            font-size: 1.5rem;
+            display: block;
+          } {% endcomment %}
+    
+    </style>
+
+  
+    <!-- PAGE LEVEL STYLES-->
+</head> 
+{% if side == 'projects' or side == 'a' or side == 'being' %}
+<body class="fixed-navbar" style="" id="searchs">
+{% else %}
+<body class="fixed-navbar" style="overflow:hidden; height:100%" id="searchs">
+    {% endif %}
+    <div class="page-wrapper">
+        <!-- START HEADER-->
+        <header class="header">
+            <div class="page-brand">
+                <a class="link" href="/">
+                    <div>
+                        <img src="{% static 'assets/img/dit.png' %}" width="45px" align="center" />
+                    </div>
+                </a>
+            </div>
+            <div class="flexbox flex-1">
+                <!-- START TOP-LEFT TOOLBAR-->
+                <ul class="nav navbar-toolbar">
+                    <li>
+                        <a class="nav-link sidebar-toggler js-sidebar-toggler"><i class="ti-menu"></i></a>
+                    </li>
+                    <li>
+                        <form class="navbar-search" action="javascript:;">
+                            <div class="rel">
+                                <span class="search-icon"><i class="ti-search"></i></span>
+                                <input class="form-control" type="text" id="myInputs" placeholder="Search here...">
+                            </div>
+                        </form>
+                    </li>
+                </ul>
+                <!-- END TOP-LEFT TOOLBAR-->
+                <!-- START TOP-RIGHT TOOLBAR-->
+                <ul class="nav navbar-toolbar">
+                    {% comment %} <li class="dropdown dropdown-inbox">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown"><i class="fa fa-envelope-o"></i>
+                            <span class="badge badge-primary envelope-badge">9</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-right dropdown-menu-media">
+                            <li class="dropdown-menu-header">
+                                <div>
+                                    <span><strong>9 New</strong> Messages</span>
+                                    <a class="pull-right" href="mailbox.html">view all</a>
+                                </div>
+                            </li>
+                            <li class="list-group list-group-divider scroller" data-height="240px" data-color="#71808f">
+                                <div>
+                                    <a class="list-group-item">
+                                        <div class="media">
+                                            <div class="media-img">
+                                                
+                                                <img src="./assets/img/users/u1.jpg" />
+                                            </div>
+                                            <div class="media-body">
+                                                <div class="font-strong"> </div>Jeanne Gonzalez<small class="text-muted float-right">Just now</small>
+                                                <div class="font-13">Your proposal interested me.</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <a class="list-group-item">
+                                        <div class="media">
+                                            <div class="media-img">
+                                                <img src="./assets/img/users/u2.jpg" />
+                                            </div>
+                                            <div class="media-body">
+                                                <div class="font-strong"></div>Becky Brooks<small class="text-muted float-right">18 mins</small>
+                                                <div class="font-13">Lorem Ipsum is simply.</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <a class="list-group-item">
+                                        <div class="media">
+                                            <div class="media-img">
+                                                <img src="./assets/img/users/u3.jpg" />
+                                            </div>
+                                            <div class="media-body">
+                                                <div class="font-strong"></div>Frank Cruz<small class="text-muted float-right">18 mins</small>
+                                                <div class="font-13">Lorem Ipsum is simply.</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <a class="list-group-item">
+                                        <div class="media">
+                                            <div class="media-img">
+                                                <img src="./assets/img/users/u4.jpg" />
+                                            </div>
+                                            <div class="media-body">
+                                                <div class="font-strong"></div>Rose Pearson<small class="text-muted float-right">3 hrs</small>
+                                                <div class="font-13">Lorem Ipsum is simply.</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </li> {% endcomment %}
+                    {% comment %} <li class="dropdown dropdown-notification">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell-o rel"><span class="notify-signal"></span></i></a>
+                        <ul class="dropdown-menu dropdown-menu-right dropdown-menu-media">
+                            <li class="dropdown-menu-header">
+                                <div>
+                                    <span><strong>5 New</strong> Notifications</span>
+                                    <a class="pull-right" href="javascript:;">view all</a>
+                                </div>
+                            </li>
+                            <li class="list-group list-group-divider scroller" data-height="240px" data-color="#71808f">
+                                <div>
+                                    <a class="list-group-item">
+                                        <div class="media">
+                                            <div class="media-img">
+                                                <span class="badge badge-success badge-big"><i class="fa fa-check"></i></span>
+                                            </div>
+                                            <div class="media-body">
+                                                <div class="font-13">4 task compiled</div><small class="text-muted">22 mins</small></div>
+                                        </div>
+                                    </a>
+                                    <a class="list-group-item">
+                                        <div class="media">
+                                            <div class="media-img">
+                                                <span class="badge badge-default badge-big"><i class="fa fa-shopping-basket"></i></span>
+                                            </div>
+                                            <div class="media-body">
+                                                <div class="font-13">You have 12 new orders</div><small class="text-muted">40 mins</small></div>
+                                        </div>
+                                    </a>
+                                    <a class="list-group-item">
+                                        <div class="media">
+                                            <div class="media-img">
+                                                <span class="badge badge-danger badge-big"><i class="fa fa-bolt"></i></span>
+                                            </div>
+                                            <div class="media-body">
+                                                <div class="font-13">Server #7 rebooted</div><small class="text-muted">2 hrs</small></div>
+                                        </div>
+                                    </a>
+                                    <a class="list-group-item">
+                                        <div class="media">
+                                            <div class="media-img">
+                                                <span class="badge badge-success badge-big"><i class="fa fa-user"></i></span>
+                                            </div>
+                                            <div class="media-body">
+                                                <div class="font-13">New user registered</div><small class="text-muted">2 hrs</small></div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </li> {% endcomment %}
+                    <li class="dropdown dropdown-user">
+                        <a class="nav-link dropdown-toggle link" data-toggle="dropdown">
+                            {% if request.user.is_staff %}
+                            <img src="{{request.user.staff.photo.url}}" />
+                            {% else %}
+                            <img src="{{request.user.student.photo.url}}" />
+                            {% endif %}
+                            <span></span>{{u}}<i class="fa fa-angle-down m-l-5"></i></a>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            {% if request.user.is_staff %}
+                            <a class="dropdown-item" href="/"><i class="fa fa-user"></i>Profile</a>
+                            {% endif %}
+                            <a class="dropdown-item" href="#profile" data-toggle="modal"
+                            ><i class="fa fa-cog"></i>Password</a>
+                            {% comment %} <a class="dropdown-item" href="javascript:;"><i class="fa fa-support"></i>Support</a> {% endcomment %}
+                            <li class="dropdown-divider"></li>
+                            <a class="dropdown-item" href="/logout"><i class="fa fa-power-off"></i>Logout</a>
+                        </ul>
+                    </li>
+                </ul>
+                <!-- END TOP-RIGHT TOOLBAR-->
+            </div>
+           
+        </header>
+        <div>
+            <form method="post" action="/changepassword">
+                {% csrf_token %}
+                <div class="modal fade" id="profile">
+                    <div class="modal-dialog profile">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Change Password</h4>
+                                {% comment %} <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button> {% endcomment %}
+                            </div>
+                            <div class="modal-body">
+                                <p>
+                                <div class="row">
+                                    <div class="col col-md-12">
+                                        <label>Old Password</label>
+                                        <input type="Password" id="myInputz" name="old" class="form-control"
+                                            placeholder="old Password">
+                                    </div>
+                                    <div class="col col-md-12">
+                                        <label>New Password</label>
+                                        <input type="Password" id="myInputx" name="new" class="form-control"
+                                            placeholder="New Password">
+                                    </div>
+                                    <div class="col col-md-12">
+                                        <label>Comfirm Password</label>
+                                        <input type="Password" id="myInputy" name="comf" class="form-control"
+                                            placeholder="Comfirm Password">
+                                    </div>
+                                    <br><br>
+                                    <div class="col col-md-12">
+                                        <input type="checkbox" onclick="myFunction()">Show Password 
+                                        </div>
+                                </div>
+                                
+                                </p>
+                            </div>
+                            <div class="modal-footer justify-content-between">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                <button name="addproduct" class="btn btn-primary ">Submit</button>
+                                
+                            </div>
+                            
+                        </div>
+        
+                        
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+                <!-- /.modal -->
+            </form>
+        </div>
+
+        <script>
+			function myFunction() {
+				var z = document.getElementById("myInputz");
+                var y = document.getElementById("myInputy");
+                var x = document.getElementById("myInputx");
+				if (x.type === "password" && y.type === "password" && z.type === "password") {
+				  x.type = "text";
+                  y.type = "text";
+                  z.type = "text";
+				} else {
+				  x.type = "password";
+                  y.type = "password";
+                  z.type = "password";
+				}
+			  } 
+		</script>
+        <!-- END HEADER-->
+        <!-- START SIDEBAR-->
+        
+        <!-- END SIDEBAR-->
+        
+    <!-- BEGIN THEME CONFIG PANEL-->
+    
+    <!-- END PAGA BACKDROPS-->
+    <!-- CORE PLUGINS-->
+    

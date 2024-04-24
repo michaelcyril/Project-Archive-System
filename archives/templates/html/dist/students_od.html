@@ -1,0 +1,554 @@
+{% load static %}
+{% include "includes/header.html" %}
+{% include "includes/sidebar.html" %}
+  <!-- START PAGE CONTENT-->
+  <div class="page-heading">
+    <h1 class="page-title">DataTables</h1>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="index.html"><i class="la la-home font-20"></i></a>
+        </li>
+        <li class="breadcrumb-item">DataTables</li>
+    </ol>
+</div>
+{% include "includes/messages.html" %}
+<div class="page-content fade-in-up">
+    <div class="ibox">
+        <div class="ibox-head">
+            
+            <div class="ibox-title">Data Table</div>
+            <button class="btn btn-primary" data-toggle="modal"
+            data-target="#modal-lg2z"><i class="fa fa-plus"></i> New </button>
+        </div>
+        <div class="ibox-body">
+          <div class="table-wrapper" role="group" aria-labelledby="caption">
+                <table id="data-table" class="table table-striped table-bordered" style="width:100%">
+                  <thead>
+                    <tr>
+                        <th>Registration Number</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      
+                      <th>Course</th>
+                      <th>NTA_Level</th>
+                      {% comment %} <th>Role</th> {% endcomment %}
+                      <th>Status</th>
+                      <th>Action</th>
+                      
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for s in s %}
+                    <tr>
+                      <td>{{s.regNo}}</td>
+                      <td>{{s.user.first_name}}</td>
+                      <td>{{s.user.username}}</td>
+                      <td>{{s.course | title}}</td>
+                      <td>{{s.NTA_Level}}</td>
+                      {% comment %} <td>
+                        
+                        
+                        
+                        <button class="btn btn-default" data-toggle="modal"
+                        data-target="#modal-role{{s.user.id}}"><i class="fa fa-eye font-14"></i></button>
+                        
+                        
+                        <br>
+                       
+                    
+                    </td> {% endcomment %}
+                      <td>
+                        {% if s.user.is_active == True %}
+                        <a data-toggle="modal" style="color:green"
+                        data-target="#modal-block{{s.user.id}}">Active</i></a>
+                        {% else %}
+                        <a data-toggle="modal" style="color:red"
+                        data-target="#modal-block{{s.user.id}}">Blocked</i></a>
+                        {% endif %}
+
+                      </td>
+                      <td>
+                        
+                        <button class="btn btn-default" data-toggle="modal"
+                        data-target="#modal-viewz{{s.user.id}}"><i class="fa fa-eye font-14"></i></button>
+                        <button class="btn btn-default" data-toggle="modal"
+                        data-target="#modal-lg1z{{s.user.id}}"><i class="fa fa-pencil font-14"></i></button>
+                        <button class="btn btn-default"data-toggle="modal" data-target="#modal-dangerz{{s.user.id}}"><i class="fa fa-trash font-14"></i></button>
+                        
+                            
+                        <a class="btn btn-default" href="{% url 'resetpassword' pk=s.user.id %}"><i class="fa fa-key font-14"></i></a>  
+                       
+                    </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              
+        </div>
+    </div>
+    {% for s in s%}
+
+{% if s.user.is_active == True %}
+      <div class="modal fade" id="modal-block{{s.user.id}}" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="deleteModalLabel">Block Confirmation</h5>
+              {% comment %} <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button> {% endcomment %}
+             
+            </div>
+            <div class="modal-body">
+              Are you sure you want to block this record?
+            </div>
+            
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <a href="/blockuser/{{s.user.id}}" class="btn btn-danger">Block</a>
+        </div>
+    
+          </div>
+        </div>
+      </div>
+{% else %}
+
+<div class="modal fade" id="modal-block{{s.user.id}}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Activate Confirmation</h5>
+          {% comment %} <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button> {% endcomment %}
+         
+        </div>
+        <div class="modal-body">
+          Are you sure you want to Activate this record?
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <a href="/blockuser/{{s.user.id}}" class="btn btn-success">Activate</a>
+        </div>
+   
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="modal fade" id="modal-danger{{s.user.id}}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">delete Confirmation</h5>
+          {% comment %} <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button> {% endcomment %}
+         
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete this record?
+        </div>
+        
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      <a href="/deletestudent/{{s.user.id}}" class="btn btn-danger">Block</a>
+    </div>
+
+      </div>
+    </div>
+  </div>
+
+
+      <div>
+    
+            <div class="modal fade" id="modal-viewz{{s.user.id}}">
+                <div class="modal-dialog modal-lg1">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">View Student</h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>
+                            <div class="row">
+                                <div class="col-lg-12 col-md-4">
+                                    <div class="ibox">
+                                        <div class="text-center">
+                                            <div class="m-t-20">
+                                                <img class="img-circle" src="{{s.photo.url}}" />
+                                            </div>
+                                            <h5 class="font-strong m-b-10 m-t-10">{{u.user.first_name}}</h5>
+                                            <div class="m-b-20 active">{{s.regNo}}</div>
+                                          
+                                        </div>
+                                
+                                        
+                                    </div>
+                                    <div class="ibox">
+                                        <div class="ibox-body">
+                                            
+                                                <div class="row text-center">
+                                                    <div class="col-3 text-muted active">Email</div>
+                                                    <div class="col-2 text-muted active"></div>
+                                                    <div class="col-4 text-muted active">{{s.user.username}}</div>
+                                                </div><hr>
+                                                <div class="row text-center">
+                                                    <div class="col-3 text-muted active">mobile</div>
+                                                    <div class="col-2 text-muted active"></div>
+                                                    <div class="col-4 text-muted active">{{s.mobile}}</div>
+                                                </div><hr>
+                                                <div class="row text-center">
+                                                    <div class="col-3 text-muted active">Course</div>
+                                                    <div class="col-2 text-muted active"></div>
+                                                    <div class="col-4 text-muted active">{{s.course| title}}</div>
+                                                </div><hr>
+                                                <div class="row text-center">
+                                                    <div class="col-3 text-muted active">Department</div>
+                                                    <div class="col-2 text-muted active"></div>
+                                                    <div class="col-4 text-muted active">{{s.department.name | title}}</div>
+                                                </div><hr>
+                                                <div class="row text-center">
+                                                    <div class="col-3 text-muted active">NTA_Level</div>
+                                                    <div class="col-2 text-muted active"></div>
+                                                    <div class="col-4 text-muted active">{{s.NTA_Level}}</div>
+                                                </div><hr>
+                                                <div class="row text-center">
+                                                    <div class="col-3 text-muted active">Gender</div>
+                                                    <div class="col-2 text-muted active"></div>
+                                                    <div class="col-4 text-muted active">{{s.gender}}</div>
+                                                </div><hr>
+                                                <div class="row text-center">
+                                                    <div class="col-3 text-muted active">Academic Year</div>
+                                                    <div class="col-2 text-muted active"></div>
+                                                    <div class="col-4 text-muted active">{{s.academic_year}}</div>
+                                                </div>
+                                            </div>
+                                            {% comment %} <p class="text-center">Lorem Ipsum is simply dummy text of the printing and industry. Lorem Ipsum has been</p> {% endcomment %}
+                                        </div>
+                                    </div>
+                                </div>
+                        
+                    </div>
+                </div>
+                    
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
+            <!-- /.modal -->
+     
+    </div>
+      <div>
+    <form method="post" action="/editstudent/{{s.user.id}}">
+        {% csrf_token %}
+        <div class="modal fade" id="modal-lg1z{{s.user.id}}">
+            <div class="modal-dialog modal-lg1">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Edit Student</h4>
+                        {% comment %} <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button> {% endcomment %}
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                        <div class="row">
+                            <div class="col col-md-6">
+                                <label>Name</label>
+                                <input type="text" name="name" pattern="[A-Za-z]+\,[A-Za-z]+ [A-Za-z]+" class="form-control"
+                                    value="{{s.user.first_name}}">
+                            </div>
+                            <div class="col col-md-6">
+                                <label>Registration Number</label>
+                                <input type="text" pattern="[0-9]{12}" name="regno" class="form-control"
+                                value="{{s.regNo}}">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col col-md-6">
+                                <label>Email</label>
+                                <input type="text" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" name="username" class="form-control"
+                                value="{{s.user.username}}">
+                            </div>
+                            <div class="col col-md-6">
+                                <label>Mobile</label>
+                                <input name="mobile" class="form-control" type="tel" pattern="[0-9]{10}" title="insert number,maxmum number is 10 digits" value="{{s.mobile}}" required>
+                                   
+                            </div>
+                            <div class="col col-md-6">
+                                <label>NAT Level</label>
+                                <input type="number" min="4" max="6" name="NTA_Level" class="form-control"
+                                value="{{s.NTA_Level}}">
+                            </div>
+                            <div class="col col-md-6">
+                                <label>Course</label>
+                                <input type="text" name="course" pattern="[A-Za-z]+\" title="" class="form-control"
+                                    value="{{s.course}}">
+                            </div>
+                            <div class="col col-md-6">
+                                <label>Academic Year</label>
+                                <input type="text" name="academic_year" pattern="\d{4}\/\d{4}" title="eg 2022/2023" class="form-control"
+                                value="{{s.academic_year}}">
+                            </div>
+                            {% comment %} <div class="col col-md-6">
+                                <label></label>
+                                <input type="number" min="0" name="quantity" class="form-control"
+                                    placeholder="Weka idadi ya bidhaa...">
+                            </div> {% endcomment %}
+                            <div class="col col-md-6">
+                                <label>Department</label>
+    
+                            <select class="form-control" name="department">
+    
+                                <option disabled selected value>select department</option>
+                                {% comment %} @foreach ($branch as $role) {% endcomment %}
+                                {% for d in d %}
+                                {% if s.department.name == d.name %}
+                                <option value="{{d.id}}" selected>{{d.name}}</option>
+                                {% else %}
+                                <option value="{{d.id}}">{{d.name}}</option>
+                                {% endif %}
+                                {% endfor %}
+                               
+    
+    
+                              </select>
+    
+    
+                            </div>
+                            <div class="col col-md-6">
+                                <label>Gender</label>
+    
+                            <select class="form-control" name="gender">
+    
+                                <option disabled selected value>select gender</option>
+                                {% comment %} @foreach ($branch as $role) {% endcomment %}
+                                {% if s.gender == 'Male' %}
+                                <option value="Male" selected>Male</option>
+                                <option value="Female">Female</option>
+                                {% else %}
+                                <option value="Male">Male</option>
+                                <option value="Female" selected>Female</option>
+                                {% endif %}
+                                {% comment %} @endforeach {% endcomment %}
+    
+    
+                              </select>
+    
+    
+                            </div>
+
+                            <div class="col col-md-6">
+                                
+                                <label>Role</label>
+                                <br>
+                                {% for i in g %}
+                                {% if i in s.user.groups.all %}
+                                <input type="checkbox" name="{{i.name}}" checked value="{{i.id}}">  {{i.name}}
+                                <br>
+                                {% else %}
+                                <input type="checkbox" name="{{i.name}}" value="{{i.id}}">  {{i.name}}
+                                <br>
+                                {% endif %}
+                                {% endfor %}
+
+                                </div>
+            
+                       
+    
+    
+                            </div>
+                            
+                           
+                        </p>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                        <button name="addproduct" class="btn btn-primary ">Submit</button>
+                        
+                    </div>
+                    
+                </div>
+
+                
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+    </form>
+</div>
+{% endfor %}
+    <form method="post" action="/addstudent">
+        {% csrf_token %}
+        <div class="modal fade" id="modal-lg2z">
+            <div class="modal-dialog modal-lg1">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Student</h4>
+                        {% comment %} <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button> {% endcomment %}
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                        <div class="row">
+                            <div class="col col-md-6">
+                                <label>Name</label>
+                                <input name ="name"class="form-control"  type="text" pattern="[A-Za-z]+ [A-Za-z]+ [A-Za-z]+" placeholder="Full Name" title="Text only required| write full name separate with white space" required>
+                            </div>
+                            <div class="col col-md-6">
+                                <label>Registration Number</label>
+                                <input type="text" pattern="[0-9]{12}" name="regno" class="form-control"
+                                    placeholder="Registration Number" title="Only number required |12 digits required">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col col-md-6">
+                                <label>Email</label>
+                                <input name="username" class="form-control"  type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" title="Valid emailformat required" placeholder="Email" required>
+                            </div>
+                            <div class="col col-md-6">
+                                <label>Mobile</label>
+                                <input name="mobile" class="form-control" type="tel" pattern="[0-9]{10}" title="insert number,maxmum number is 10 digits" placeholder="Phone Number" required>
+                                   
+                            </div>
+                            <div class="col col-md-6">
+                                <label>NAT Level</label>
+                                <input type="number" min="4" max="6" name="NTA_Level" class="form-control"
+                                    placeholder="NTA Level">
+                            </div>
+                            <div class="col col-md-6">
+                                <label>Course</label>
+                                <input type="text" name="course" pattern="[A-Za-z]{1,}" title="text only required" class="form-control"
+                                    placeholder="course">
+                            </div>
+                            <div class="col col-md-6">
+                                <label>Academic Year</label>
+                                <input type="text" name="academic_year" pattern="\d{4}\/\d{4}" title="eg 2022/2023" class="form-control"
+                                    placeholder="academic year">
+                            </div>
+                            <div class="col col-md-6">
+                                <label>Department</label>
+    
+                            <select class="form-control" name="department">
+                                
+                                <option disabled selected value>select department</option>
+                             
+                                {% for d in d %}
+                                <option value="{{d.id}}">{{d.name}}</option>
+                                {% endfor %}
+                              
+                              </select>
+    
+    
+                            </div>
+                            <div class="col col-md-6">
+                                <label>Gender</label>
+    
+                                <select class="form-control" name="gender" required>
+                                
+                                    <option disabled selected value>select gender</option>
+                                 
+                                    
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Male</option>
+                                    
+                                  
+        
+        
+                                  </select>
+    
+                            </div>
+                            {% comment %} <div class="col col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Choose Department</label>
+                                <select class="form-control select2_demo_1">
+                                    <optgroup label="Department">
+                                        <option value="">..........</option>
+                                      
+                                    </optgroup>
+                                </select>
+                                </div>  {% endcomment %}
+                           
+                        
+    
+                        </div>
+                        </p>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                        <button name="addproduct" class="btn btn-primary ">Submit</button>
+                        
+                    </div>
+                    
+                </div>
+
+                
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+    </form>
+
+    
+    
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/js/dataTables.bootstrap.min.js"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.0/moment.min.js'></script>
+<script>
+$(document).ready(function() {
+   $("#sort").DataTable({
+    pageLength: 1,
+      columnDefs : [
+    { type : 'date', targets : [2] }
+],  
+   });
+});
+</script>
+
+<script>
+
+    $(document).ready(function() {
+        var table = $('#myTable').DataTable({
+            "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+          "columnDefs": [{
+            "searchable": false,
+            "orderable": false,
+            "targets": [2]
+          }],
+          "order": [
+            [1, 'asc']
+          ]
+        });
+      
+        $('#myTable thead tr:eq(1) th').each(function() {
+          var title = $(this).text();
+          $(this).html('<input type="text" placeholder="Search ' + title + '" />');
+        });
+      
+        table.columns().every(function() {
+          var that = this;
+      
+          $('input', this.header()).on('keyup change clear', function() {
+            if (that.search() !== this.value) {
+              that
+                .search(this.value)
+                .draw();
+            }
+          });
+        });
+      });
+      
+</script>
+{% include "includes/footer.html"%}
+{% include 'includes/theme.html' %}
+{% include "includes/js.html "%} 
+</body>
+</html>

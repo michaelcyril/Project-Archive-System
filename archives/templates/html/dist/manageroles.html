@@ -1,0 +1,213 @@
+
+{% load static %}
+{% include "includes/header.html" %}
+{% include "includes/sidebar.html" %}
+			
+			<!-- Page Wrapper -->
+            <div class="page-wrapper">
+                <div class="content container-fluid">
+				
+					<!-- Page Header -->
+					{% comment %} <div class="page-header"> {% endcomment %}
+						<div class="row">
+							<div class="col-sm-7 col-auto">
+								{% comment %} <h3 class="page-title">Roles</h3>
+								<ul class="breadcrumb">
+									<li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+									<li class="breadcrumb-item active">Role</li>
+								</ul> {% endcomment %}
+							</div>
+							<div class="col-sm-5 col">
+								
+								<a href="#Add_Specialities_details" data-toggle="modal" class="btn btn-primary float-right mt-2">Add</a>
+							
+							</div>
+						</div>
+					</div>
+					{% include "includes/messages.html" %}
+					<!-- /Page Header -->
+					<div class="row">
+						<div class="col-sm-12">
+							<div class="card">
+								<div class="card-body">
+									<div class="table-responsive">
+										<table id="data-tablex" class="table table-striped table-bordered" style="width:100%">
+											<thead>
+												<tr>
+													
+													<th>Name</th>
+													{% comment %} {% if perms.auth.view_permission %} {% endcomment %}
+													<th>Permissions</th>
+													{% comment %} {% endif %} {% endcomment %}
+													{% comment %} {% if perms.auth.delete_group or perms.auth.change_group %} {% endcomment %}
+													<th>Actions</th>
+													{% comment %} {% endif %} {% endcomment %}
+												</tr>
+											</thead>
+											<tbody>
+												{% for g in g %}
+												<tr>
+													
+													<td>
+														
+														{{g.name}}</td>
+													
+														{% comment %} {% if perms.auth.view_permission %} {% endcomment %}
+														<td>
+															<select name="">
+																{% for i in g.permissions.all %}
+																<option value="">{{i.name}}<br></option>
+																{% endfor %}
+														</select>
+
+														</td>
+													{% comment %} {% endif %} {% endcomment %}
+												
+													<td>
+														<div class="actions">
+															{% comment %} {% if perms.auth.change_group %} {% endcomment %}
+															<a class="btn btn-sm bg-success-light" href="/editroles/{{g.id}}">
+																<i class="fa fa-pencil"></i>
+															</a>
+															{% comment %} {% endif %} {% endcomment %}
+															{% comment %} {% if perms.auth.delete_group %} {% endcomment %}
+															<a href="/deleteroles/{{g.id}}" class="btn btn-sm bg-danger-light">
+																<i class="fa fa-trash"></i>
+															</a>
+															{% comment %} {% endif %} {% endcomment %}
+														</div>
+													</td>
+												</tr>
+												{% endfor %}
+												</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>			
+					</div>
+				</div>			
+			</div>
+			<!-- /Page Wrapper -->
+			
+			
+			<!-- Add Modal -->
+			<div class="modal fade" id="Add_Specialities_details" aria-hidden="true" role="dialog">
+				<div class="modal-dialog modal-dialog-centered" role="document" >
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Add Role</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<form method="post" action="/addroles">
+								{% csrf_token %}
+								<div class="row form-row">
+									<div class="col-12 col-sm-12">
+										<div class="form-group">
+											<label>Role</label>
+											<input type="text" name="name" class="form-control">
+										</div>
+									</div>
+									<!-- <div class="col-12 col-sm-6">
+										<div class="form-group">
+											<label>Role</label>
+											<input type="text" name="name" class="form-control">
+										</div>
+									</div> -->
+									{% for r in p %}
+									<div class="col-2 col-sm-3">
+										<div class="form-group">
+											
+											
+										<br>
+										
+										<input type="checkbox" name="{{r.name}}" value="{{r.id}}"> {{r.name}} 
+										<br>
+										
+										</div>
+									</div>
+									{% endfor %}
+									
+								</div>
+								<button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /ADD Modal -->
+			
+			<!-- Edit Details Modal -->
+			<div class="modal fade" id="edit_specialities_details" aria-hidden="true" role="dialog">
+				<div class="modal-dialog modal-dialog-centered" role="document" >
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Edit Role</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<form>
+								{% for r in r %}
+								<div class="row form-row">
+									<div class="col-12 col-sm-6">
+										<div class="form-group">
+											<label>Specialities</label>
+											<input type="text" class="form-control" value="Cardiology">
+										</div>
+									</div>
+									<div class="col-12 col-sm-6">
+										<div class="form-group">
+											<label>Permissions</label>
+										<br>
+										{% for p in p %}
+										<input type="checkbox" name="{{p.name}}" value="{{p.id}}">{{p.name}}
+										<br>
+										{% endfor %}
+										</div>
+									</div>
+									
+								</div>
+								<button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+								{% endfor %}
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /Edit Details Modal -->
+			
+			<!-- Delete Modal -->
+			<div class="modal fade" id="delete_modal" aria-hidden="true" role="dialog">
+				<div class="modal-dialog modal-dialog-centered" role="document" >
+					<div class="modal-content">
+					<!--	<div class="modal-header">
+							<h5 class="modal-title">Delete</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>-->
+						<div class="modal-body">
+							<div class="form-content p-2">
+								<h4 class="modal-title">Delete</h4>
+								<p class="mb-4">Are you sure want to delete?</p>
+								<button type="button" class="btn btn-primary">Save </button>
+								<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /Delete Modal -->
+        </div>
+		<!-- /Main Wrapper -->
+		
+		{% include "includes/footer.html"%}
+{% comment %} {% include 'includes/theme.html' %} {% endcomment %}
+            {% comment %} {% include "includes/js.html "%}  {% endcomment %}
+
+		

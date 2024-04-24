@@ -1,0 +1,35 @@
+{% load static %}
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Template</title>
+</head>
+<body>
+    <p>Date: {{ date | timeuntil }}</p>
+    <p>Time: {{ now }}</p>
+
+    <script type="text/javascript">
+        // Check the time remaining every second
+setInterval(function() {
+  // Get the value of 'date' and convert it to a JavaScript Date object
+  var dateStr = '{{ date | timeuntil}}';
+  var date = new Date(dateStr);
+  console.error(dateStr)
+  // Calculate the time remaining until the deadline
+  var timeUntil = '{{ date | timeuntil}}';
+  
+  // If the time remaining is zero or negative, trigger the redirect
+  if (timeUntil == '0 minutes') {
+    window.location.href = '/';
+  }
+}, 1000); // Run the check every second
+
+    </script>
+</body>
+</html>
+
+
+ 

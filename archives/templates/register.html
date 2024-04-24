@@ -1,0 +1,219 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    
+<!-- Mirrored from dreamguys.co.in/demo/doccure/admin/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 30 Nov 2019 04:12:20 GMT -->
+<head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+        <title>DAS</title>
+		
+		<!-- Favicon -->
+        <link rel="shortcut icon" type="image/x-icon" href="{% static 'admin/img/logo1.png'%}">
+		
+		<!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="{% static 'admin/css/bootstrap.min.css'%}">
+		
+		<!-- Fontawesome CSS -->
+        <link rel="stylesheet" href="{% static 'admin/css/font-awesome.min.css'%}">
+		
+		<!-- Feathericon CSS -->
+        <link rel="stylesheet" href="{% static 'admin/css/feathericon.min.css'%}">
+		
+		<link rel="stylesheet" href="{% static 'admin/plugins/morris/morris.css'%}">
+		
+		<!-- Main CSS -->
+        <link rel="stylesheet" href="{% static 'admin/css/style.css'%}">
+		<link type="image/x-icon" href="{% static 'assets/img/favicon.png'%}" rel="icon">
+		
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css'%}">
+		
+		<!-- Fontawesome CSS -->
+		<link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/fontawesome.min.css'%}">
+		<link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/all.min.css'%}">
+		
+		<!-- Main CSS -->
+		<link rel="stylesheet" href="{% static 'assets/css/style.css'%}">
+		
+		<!--[if lt IE 9]>
+			<script src="assets/js/html5shiv.min.js"></script>
+			<script src="assets/js/respond.min.js"></script>
+		<![endif]-->
+    </head>
+    <body>
+
+		<!-- Main Wrapper -->
+		
+		
+	<!-- Header -->
+	<header class="header">
+		<nav class="navbar navbar-expand-lg header-nav">
+			<div class="navbar-header">
+				<a id="mobile_btn" href="javascript:void(0);">
+					<span class="bar-icon">
+						<span></span>
+						<span></span>
+						<span></span>
+					</span>
+				</a>
+				<a href="/" class="navbar-brand logo">
+					<img src="{% static 'assets/img/logo1.png'%}" class="img-fluid" alt="Logo">
+				</a>
+			</div>
+			<div class="main-menu-wrapper">
+				<div class="menu-header">
+					<a href="/" class="menu-logo">
+						<img src="{% static 'assets/img/logo1.png'%}" class="img-fluid" alt="Logo">
+					</a>
+					<a id="menu_close" class="menu-close" href="javascript:void(0);">
+						<i class="fas fa-times"></i>
+					</a>
+				</div>
+				<ul class="main-nav">
+					<li class="active">
+						<a href="/">Home</a>
+					</li>
+					<li class="has-submenu">
+						<a href="#">Doctors <i class="fas fa-chevron-down"></i></a>
+						<ul class="submenu">
+							<li><a href="/doctordashboard">Doctor Dashboard</a></li>
+							<li><a href="/doctorappointment">Appointments</a></li>
+							<li><a href="/doctorschedule">Schedule Timing</a></li>
+							<li><a href="/mypatient">Patients List</a></li>
+							
+							
+						</ul>
+					</li>	
+					<li class="has-submenu">
+						<a href="#">Patients <i class="fas fa-chevron-down"></i></a>
+						<ul class="submenu">
+							<li><a href="/mydoctor">Search Doctor</a></li>
+							
+							<li><a href="/booking">Booking</a></li>
+							
+							
+							<li><a href="/patiendashboard">Patient Dashboard</a></li>
+							
+						</ul>
+					</li>	
+			
+					<li>
+						<a href="/dashboard" target="_blank">Admin</a>
+					</li>
+					<li class="login-link">
+						<a href="/login">Login / Signup</a>
+					</li>
+				</ul>		 
+			</div>		 
+			<ul class="nav header-navbar-rht">
+				<li class="nav-item contact-item">
+					<div class="header-contact-img">
+						<i class="far fa-hospital"></i>							
+					</div>
+					<div class="header-contact-detail">
+						<p class="contact-header">Contact</p>
+						<p class="contact-info-header"> +255 625 253 363</p>
+					</div>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link header-login" href="/login">login / Signup </a>
+				</li>
+			</ul>
+		</nav>
+	</header>
+	<!-- /Header -->
+			<div class="main-wrapper">
+		<!-- Main Wrapper -->
+        <div class="main-wrapper login-body">
+			<br><br>
+            <div class="login-wrapper">
+            	<div class="container">
+                	<div class="loginbox">
+                    	<div class="login-left">
+							<img class="img-fluid" src="{% static 'assets/img/logo1.png'%}" alt="Logo">
+                        </div>
+					
+                        <div class="login-right">
+							<div class="login-right-wrap">
+								<br>
+								<p style="text-align: left;"><a href="/registerdoctor">Iam a Doctor</a>
+								<br>
+								<h1>Patient Register</h1>
+								
+								<!-- Form -->
+								<form action="/register" method="POST">
+									{% csrf_token %}
+									<div class="form-group">
+										<input name ="fname"class="form-control" pattern="[A-Za-z]{1,}" type="text" placeholder="First_Name" title="Text only required" required>
+									</div>
+									<div class="form-group">
+										<input name="mname"class="form-control" pattern="[A-Za-z]{1,}" type="text" title="Text only required" placeholder="Middle_Name"required>
+									</div>
+									<div class="form-group">
+										<input name="lname" class="form-control" pattern="[A-Za-z]{1,}" type="text" placeholder="Last_Name" title="Text only required" required>
+									</div>
+									<div class="form-group">
+										<input name="username" class="form-control"  type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" title="Valid email format required" placeholder="Email" required>
+									</div>
+									<div class="form-group">
+										<input name="phone" class="form-control" type="tel" pattern="[0-9]{10}" title="insert number,maxmum number is 10 digits" placeholder="Phone Number" required>
+									</div>
+									<div class="form-group">
+										<input name="password1" class="form-control" id="myInput" type="password" placeholder="Password"  pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
+									</div>
+									<div class="form-group">
+										<input name="password2"class="form-control" id="myInput" type="password" placeholder="Confirm Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
+									
+										<input type="checkbox" onclick="myFunction()">Show Password 
+									<div class="form-group mb-0">
+										<button class="btn btn-primary btn-block" type="submit">Register</button>
+									</div>
+								</form>
+								<!-- /Form -->
+								
+								<div class="login-or">
+									<span class="or-line"></span>
+									<span class="span-or">or</span>
+								</div>
+								
+								<!-- Social Login -->
+								<div class="social-login">
+									<span>Register with</span>
+									<a href="#" class="facebook"><i class="fa fa-facebook"></i></a><a href="#" class="google"><i class="fa fa-google"></i></a>
+								</div>
+								<!-- /Social Login -->
+								
+								<div class="text-center dont-have">Already have an account? <a href="/login">Login</a></div>
+								<div class="text-center dont-have"><a href="/">Home</a></div>
+							</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<!-- /Main Wrapper -->
+		<script>
+			function myFunction() {
+				var x = document.getElementById("myInput");
+				if (x.type === "password") {
+				  x.type = "text";
+				} else {
+				  x.type = "password";
+				}
+			  } 
+		</script>
+		<!-- jQuery -->
+        <script src="assets/js/jquery-3.2.1.min.js"></script>
+		
+		<!-- Bootstrap Core JS -->
+        <script src="assets/js/popper.min.js"></script>
+        <script src="assets/js/bootstrap.min.js"></script>
+		
+		<!-- Custom JS -->
+		<script src="assets/js/script.js"></script>
+		
+    </body>
+
+<!-- Mirrored from dreamguys.co.in/demo/doccure/admin/register.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 30 Nov 2019 04:12:53 GMT -->
+</html>

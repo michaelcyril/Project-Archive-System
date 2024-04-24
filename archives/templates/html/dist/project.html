@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload with Ajax Javascript and PHP</title>
+<style>
+.container{
+    width: 400px;
+    height: 108px;
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    margin: auto;
+    background-color: #8C52FF;
+    padding: 30px 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+#file{
+    display: none;
+}
+button{
+    background-color: white;
+    border: 0px;
+    width: 130px;
+    padding: 10px 40px;
+    border-radius: 3px;
+    color: #8C52FF;
+    cursor: pointer;
+}
+.progress{
+    background-color: white;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    height: 7px;
+    border-radius: 3px;
+    padding: 4px;
+}
+.progress-bar{
+    width: 0%;
+    height: 100%;
+    background-color: #8C52FF;
+    border-radius: 3px;
+}
+span{
+    width: 130px;
+    line-height: 35px;
+    border-radius: 3px;
+    position: relative;
+    top: 1px;
+    text-align: center;
+    display: inline-block;
+    background-color: white;
+    color: #8C52FF;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <input type="file" id="file">
+    <button id="upload">Upload</button>
+    <span id="percent">0%</span>
+    <button id="cancel">Cancel</button>
+    <div class="progress">
+        <div class="progress-bar"></div>
+    </div>
+    <span id="dataTransferred">Loaded/Total</span>
+    <span id="Mbps">Mbps</span>
+    <span id="timeLeft">Time Left</span>
+</div>
+
+<script>
+  var input = document.querySelector('#file')
+  var upload = document.querySelector('#upload')
+  var percent = document.querySelector('#percent')
+  var cancel = document.querySelector('#cancel')
+  var progressBar = document.querySelector('.progress-bar')
+  var dataTransferred = document.querySelector('#dataTransferred')
+  var mbps = document.querySelector('#Mbps')
+  var timeLeft = document.querySelector('#timeLeft')
+  
+  upload.onclick = () => input.click()
+  input.onchange = () => fileUpload()
+  
+  function fileUpload(){
+      // File upload via Ajax
+      var xhr = new XMLHttpRequest();
+      var csrfToken = getCookie('csrftoken');
+      var data = new FormData();
+      data.append('file', input.files[0]);
+      // get start time
+      var startTime = new Date().getTime();
+      
+      // for cancel file transfer
+      cancel.onclick = () => xhr.abort()
+  
+      // remove value form input button
+      input.value = '';
+       // add some preloader or perform any action before uploading
+      percent.innerHTML = `0%`
+      progressBar.style.width = `0%`
+  
+      xhr.onreadystatechange = () => {
+        if(xhr.readyState == 4) {
+              if(xhr.status == 200){
+                  // get response on successful uploading
+                  percent.innerHTML = `Uploaded`
+              }else{
+                  // if request not complete
+                  console.log('Error');
+              }
+          }
+      }
+      xhr.upload.onprogress = (e) => {
+          var percent_complete = (e.loaded / e.total)*100;
+  
+          // e.loaded is in bytes convert it to kb, mb or gb. your choice
+          var mbTotal = Math.floor(e.total/(1024*1024));
+          var mbLoaded = Math.floor(e.loaded/(1024*1024));
+  
+          // calculate data transfer per sec
+          var time = ( new Date().getTime() - startTime ) / 1000;
+        var bps = e.loaded / time;
+          var Mbps = Math.floor(bps / (1024*1024));
+          
+          // calculate remaining time
+          var remTime = (e.total - e.loaded) / bps;
+          var seconds = Math.floor(remTime % 60);
+          var minutes = Math.floor(remTime / 60);
+  
+          // give output
+          dataTransferred.innerHTML = `${mbLoaded}/${mbTotal} MB`
+          mbps.innerHTML = `${Mbps} Mbps`
+          timeLeft.innerHTML = `${minutes}:${seconds}s`
+          percent.innerHTML = `${Math.floor(percent_complete)} %`
+          progressBar.style.width = percent_complete + '%'
+      }
+      xhr.onabort = () => {
+          percent.innerHTML = `Canceled`
+          progressBar.style.width = '0%'
+      }
+      xhr.open("POST", "upload", true);
+      xhr.setRequestHeader('X-CSRFToken', csrfToken);
+      xhr.send(data);
+  }
+
+  function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+</script>
+</body>
+</html>

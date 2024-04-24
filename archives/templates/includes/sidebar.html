@@ -1,0 +1,149 @@
+{% load static %}
+<nav class="page-sidebar" id="sidebars">
+    <div id="sidebar-collapse">
+        <div class="admin-block d-flex">
+            <div>
+                {% if request.user.is_staff %}
+                <img src="{{request.user.staff.photo.url}}" width="45px" />
+                   {% else %}   
+                   <img src="{{request.user.student.photo.url}}" width="45px" />
+                   {% endif %}
+            </div>
+            <div class="admin-info">
+                <div class="font-strong">{{request.user.first_name}} </div><small>{{request.user.student.course}}</small></div>
+        </div>
+        <ul class="side-menu metismenu">
+            
+            <li>
+                <a class="{% if side == 'dashboard' %} active {% endif %}" href="/"><i class="sidebar-item-icon fa fa-th-large"></i>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+                <i class="fa-duotone fa-screen-users"></i>
+            </li>
+            {% if perms.archives.add_user%}
+            <li class="{% if side == 'being' %} active {% elif side == 'staff' %} active  {% elif side == 'role' %} active {% endif %}">
+                <a href="javascript:;" class="{% if side == 'being' %} active {% elif side == 'staff' %} active {% endif %}"><i class="sidebar-item-icon fa fa-user-circle-o"></i>
+                    <span class="nav-label">User Management</span><i class="fa fa-angle-left arrow"></i></a>
+                <ul class="nav-2-level collapse"> 
+            <li>
+                {% comment %} <a href="javascript:;" class="{% if side == 'being'  %} active {% elif side == 'od'  %} active {% endif %}"><i class="sidebar-item-icon fa fa-users"></i>
+                    <span class="nav-label">Student Management</span><i class="fa fa-angle-left arrow"></i></a> {% endcomment %}
+                
+                    
+                        <a class="{% if side == 'being' %} active {% endif %}" href="/student" ><i class="sidebar-item-icon fa fa-mortar-board"></i>
+                            <span class="nav-label">Student Management</span>
+                        </a>
+                        
+                   
+                    {% comment %} <li>
+                        <a class="{% if side == 'od' %} active {% endif %}" href="/student_od" >OD</a>
+                    </li> {% endcomment %}
+                
+            </li>
+            <li class="{% if side == 'staff' %} active {% endif %}">
+                <a class="{% if side == 'staff' %} active {% endif %}" href="/staff" class=""><i class="sidebar-item-icon fa fa-users"></i>
+                    <span class="nav-label">Staff Management</span></i></a>
+                {% comment %} <ul class="nav-2-level collapse">
+                    <li>
+                        <a href="/" >BEING</a>
+                    </li>
+                    <li>
+                        <a class="" href="/" >OD</a>
+                    </li>
+                </ul> {% endcomment %}
+            </li>
+            <li class="{% if side == 'role' %} active {% endif %}">
+                <a class="{% if side == 'role' %} active {% endif %}" href="/manageroles" class=""><i class="sidebar-item-icon fa fa-drivers-license-o"></i>
+                    <span class="nav-label">Roles Management</span></i></a>
+                {% comment %} <ul class="nav-2-level collapse">
+                    <li>
+                        <a href="/" >BEING</a>
+                    </li>
+                    <li>
+                        <a class="" href="/" >OD</a>
+                    </li>
+                </ul> {% endcomment %}
+            </li>
+        </ul>
+    </li>
+    {% endif %}
+    {% if perms.archives.view_document %}
+            <li class="{% if side == 'upload_project' %} active {% elif side == 'projects' %} active {% elif side == 'manage_project'%} active {% elif side == 'assessment'%} active {% endif %} ">
+                <a href="javascript:;" class="{% if side == 'upload_project' %} active {% elif side == 'project' %} active {% elif side == 'manage_project' %} active {% elif side == 'assessment'%} active {% endif %}"><i class="sidebar-item-icon fa fa-book"></i>
+                    <span class="nav-label">Project Management</span><i class="fa fa-angle-left arrow"></i></a>
+                <ul class="nav-2-level collapse"> 
+                    <li class="{% if side == 'projects' %} active {% endif %}">
+                        <a class="{% if side == 'projects' %} active {% endif %}" href="/projects" class=""><i class="sidebar-item-icon fa fa-eye"></i>
+                            <span class="nav-label">View Project</span></i></a>
+                        
+                    </li>
+                    {% if perms.archives.add_document  %}
+            <li class="{% if side == 'upload_project' %} active {% endif %}">
+                <a class="{% if side == 'upload_project' %} active {% endif %}" href="/pdf_upload" class=""><i class="sidebar-item-icon fa fa-cloud-upload"></i>
+                    <span class="nav-label">Upload Project</span></i></a>
+               
+            </li>
+            {% endif %}
+            {% if perms.archives.change_document %}
+            <li class="{% if side == 'manage_project' %} active {% endif %}">
+                <a class="{% if side == 'manage_project' %} active {% endif %}" href="/manage_project" class=""><i class="sidebar-item-icon fa fa-database"></i>
+                    <span class="nav-label">Manage Project</span></i></a>
+               
+            </li>
+
+            {% endif %}
+            {% if perms.archives.add_progress %}
+            <li class="{% if side == 'assessment' %} active {% endif %}">
+                <a class="{% if side == 'assessment' %} active {% endif %}" href="/assessment" class=""><i class="sidebar-item-icon fa fa-bar-chart"></i>
+                    <span class="nav-label">Project Submission</span></i></a>
+               
+            </li>
+            {% endif %}
+                </ul>
+            </li>
+            {% endif %}
+            {% if perms.archives.view_department%}
+            <li>
+                <a href="{% url 'department' %}" class="{% if side == 'department' %} active {% endif %}"><i class="sidebar-item-icon fa fa-university"></i>
+                    <span class="nav-label">Department</span></i></a>
+                </li>
+                {% endif %}
+                {% if perms.archives.view_level%}
+                <li>
+                    <a href="{% url 'level' %}"class="{% if side == 'level' %} active {% endif %}"><i class="sidebar-item-icon fa fa-bookmark"></i>
+                        <span class="nav-label">Academic Level</span></i></a>
+                    </li>
+                    {% endif %}
+                    {% if perms.archives.add_project_type%}
+                    <li>
+                        <a href="{% url 'project_type' %}" class="{% if side == 'project_type' %} active {% endif %}"><i class="sidebar-item-icon fa fa-sitemap"></i>
+                            <span class="nav-label">Project type</span></i></a>
+                        </li>
+                        {% endif %}
+            {% comment %} <li class="heading">FEATURES</li>
+            <li>
+                <a href="/" class=""><i class="sidebar-item-icon fa fa-shield"></i>
+                    <span class="nav-label">System Setting</span></i></a>
+                </li> {% endcomment %}
+            
+        </ul>
+    </div>
+</nav>
+<style>
+
+    .page-sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        {% comment %} width: 250px; {% endcomment %}
+        overflow-y: auto;
+       
+        z-index: 9999;
+      }
+      
+</style>
+<div class="content-wrapper">
+    
+
+   

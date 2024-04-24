@@ -1,0 +1,120 @@
+
+{% load static %}
+{% include "includes/header.html" %}
+{% include "includes/sidebar.html" %}
+            <div class="page-wrapper">
+                <div class="content container-fluid">
+					
+					{% comment %} <div class="page-header">
+						<div class="row">
+								<h3 class="page-title">Role</h3>
+								<ul class="breadcrumb">
+									<li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+									<li class="breadcrumb-item active">Profile</li>
+								</ul>
+							</div>
+						</div>
+					</div> {% endcomment %}
+					<!-- /Page Header -->
+					
+					<div class="row">
+						<div class="col-md-12">
+							<div class="profile-header">
+								<div class="row align-items-center">
+									<!-- <div class="col-auto profile-image">
+										<a href="#">
+											<img class="rounded-circle" alt="User Image" src="{{d.profile.url}}">
+										</a>
+									</div> -->
+									<!-- <div class="col ml-md-n2 profile-user-info">
+										<h4 class="user-name mb-0">{{d.user.last_name}}</h4>
+										<h6 class="text-muted">{{d.user.username}}</h6>
+										<div class="user-Location"><i class="fa fa-map-marker"></i> {{d.address}}</div>
+										<div class="about-text"></div>
+									</div> -->
+									<!-- <div class="col-auto profile-btn">
+										
+										<a href="#" class="btn btn-primary">
+											Edit
+										</a>
+									</div> -->
+								</div>
+							</div>
+							<div class="profile-menu">
+								<ul class="nav nav-tabs nav-tabs-solid">
+									<!-- <li class="nav-item">
+										<a class="nav-link" href="/editpatient/{{d.user.id}}">About</a>
+									</li> -->
+									<li class="nav-item">
+										<a class="nav-link active" href="">Role</a>
+									</li>
+								</ul>
+							</div>	
+						
+								
+								<!-- Personal Details Tab -->
+								
+								
+				
+									<div class="tab-content profile-tab-cont">
+								<!-- Change Password Tab -->
+								<div>
+								
+									<div class="card">
+										<div class="card-body">
+											<h5 class="card-title">Role</h5>
+											<div class="row">
+												{% for r in r %}
+												<div class="col-md-12 col-lg-12">
+													
+													<form action="" method="post">
+														{% csrf_token %}
+														<!-- <div class="form-group">
+															<label>Old Password</label>
+															<input type="password" name="old" class="form-control">
+														</div> -->
+														<div class="form-group">
+															<label>Role</label>
+															<input type="text" name="name" value="{{r.name}}" class="form-control">
+														</div>
+														<div class="form-group">
+															<label>Permissions</label>
+										<br>
+										{% for i in p %}
+										
+									      {% if i in r.permissions.all %}
+										  
+										<input type="checkbox" checked name="{{i.name}}" value="{{i.id}}">&nbsp;{{i.name}}
+										
+										{% else %}
+										<input type="checkbox" name="{{i.name}}" value="{{i.id}}">&nbsp;{{i.name}}
+										
+										{% endif %}
+								        {% endfor %}
+														</div>
+														
+														<button class="btn btn-primary" type="submit">Save Changes</button>
+												{% endfor %}
+													</form>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- /Change Password Tab -->
+							
+							</div>
+						</div>
+					</div>
+				
+				</div>			
+			</div>
+			<!-- /Page Wrapper -->
+		
+        </div>
+		<!-- /Main Wrapper -->
+		
+		{% include "includes/footer.html"%}
+{% include 'includes/theme.html' %}
+            {% comment %} {% include "includes/js.html "%}  {% endcomment %}
+		

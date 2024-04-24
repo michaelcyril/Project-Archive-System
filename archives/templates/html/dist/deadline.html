@@ -1,0 +1,60 @@
+{%load static %}
+{% include "includes/header.html" %}
+{% include "includes/sidebar.html" %}
+{% include "includes/messages.html" %} 
+<style>
+
+    .page {
+        position: auto;
+        
+        {% comment %} width: 250px; {% endcomment %}
+       
+      }
+      
+</style>
+<br><br>
+<div class="container" style="overflow:hidden">
+  <div class="row">
+    <div class="col-md-6 mx-auto">
+      <div class="card">
+        <div class="card-header">
+          <h4>Project Upload</h4>
+        </div>
+        <div class="card-body">
+         
+         
+            <p style="color:red; align:center "> TIME OUT !</p>
+            {% comment %} <a href="{{ pdf_file.pdf_file.url }}">{{ pdf_file.pdf_file.url }}</a> {% endcomment %}
+          
+            
+         
+            {% comment %} {% if request.user.is_superuser %} {% endcomment %}
+            </div>
+            {% comment %} {% if request.user.is_superuser %}
+
+            <div class="row">
+              <div class="col">
+                <div>the deadline of submission is </div>
+              </div>
+              <div class="col">
+                {% for sub in sub %}
+                {% if sub.level.name|lower == 'bachelor degree'%}
+                bachelor: <div  id="event-box"> {{sub.when|date:"M d, Y H:m:s"}}</div>
+                {% elif sub.level.name|lower == 'ordinary diploma' %}
+                OD: <div  id="event-box"> {{sub.when|date:"M d, Y H:m:s"}}</div>
+                {% endif %}
+                
+              </div>
+            </div>
+            <div class="text-center mt-3 h6"><b>Time left</b></div>
+            <div id="countdown-box" style="color:red"class="text-center mt-3 h6">
+              <div class="spinner-border" style="color:black" role="status"><div>
+            </div>
+            {% endfor %}
+
+
+            {% else %} {% endcomment %}
+        </div>
+    </div>    
+
+{% include "includes/footer.html"%}

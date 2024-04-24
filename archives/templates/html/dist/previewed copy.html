@@ -1,0 +1,155 @@
+{% load static %}
+{% include "includes/header.html" %}
+{% include "includes/sidebar.html" %}
+<style>
+	.container {
+		display: flex;
+		flex-wrap: wrap;
+	}
+	.left-column {
+		{% comment %} flex-basis: 100%; {% endcomment %}
+		padding: 20px;
+		box-sizing: border-box;
+		text-align: center;
+		{% comment %} order: 1; /* Change the order to 1 to move it to the top */ {% endcomment %}
+	}
+	.right-column {
+		{% comment %} flex-basis: 100%; {% endcomment %}
+		padding: 20px;
+		box-sizing: border-box;
+		height: 170vh;
+		{% comment %} order: 2; /* Change the order to 2 to move it to the bottom */ {% endcomment %}
+	}
+	iframe {
+		width: 100%;
+		height: 100%;
+		-webkit-user-select: none; /* Safari */
+		-webkit-user-select: none; /* Opera */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* IE10+/Edge */
+		user-select: none; /* Standard */
+	}	  
+	@media screen and (min-width: 720px) {
+		.left-column {
+			flex-basis: 40%;
+		}
+		.right-column {
+			flex-basis: 100%;
+		}
+	}
+</style>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+
+
+	{% for d in d %}
+	<div class="container">
+		{% comment %} <div class="left-column">
+			<div class="row">
+				<div class="col col-md-4">
+			<img src="{{d.project.student.photo.url}}"/>
+				</div>
+				<div class="col col-md-8">
+			<table>
+			<tr>
+				<td><b>Title:</b> {{d.project.title}}</td>
+			</tr>
+			<tr>
+				<td><b>Name:</b> {{d.project.student.user.first_name}}</td>
+			</tr>
+			<tr>
+				<td><b>RegNo:</b> {{d.project.student.regNo}}</td>
+			</tr>
+		</table>
+				</div>
+			</div>
+			
+		</div> {% endcomment %}
+       
+		<div class="right-column">
+			
+			{% if request.user.is_staff %}
+			<canvas id="myCanvas" allowfullscreen allowtransparency scrolling="no"></canvas>
+
+<script>
+  // Get the canvas element
+  var canvas = document.getElementById('myCanvas');
+
+  // Set the properties
+  canvas.src = "{{d.file.url}}#view=FitH#toolbar=0#search='highlight'";
+  canvas.width = window.innerWidth; // Set the canvas width to match the window width
+  canvas.height = window.innerHeight; // Set the canvas height to match the window height
+
+  // Get the 2D rendering context
+  var ctx = canvas.getContext('2d');
+
+  // Render the content on the canvas
+  function renderCanvas() {
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Render the content
+    // ... Add your rendering logic here ...
+  }
+
+  // Call the renderCanvas function initially
+  renderCanvas();
+
+  // Add an event listener to handle window resize
+  window.addEventListener('resize', function () {
+    // Update the canvas size on window resize
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Call the renderCanvas function again after resizing
+    renderCanvas();
+  });
+</script>
+
+
+	  {% else %}
+	  <iframe id="iframe_pdf" src="{{d.file.url}}#page=1&view=FitH,0&zoom=auto&pagemode=none&toolbar=0" style="height:50%; width:100%" ></iframe>
+	  {% endif %}
+	  
+
+	  
+	  <button id="load-more" style="display:none;">Load More Pages</button>
+	  <script>
+		const pdfContainer = document.getElementById('right-column');
+const loadMoreButton = document.getElementById('load-more');
+const iframe = document.getElementById('iframe_pdf');
+const totalNumPages = 4;
+let currentPageNum = 1;
+
+function loadMorePages() {
+    currentPageNum += 10;
+    iframe.src = `${iframe.src},#page=${currentPageNum}-#page=${currentPageNum+9}`;
+    if (currentPageNum + 9 >= totalNumPages) {
+        loadMoreButton.style.display = 'none';
+    }
+}
+
+iframe.onload = function() {
+    if (currentPageNum + 9 < totalNumPages) {
+        loadMoreButton.style.display = 'block';
+    }
+};
+
+loadMoreButton.onclick = loadMorePages;
+
+	  </script>
+	  {% endfor %}
+		</div>
+        
+        <script>
+          $(document).ready(function(){
+            $('#iframe_pdf').bind("cut copy paste", function(e){
+                e.preventDefault();
+            });
+
+          });
+        </script>
+        
+	</div>
+	{% include "includes/footer.html"%}

@@ -1,0 +1,35 @@
+{%load static %}
+{% include "includes/header.html" %}
+{% include "includes/sidebar.html" %}
+{% include "includes/messages.html" %} 
+    <div class="col-lg-6 col-md-8" style="margin: 30px auto; display: block;">
+        <div class="drop-box" id="dropBox" style="width: 100%; height: 200px; border: 4px dashed gray;" >
+            <p style="text-align: center; vertical-align: middle; line-height: 200px; font-size: 24px; color: gray;">Drag & Drop to Upload File</p>
+        </div>
+        <form enctype="multipart/form-data" method="POST" action="/upload" style="text-align: center;">
+            <p style="color: gray; padding-top: 20px;">or</p>
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Select file to upload.</label>
+                <input type="file" class="form-control" id="fileupload" accept=".pdf" pattern=".*\.pdf" placeholder="Select file" required>
+            </div>
+            <input type="submit" value="Upload" id="submit" class="btn btn-success">     
+        </form>
+        <div id="uploaded_files"></div>
+    </div>
+    <div class="modal fade" id="error" aria-hidden="true">
+      </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{% static 'app.js' %}"></script>
+    <script>
+
+        var fileInput = document.getElementById('fileupload');
+        var filePath = fileInput.value;
+        var allowedExtensions = /(\.pdf)$i;
+        if (!allowedExtensions.exec(filePath)){
+            alert('invalid file type')
+            fileInput.value = "";
+            return false
+        }
+    </script>
+    {% include "includes/footer.html"%}
