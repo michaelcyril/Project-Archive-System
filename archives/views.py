@@ -655,9 +655,8 @@ def addroles(request):
       for s in s_id:
            p.permissions.add(Permission.objects.get(id=s))   
       messages.success(request,'Role added successful')
-      return redirect('/manageroles')  
+      return redirect('manageroles')  
   except:
-      
     messages.error(request,'Something went wrong')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
@@ -689,16 +688,29 @@ def editroles(request,pk):
     for s in s_id:
            y.permissions.add(Permission.objects.get(id=s))  
     messages.success(request,'Login successful')
-    return redirect('/manageroles')
+    return redirect('manageroles')
            
    return render(request,'html/dist/editroles.html',{'r':r,'p':p})
   except:
       messages.error(request,'Something is wrong')
+      
+      
+@login_required(login_url='/login/')   
+def deleteroles(request,pk):
+   try: 
+    g = Group.objects.filter(id=pk).delete()
+    if g:
+       messages.success(request,'Role deleted successful')
+    
+    return redirect('manageroles')
+   except:
+    messages.error(request,'Something went wrong')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
 
 @login_required(login_url='/login/')     
 def blockuser(request,pk):
        
-     
       try:
          u = User.objects.filter(id=pk).filter(is_active='True')
          if u:      
@@ -714,17 +726,8 @@ def blockuser(request,pk):
        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-@login_required(login_url='/login/')   
-def deleteroles(request,pk):
-   try: 
-    g = Group.objects.filter(id=pk).delete()
-    if g:
-       messages.success(request,'Role deleted successful')
-    
-    return redirect('/manageroles')
-   except:
-    messages.error(request,'Something went wrong')
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
 @login_required(login_url='/login/')
 def reset_password(request,pk):
    password = make_password("@DIT123")

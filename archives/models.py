@@ -146,9 +146,9 @@ class Submission(models.Model):
     class Meta:
         db_table = "submission"
 
-# class Upvote(models.Model):
-#     user = models.ForeignKey(User,on_delete=models.CASCADE)
-#     document = models.ManyToManyField(ProjectDocument)
+class Upvote(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    document = models.ManyToManyField(ProjectDocument)
     
-#     class Meta:
-#         db_table = "Likes"
+    class Meta:
+        db_table = "Likes"
