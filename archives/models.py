@@ -15,7 +15,7 @@ class Level(models.Model):
     
     def __str__(self):
         return self.name
-    
+
 
 class Department(models.Model):
     name = models.CharField(max_length=100)
@@ -25,7 +25,7 @@ class Department(models.Model):
 
     def __str__(self):
         return self.name
-    
+
 
 class Awards(models.Model):
     name = models.CharField(max_length=100)
@@ -36,7 +36,7 @@ class Awards(models.Model):
     
     def __str__(self):
         return self.name
-    
+
 
 class Student(models.Model):
     GENDER = (
@@ -93,13 +93,13 @@ class ProjectType(models.Model):
 
 
 class Project(models.Model):
-    title = models.CharField(null=True,blank=True,max_length=200)
+    title = models.CharField(null=True, blank=True, max_length=200)
     student = models.OneToOneField(Student, on_delete=models.CASCADE)
-    project_type = models.ForeignKey(ProjectType,on_delete=models.CASCADE,null=True,blank=True)
-    department = models.ForeignKey(Department,on_delete=models.CASCADE,null=True,blank=True)
+    project_type = models.ForeignKey(ProjectType, on_delete=models.CASCADE, null=True, blank=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
     date_created = models.DateField(auto_now_add=True)
     accepted = models.BooleanField(default=False)
-    note = models.TextField(null=True,blank=True)
+    note = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "project"
@@ -107,13 +107,30 @@ class Project(models.Model):
     def __str__(self):
         return self.title
 
+    def total_upvotes(self):
+        return self.upvote_set.count()
+
+
+class Upvote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    date_created = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
+
 
 class ProjectDocument(models.Model):
+    DOCUMENT_TYPE = (
+        ('Proposal','Proposal'),
+        ('Final','Final'),
+    )
     project = models.OneToOneField(Project,null=True, blank=True, on_delete=models.CASCADE)
     file = models.FileField(upload_to='Document/Projects',null=True,blank=True)
     # preview = models.FileField(upload_to='Document/Preview',null=True,blank=True)
     submitted = models.BooleanField(null=True,blank=True,default=False)
     date_created = models.DateField(auto_now_add=True)
+    document_type = models.CharField(choices=DOCUMENT_TYPE, max_length=20, null=True, blank=True)
     # cover = models.ImageField(upload_to='Document/Cover', null=True, blank=True)
 
     class Meta:
@@ -145,10 +162,3 @@ class Submission(models.Model):
     
     class Meta:
         db_table = "submission"
-
-class Upvote(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
-    document = models.ManyToManyField(ProjectDocument)
-    
-    class Meta:
-        db_table = "Likes"
