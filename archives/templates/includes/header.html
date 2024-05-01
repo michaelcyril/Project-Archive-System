@@ -34,70 +34,6 @@
     {% comment %} <script src="https://kit.fontawesome.com/a076d05399.js"></script> {% endcomment %}
 
     <style>
-        {% comment %} * {
-            box-sizing: border-box;
-          }
-          
-          :root {
-            --color-primary: #2e4a40;
-            --color-secondary: #e6efa3;
-            --color-tertiary: rgba(0, 0, 0, 0.2);
-          
-            --font-body: "Switzer", sans-serif;
-            --font-headings: "Gambarino", sans-serif;
-          } {% endcomment %}
-          
-          
-          {% comment %} figure {
-            width: 100%;
-            max-width: 800px;
-          } {% endcomment %}
-          
-          {% comment %} table {
-            text-align: left;
-            border-collapse: collapse;
-            margin-bottom: 1rem;
-            table-layout: fixed;
-            white-space: nowrap;
-            border-radius: 3rem;
-            width: min(auto, 100%);
-          }
-          
-          table tbody {
-              border:  2px solid var(--color-tertiary);
-          }
-          
-          tbody td {
-            vertical-align: top;
-          }
-          
-          th {
-            font-family: var(--font-headings);
-            font-weight: bold;
-          }
-          
-          tr > * {
-            padding: 0.75rem 1rem;
-          }
-          
-          tr > *:nth-child(even) {
-            background-color: var(--color-tertiary);
-          }
-          
-          tr:first-child > td {
-            font-family: var(--font-headings);
-            font-weight: bold;
-          }
-          
-          thead {
-            border-bottom: 1px solid var(--color-primary);
-            font-size: var(--step-1);
-          }
-          
-          tr > * {
-            border-bottom: 2px solid var(--color-tertiary);
-              border-top: 2px solid var(--color-tertiary);
-          } {% endcomment %}
           
           .table-wrapper {
             overflow: auto;
@@ -124,18 +60,6 @@
             background: var(--color-tertiary);
           }
           
-          {% comment %} caption {
-            text-align: left;
-            margin-bottom: 1rem;
-          }
-          
-          h1 {
-            margin-top: 0;
-            margin-bottom: 1rem;
-            font-family: var(--font-headings);
-            font-size: 1.5rem;
-            display: block;
-          } {% endcomment %}
     
     </style>
 
@@ -304,7 +228,7 @@
                             ><i class="fa fa-cog"></i>Password</a>
                             {% comment %} <a class="dropdown-item" href="javascript:;"><i class="fa fa-support"></i>Support</a> {% endcomment %}
                             <li class="dropdown-divider"></li>
-                            <a class="dropdown-item" href="/logout"><i class="fa fa-power-off"></i>Logout</a>
+                            <a class="dropdown-item" href={% url "logout" %}><i class="fa fa-power-off"></i>Logout</a>
                         </ul>
                     </li>
                 </ul>

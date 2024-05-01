@@ -1,38 +1,45 @@
-from django.shortcuts import render
-from django.http.response import HttpResponse
-from django.shortcuts import redirect, render,HttpResponse
-from django.contrib.auth.models import User,auth,Permission,Group
-from django.contrib import messages
+from django.shortcuts import redirect, render
 from django.db.models import Q
-import pytz
-from .models import *
-from django.contrib.auth.hashers import make_password
-import random 
 import pandas as pd
-from urllib.parse import urlparse
 import os
 import datetime
 from django.shortcuts import HttpResponseRedirect
-from django.core.files.storage import FileSystemStorage
-from django.template import defaultfilters
-from django.utils.datastructures import MultiValueDictKeyError
-from django.utils import formats
-from django.core.mail import send_mail,EmailMessage,EmailMultiAlternatives
-import math
 from django.contrib.auth.decorators import *
-from email.mime.image import MIMEImage
-# from RaphaelSomaDIT import rex
-from django.core.files import File
-from .models import *
 from django.http import JsonResponse
-from pdf2image import convert_from_path
-import csv
 import shutil
 from fuzzywuzzy import fuzz
 import requests
 from django.views.decorators.csrf import csrf_exempt
-# from projectArchives.settings import *
-# from .soma import rex
+import PyPDF2
+from fuzzywuzzy import fuzz
+import fitz
+import re
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import redirect
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy, reverse
+from django.views.generic import View
+from django.views.generic import ListView
+
+from django.views.generic import View
+
+from django.contrib.auth.hashers import make_password
+from .forms import StudentForm, StaffForm
+from django.contrib.auth.models import User, Group, Permission
+from django.views.generic import View
+from django.contrib import messages
+from django.contrib.auth.views import PasswordChangeView
+from django.views.generic import FormView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import *
+
+# CCBV
+
+
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 poppler_path = os.path.join(PROJECT_DIR, '..', 'poppler-23.01.0', 'Library', 'bin')
@@ -41,425 +48,438 @@ profile = os.path.join(PROJECT_DIR, '..', 'media','profile_pic')
 
 
 def check_connection():
-       try:
+    try:
         response = requests.get('http://www.google.com')
         if response.status_code == 200:
-              return True
-       except:
-          pass
-       
-       return False
-           
+            return True
+    except:
+        pass
 
-def login(request):
- try:
-   user = User()
-   students = Student()
-   staffs = Staff()
-   projects = Project()
- 
-   role8 = Group.objects.get(name='Final_Year')
-   role = Group.objects.get(name='Student') 
-   is_connected = check_connection()
+    return False
+
+######################################### CCBV #########################################
+
+class LoginRequiredView(LoginRequiredMixin):
+    login_url = "/login/"
+
+
+class LoginView(FormView):
+   form_class = AuthenticationForm
+   template_name = "html/dist/login.html"
+   success_url = reverse_lazy("home")
+    
+   def get_success_url(self):
+      requested_url = self.request.GET.get("next")
+      if requested_url:
+         return requested_url
+      return super().get_success_url()
    
-   if is_connected==True:
-    if request.method == 'POST':
-     if is_connected==True:
-      email=request.POST.get("username")
-      password=request.POST.get("password")
-      users = User.objects.filter(username=email).exists()
-      
-      u = User.objects.filter(username=email)
-      
-      u = user.first_name.split(',')
-      u = u
-      
-      current_date = datetime.datetime.now().date()
-      october = datetime.datetime(current_date.year,10,1).date()
-      
-   
-      if users:
-         us = User.objects.get(username=email)
-         if us.is_staff==False:
-            if current_date >=october:
-               rex.studentInfo(email=request.POST.get("username"), password=request.POST.get("password"))
-               
-            
-               # if rex.error == "no internet connection":
-               #    messages.error(request,rex.error)
-               #    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-               if rex.error == "Login Failed: invalid credentials":
-                  messages.error(request,rex.error)
-                  return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-               elif rex.error == 'invalid status code':
-                  messages.error(request,rex.error)
-                  return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-               else:
-                  Student.objects.filter(user__email=request.POST.get("username")).update(NTA_Level = rex,academic_year = rex.academic_year)
-                  user = auth.authenticate(username=email,password=password)
-                  if user is not None:
-                     auth.login(request,user)
-                     messages.success(request,'Login successful')
-                     return redirect('/')
-               
-            
-                  return redirect('/login')
-            else:
-               userr = auth.authenticate(username=email,password=password)
-               if userr is not None:
-                  auth.login(request,userr)
-                  messages.success(request,'Login successful')
-                  return redirect('/')
-               else:
-                  messages.error(request,'Unknown information')
-                  return redirect('/login')
-         else:
-               userr = auth.authenticate(username=email,password=password)
-               if userr is not None:
-                  auth.login(request,userr)
-                  messages.success(request,'Login successful')
-                  return redirect('/')
-               else:
-                  messages.error(request,'Unknown information')
-                  return redirect('/login') 
+   def form_valid(self, form):
+      user = authenticate(
+      username=form.cleaned_data["username"],
+      password=form.cleaned_data["password"],
+   )
+      if user is not None:
+         login(self.request, user)
+         messages.success(self.request, "Login successful")
+         return super().form_valid(form)
       else:
-         
-         rex.studentInfo(email=request.POST.get("username"), password=request.POST.get("password"))
-         # if rex.error == "no internet connection":
-         #       messages.error(request,rex.error)
-         #       return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-         if rex.error == "Login Failed: invalid credentials":
-               messages.error(request,rex.error)
-               return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-         elif rex.error == 'invalid status code':
-               messages.error(request,rex.error)
-               return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-         else:
-            
-            user.first_name = rex.name
-            user.username = rex.email
-            user.email = rex.email
-            user.password = make_password(request.POST.get("password"))
-            user.save()
-            # print(f'{rex.NTA_level},{rex.regno}')
-            
-            # if rex.NTA_level == '8' or (rex.NTA_level=='6' and 'diploma' in (rex.level).lower()):
-            #        user.groups.add(role8)
-            # else:
-            user.groups.add(role) 
-            # course = (rex.level).split()
-            # course = course[-2] +" "+ course[-1]
-            # print(course)
-            students.user = user
-            students.regNo = rex.regno
-            students.NTA_Level = rex.NTA_level
-            
-            students.academic_year = rex.academic_year
-            students.mobile = rex.mobile
-            students.gender = rex.gender
-            students.course = rex.level
-         
-            if 'computer' in (rex.level).lower() or 'information' in (rex.level).lower() or 'multimedia' in (rex.level).lower():
-               students.department_id = 2
-            elif 'civil' in (rex.level).lower() or 'mining' in (rex.level).lower() or 'gas' in (rex.level).lower():
-               students.department_id = 1
-            elif 'electrical' in (rex.level).lower() or 'biomedical' in (rex.level).lower() or 'renewable' in (rex.level).lower():
-               students.department_id = 3
-            elif 'electronics' in (rex.level).lower() or 'communication' in (rex.level).lower():
-               students.department_id = 4
-            elif 'mechanical' in (rex.level).lower():
-                students.department_id = 5
-            elif 'food' in (rex.level).lower() or 'laboratory' in (rex.level).lower() or 'biotechnology' in (rex.level).lower():
-               students.department_id = 6
-            if 'bachelor' in (rex.level).lower():
-                   students.level_id = 1
+         messages.error(self.request, "Invalid username or password")
+         return self.form_invalid(form)
+
+   def form_invalid(self, form):
+      messages.error(self.request, "Invalid username or password")
+      return super().form_invalid(form)
+
+   def get(self, request, *args, **kwargs):
+      # If the user is already logged in, they shouldn't be visiting the login page again
+      if request.user.is_authenticated:
+         return redirect(self.get_success_url())
+      return super().get(request, *args, **kwargs)
+
+
+class LogoutView(LoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        logout(request)
+        return redirect("login")
+
+class ChangePasswordView(LoginRequiredView, PasswordChangeView):
+      template_name = "html/dist/change_password.html"
+      success_url = reverse_lazy("login")
+   
+      def form_valid(self, form):
+         messages.success(self.request, "Password changed successfully.")
+         return super().form_valid(form)
+   
+      def form_invalid(self, form):
+         messages.error(self.request, "Something went wrong.")
+         return super().form_invalid(form)
+
+
+class DashboardView(LoginRequiredView, TemplateView):
+    template_name = "html/dist/index.html"
+ 
+    def get_context_data(self, **kwargs):
+      context = super().get_context_data(**kwargs)
+      try:
+         context["s"] = Student.objects.all().count()
+         context["d"] = Department.objects.all().count()
+         context["p"] = Progress.objects.all().count()
+         context["f"] = Staff.objects.all().count()
+         context["b"] = Progress.objects.all()
+         context["o"] = Student.objects.filter(NTA_Level=6)
+         context["side"] = "dashboard"
+      except:
+         messages.error(self.request, "Something went wrong")
+         return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
+      return context
+
+
+class AssessmentView(LoginRequiredView, TemplateView):
+    template_name = "html/dist/assessment.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_superuser:
+            date = datetime.datetime.now().year
+            first = str(date - 1)
+            date = str(date)
+            date = f"{first}/{date}"
+            finalB = Progress.objects.all()
+            sub = Submission.objects.all()
+            ex = True
+        elif self.request.user.is_staff:
+            date = datetime.datetime.now().year
+            first = str(date - 1)
+            date = str(date)
+            date = f"{first}/{date}"
+            finalB = Progress.objects.filter(
+                document__project__student__level__id=self.request.user.staff.level.id
+            ).filter(document__project__student__academic_year=date)
+            sub = (
+                Submission.objects.filter(level_id=self.request.user.staff.level.id)
+                .filter(academic_year=date)
+                .filter(department_id=self.request.user.staff.department.id)
+            )
+            ex = Submission.objects.filter(
+                level_id=self.request.user.staff.level.id,
+                department_id=self.request.user.staff.department.id,
+            ).exists()
+        context["side"] = "assessment"
+        context["b"] = finalB
+        context["sub"] = sub
+        context["ex"] = ex
+        return context
+
+class StudentView(LoginRequiredView, TemplateView):
+    template_name = 'html/dist/students.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        exclude_perm = [1, 2, 3, 4, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 37]
+        context['p'] = Permission.objects.exclude(id__in=exclude_perm)
+        context["students"] = Student.objects.all().order_by("id")
+        context["departments"] = Department.objects.all()
+        context['g'] = Group.objects.all()
+        return context
+
+class StudentODView(LoginRequiredView, TemplateView):
+    template_name = 'html/dist/students_od.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        exclude_perm = [1, 2, 3, 4, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 37]
+        context['p'] = Permission.objects.exclude(id__in=exclude_perm)
+        context['s'] = Student.objects.filter(NTA_Level__lte=6, NTA_Level__gte=4)
+        context["departments"] = Department.objects.all()
+        context['g'] = Group.objects.all()
+        return context
+
+class AddStudentView(LoginRequiredMixin, FormView):
+    template_name = "html/dist/students.html"
+    form_class = StudentForm
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+        if self.user_exists(data["email"], data["regNo"]):
+            if self.student_exists(data["regNo"]):
+                messages.error(self.request, "Student already exists")
+                return self.form_invalid(form)
             else:
-                   students.level_id = 2
-            students.save()
-            # us = Student.objects.get(user__username=email)
-            # print(f'{rex.NTA_level}:{rex.level}')
-            # if rex.NTA_level == '6' and 'diploma' in (rex.level).lower():
-            #        projects.student_id = us.id
-            #        projects.department_id = us.department_id
-                  
-            #       #  projects.save()
-            #       #  doc = Document.objects.create(project=projects)
-            #       #  Progress.objects.create(document=doc)
-            # if 'bachelor' in (rex.level).lower() and rex.NTA_level == '8':
-            #         projects.student_id = us.id
-            #         projects.department_id = us.department_id
-                  
-            # projects.save()  
-            # p = Project.objects.get(student_id=us.id)
-            # Document.objects.create(project_id=p.id)
-            # f = Document.objects.get(project_id=p.id)
-            # Progress.objects.create(document_id=f.id)
-            rex.studentImage(email=request.POST.get("username"), password=request.POST.get("password"))
-            
-            with open(rex.regno+".jpg", 'rb') as f:
-               
-               django_file = File(f)
-               students.photo.save(rex.regno+".jpg", django_file, save=True)
-            os.remove(rex.regno+".jpg")
-            user = auth.authenticate(username=email,password=password)
-            if user is not None:
-               auth.login(request,user)
-               messages.success(request,'Login successful')
-               return redirect('/')
+                user = User.objects.get(email=data["email"])
+                self.create_student(user, data)
+                messages.success(self.request, "Student created successfully")
+                return super().form_valid(form)
+
+        else:
+            try:
+               user = self.create_user( data["email"], data["firstname"], data["lastname"], data["regNo"])
+               self.create_student(user, data)
+               messages.success(self.request, "Student created successfully")
+               return super().form_valid(form)
+            except:
+                messages.error(self.request, "Something went wrong")
+                return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
+
+    def form_invalid(self, form):
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(self.request, f"{field}: {error}")
+        return super().form_invalid(form)
+
+    def get_success_url(self):
+        return reverse("student")
+
+    def user_exists(self, email, regNo):
+        return (
+            User.objects.filter(username=email).exists()
+            or Student.objects.filter(regNo=regNo).exists()
+        )
+    def student_exists(self, regNo):
+        return Student.objects.filter(regNo=regNo).exists()
+
+    def create_user(self, email, firstname, lastname, regNo):
+        password = make_password(regNo)
+        user = User.objects.create(
+           username=lastname,
+           email=email, 
+           first_name=firstname, 
+           last_name=lastname, 
+           password=password
+         )
+        student_group, _ = Group.objects.get_or_create(name="Student")
+        user.groups.add(student_group)
+        return user
+
+    def create_student(self, user, data):
+      department = data.get("department")
+      department = Department.objects.filter(name=department).first()
+      print(department.id)
+      Student.objects.create(
+            user=user,
+            regNo=data["regNo"],
+            mobile=data["mobile"],
+            academic_year=data["academic_year"],
+            NTA_Level=data["NTA_Level"],
+            course=data["course"],
+            department=department,
+            gender=data["gender"],
+      )
          
-            return redirect('/login')
-     else: 
-        messages.error(request,'No internet Connection')
-        return render(request,'html/dist/login.html')         
-    return render(request,'html/dist/login.html')
-   else:
-      messages.error(request,'No internet Connection')
-      return render(request,'html/dist/login.html')    
- except:
-    messages.error(request,'Something went wrong')
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+class ProjectsView(LoginRequiredView, TemplateView):
+    template_name = "html/dist/projects.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            context["d"] = ProjectDocument.objects.all()
+            context["l"] = ProjectDocument.objects.all().count()
+            context["f"] = Department.objects.all()
+            context["s"] = list(
+                Student.objects.values_list("academic_year", flat=True).distinct()
+            )
+            context["g"] = ProjectType.objects.all()
+            context["level"] = Level.objects.all()
+            name = self.request.POST.get("department")
+            context["g"] = ProjectType.objects.filter(department__name=name)
+            context["side"] = "projects"
+        except:
+            messages.error(self.request, "Something went wrong")
+            return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
+        return context
+
+class ManageProjectView(LoginRequiredView, ListView):
+    template_name = 'html/dist/manage_project.html'
+    context_object_name = 'd'
+    login_url = '/login/'
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return ProjectDocument.objects.all()
+        elif self.request.user.is_staff:
+            return ProjectDocument.objects.filter(project__department_id=self.request.user.staff.department.id)
+        else:
+            return ProjectDocument.objects.filter(project__department_id=self.request.user.student.department.id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['f'] = Department.objects.all()
+        context['s'] = list(Student.objects.values_list('academic_year', flat=True).distinct())
+        name = self.request.POST.get('department')
+        context['g'] = ProjectType.objects.filter(department__name=name)
+        context['side'] = 'manage_project'
+        return context
+
+class EditStudentView(LoginRequiredMixin, FormView):
+    template_name = "html/dist/students.html"
+    form_class = StudentForm
+    success_url = reverse_lazy(
+        "student"
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["u"] = Group.objects.all()
+
+        try:
+            context["d"] = Student.objects.filter(user=self.request.user)
+            context["p"] = Student.objects.get(user=self.request.user)
+
+        except Student.DoesNotExist:
+            context["d"] = None
+            context["p"] = None
+
+        context["t"] = Permission.objects.all()
+        return context
+
+    def form_valid(self, form):
+        try:
+            user = self.request.user
+            student = Student.objects.get(user=user)
+
+            # Update student information
+            student.regNo = form.cleaned_data["regno"]
+            student.mobile = form.cleaned_data["mobile"]
+            student.academic_year = form.cleaned_data["academic_year"]
+            student.NTA_Level = form.cleaned_data["NTA_Level"]
+            student.course = form.cleaned_data["course"]
+            student.department_id = form.cleaned_data["department"]
+            student.gender = form.cleaned_data["gender"]
+            student.save()
+
+            # Update user groups and permissions
+            user.groups.clear()
+            user.user_permissions.clear()
+
+            selected_groups = form.cleaned_data.get("groups", [])
+            selected_permissions = form.cleaned_data.get("permissions", [])
+
+            user.groups.add(*selected_groups)
+            user.user_permissions.add(*selected_permissions)
+
+            messages.success(self.request, "Student updated successfully")
+            return super().form_valid(form)
+
+        except Student.DoesNotExist:
+            messages.error(self.request, "Student does not exist")
+            return super().form_invalid(form)
+
+        except Exception as e:
+            messages.error(self.request, f"An error occurred: {e}")
+            return super().form_invalid(form)
 
 
+class StaffView(LoginRequiredMixin, TemplateView):
+    template_name = "html/dist/staffs.html"
 
-@login_required(login_url='/login')
-def dashboard(request):
- try:
-   s = Student.objects.all().count()
-   d = Department.objects.all().count()
-   # if request.user.is_superuser:
-          
-   p = Progress.objects.all().count()
-   # else:
-   #    p = Project.objects.filter(department_id=request.user.student.department.id).count() or Project.objects.filter(department_id=request.user.staff.department.id).count()    
-   f  = Staff.objects.all().count()
-   finalB =  Progress.objects.all()
-   finalD =  Student.objects.filter(NTA_Level=6)
-   k = request.POST.dict()
-   # print(request.user.student.level.id)
-   return render(request,'html/dist/index.html',{'side':'dashboard','s':s,'d':d,'f':f,'p':p,'b':finalB,'o':finalD})
- except:
-  messages.error(request,'Something went wrong')
-  return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            level = Level.objects.all()
+            exclude_perm = [
+                1,
+                2,
+                3,
+                4,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                24,
+                37,
+            ]
 
-@login_required(login_url='/login')
-def assessment(request):
-#  try:
-  if request.user.is_superuser:
-   date =  datetime.datetime.now().year 
-   first = str(date-1)
-   date = str(date)
-   date = f'{first}/{date}'
-   finalB =  Progress.objects.all() 
-   sub = Submission.objects.all()
-   ex = True
-  elif request.user.is_staff:
-    date =  datetime.datetime.now().year
-    first = str(date-1)
-    date = str(date)
+            context["side"] = "staff"
+            context["s"] = Staff.objects.all()
+            context["d"] = Department.objects.all()
+            context["g"] = Group.objects.all()
+            context["p"] = Permission.objects.exclude(id__in=exclude_perm)
+            context["l"] = level
+        except:
+            messages.error(self.request, "Something went wrong")
+            return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
+        return context
 
-    date = f'{first}/{date}'
-    finalB =  Progress.objects.filter(document__project__student__level__id=request.user.staff.level.id).filter(document__project__student__academic_year=date) 
-    sub = Submission.objects.filter(level_id=request.user.staff.level.id).filter(academic_year=date).filter(department_id=request.user.staff.department.id)
-    ex = Submission.objects.filter(level_id=request.user.staff.level.id,department_id=request.user.staff.department.id).exists()
-   
 
-  return render(request,'html/dist/assessment.html',{'side':'assessment','b':finalB,'sub':sub,'ex':ex})
-#  except:
-#     messages.error(request,'Something went wrong')
-#     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+class AddStaffView(LoginRequiredMixin, FormView):
+    template_name = "html/dist/staffs.html"
+    form_class = StaffForm
 
-@login_required(login_url='/login')
-def student(request):
- try:
-   exclude_perm=[1,2,3,4,13,14,15,16,17,18,19,20,21,22,23,24,37]
-   p = Permission.objects.exclude(id__in=exclude_perm)
-   
-   s = Student.objects.all().order_by('id')
-   d = Department.objects.all()
-   g = Group.objects.all()
-   
-   return render(request,'html/dist/students.html',{'side':'being','s':s,'d':d,'g':g,'p':p})
- except:
-    messages.error(request,'Something went wrong')
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    def form_valid(self, form):
+        data = form.cleaned_data
+        if self.user_exists(data["email"]):
+            if self.staff_exists(data["staff_id"]):
+                messages.error(self.request, "Staff already exists")
+                return self.form_invalid(form)
+            else:
+                user = User.objects.get(email=data["email"])
+                self.create_staff(user, data)
+                messages.success(self.request, "Staff created successfully")
+                return super().form_valid(form)
 
-@login_required(login_url='/login')
-def student_od(request):
- try:
-   exclude_perm=[1,2,3,4,13,14,15,16,17,18,19,20,21,22,23,24,37]
-   p = Permission.objects.exclude(id__in=exclude_perm)
-   s = Student.objects.filter(NTA_Level__lte=6,NTA_Level__gte=4)
-   d = Department.objects.all()
-   g = Group.objects.all()
-   
-   return render(request,'html/dist/students_od.html',{'side':'od','s':s,'d':d,'g':g,'p':p})
- except:
-    messages.error(request,'Something went wrong')
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        else:
+            user = self.create_user(data["email"], data["firstname"], data["lastname"], data["staff_id"])
+            self.create_staff(user, data)
+            messages.success(self.request, "Staff created successfully")
+            return super().form_valid(form)
 
-@login_required(login_url='/login')
-def addstudent(request):
- try:
-   if request.method == "POST":
-      
-      name = request.POST.get('name')
-      email = request.POST.get('username')
-      regNo = request.POST.get('regno')
-      mobile = request.POST.get('mobile')
-      academic_year = request.POST.get('academic_year')
-      NTA_Level = int(request.POST.get('NTA_Level'))
-      course = request.POST.get('course')
-      departments = request.POST.get('department')
-      gender = request.POST.get('gender')
-      password = make_password("@DIT123")
-      users = User.objects.filter(username=email).exists()
-      user = Student.objects.filter(regNo=regNo).exists()
-      
-      
-      group = Group.objects.get(name='Student')
-      if users and user:
-         messages.error(request,'Student exists')
-         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-      if NTA_Level==8:
-       u = User.objects.create(username=email,email=email,password=password,first_name=name)
-       u.groups.add(group)
-       Student.objects.create(user=u,regNo=regNo,mobile=mobile,academic_year=academic_year,level_id=1,NTA_Level=NTA_Level,course=course,department_id=departments,gender=gender)
-       messages.success(request,'Student created successful')
-       return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-      elif NTA_Level==6:
-       u = User.objects.create(username=email,email=email,password=password,first_name=name)
-       u.groups.add(group)
-       Student.objects.create(user=u,regNo=regNo,mobile=mobile,academic_year=academic_year,level_id=2,NTA_Level=NTA_Level,course=course,department_id=departments,gender=gender)
-       messages.success(request,'Student created successful')
-       return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-      elif NTA_Level>6:
-       u = User.objects.create(username=email,email=email,password=password,first_name=name)
-       u.groups.add(group)
-       Student.objects.create(user=u,regNo=regNo,mobile=mobile,academic_year=academic_year,level_id=1,NTA_Level=NTA_Level,course=course,department_id=departments,gender=gender)
-       messages.success(request,'Student created successful')
-       return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-      elif NTA_Level <=6:
-       u = User.objects.create(username=email,email=email,password=password,first_name=name)
-       u.groups.add(group)
-       Student.objects.create(user=u,regNo=regNo,mobile=mobile,academic_year=academic_year,level_id=2,NTA_Level=NTA_Level,course=course,department_id=departments,gender=gender)
-       messages.success(request,'Student created successful')
-       return HttpResponseRedirect(request.META.get('HTTP_REFERER'))    
- except Exception as e:
-    print(e)
-    messages.error(request,'Something went wrong')
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    def form_invalid(self, form):
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(self.request, f"{field}: {error}")
+        return super().form_invalid(form)
 
-@login_required(login_url='/login')
-def addstaff(request):
- try:
-   if request.method == "POST":
-      
-      name = request.POST.get('name')
-      email = request.POST.get('username')
-      staff_id = request.POST.get('staff_id')
-      mobile = request.POST.get('mobile')
-      level = request.POST.get('level')
-      # NTA_Level = request.POST.get('NTA_Level')
-      # course = request.POST.get('course')
-      departments = request.POST.get('department')
-      gender = request.POST.get('gender')
-      
-      group_id = request.POST.get('role')
-      
-      group = Group.objects.get(id=group_id)
-      password = make_password("@DIT123")
-      users = User.objects.filter(username=email).exists()
-      user = Staff.objects.filter(staff_id=staff_id).exists()
-      us = Staff.objects.filter(level_id=1).exists()
-      uss = Staff.objects.filter(level_id=2).exists()
-      if users and user:
-         messages.error(request,'Staff exists')
-         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-      # images = convert_from_path('C:\\Users\\Raphael\\OneDrive\\Desktop\\file\\pdf\\RSM.pdf',poppler_path=poppler_path)
+    def user_exists(self, email):
+        return User.objects.filter(email=email).exists()
 
-      # # Save pages as images in the pdf
-      # images[0].save(f'{cover}\\page' +'.jpg', 'JPEG') 
-      u = User.objects.create(username=email,email=email,password=password,first_name=name,is_staff=True)
-      Staff.objects.create(user=u,staff_id=staff_id,mobile=mobile,department_id=departments,gender=gender,level_id=level)
-      u.groups.add(group)
-   
-      messages.success(request,'Staff created successful')
-      return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
- except Exception as e:
-    print("******************")
-    print(e)
-    messages.error(request,'Something went wrong')
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
- 
- 
-@login_required(login_url='/login')
-def editstudent(request,pk):
-   
- try:
-   r=User.objects.get(id=pk)
-   u = Group.objects.all()
-   d=Student.objects.filter(user__id=pk)
-   p =Student.objects.get(user__id=pk)
-   t = Permission.objects.all()
-   if request.method=='POST':
-      name = request.POST.get('name')
-      email = request.POST.get('username')
-      regNo = request.POST.get('regno')
-      mobile = request.POST.get('mobile')
-      academic_year = request.POST.get('academic_year')
-      NTA_Level = request.POST.get('NTA_Level')
-      course = request.POST.get('course')
-      departments = request.POST.get('department')
-      gender = request.POST.get('gender')
-      users = User.objects.get(id=pk)
-      user = Student.objects.get(user_id=pk)
-      User.objects.filter(id=pk).update(username=email,email=email,first_name=name)
-      Student.objects.filter(user_id=pk).update(regNo=regNo,mobile=mobile,academic_year=academic_year,NTA_Level=NTA_Level,course=course,department_id=departments,gender=gender)
-      for i in Group.objects.all():
-             p.user.groups.remove(i.id)
-             
-      for j in Permission.objects.all():
-              p.user.user_permissions.remove(j.id)
-      
-             
-      s_id = []
-      r_id=[]
-      permission = [x.name for x in Group.objects.all()]
-      perm = [i.name for i in Permission.objects.all()]
-      for x in permission:
-             
-             s_id.append(int(request.POST.get(x))) if request.POST.get(x) else print("")
-      for i in perm:
-             
-             r_id.append(int(request.POST.get(i))) if request.POST.get(i) else print("")
-      for s in s_id:
-           p.user.groups.add(Group.objects.get(id=s)) 
-      for r in r_id:
-           p.user.user_permissions.add(Permission.objects.get(id=r))    
-      messages.success(request,'Student updated successful')
-      return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
- except:
-      messages.error(request,'Something went wrong | exist')
-      return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
-   
-   
-@login_required(login_url='/login')
-def staff(request):
- try:
-   l = Level.objects.all()
-   
-   exclude_perm=[1,2,3,4,13,14,15,16,17,18,19,20,21,22,23,24,37]
-   p = Permission.objects.exclude(id__in=exclude_perm)
-   s = Staff.objects.all()
-   d = Department.objects.all()
-   g = Group.objects.all()
-   
-   return render(request,'html/dist/staffs.html',{'side':'staff','s':s,'d':d,'g':g,'p':p,'l':l})
- except:
-    messages.error(request,'Something went wrong')
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    def staff_exists(self, staff_id):
+        return Staff.objects.filter(staff_id=staff_id).exists()
 
-@login_required(login_url='/login')
+    def create_user(self, email, firstname, lastname, staff_id):
+        password = staff_id + "@DIT123"
+        password = make_password(password)
+        user = User.objects.create(
+            username=lastname,
+            email=email,
+            password=password,
+            first_name=firstname,
+            last_name=lastname,
+            is_staff=True,
+         )
+        staff_group, _ = Group.objects.get_or_create(name="Staff")
+        user.groups.add(staff_group)
+        return user
+
+    def create_staff(self, user, data):
+        Staff.objects.create(
+            user=user,
+            staff_id=data["staff_id"],
+            mobile=data["mobile"],
+            department=data["department"],
+            gender=data["gender"],
+        )
+
+
+class ProjectTypeView(LoginRequiredView, TemplateView):
+    template_name = "html/dist/project_type.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["d"] = Department.objects.all()
+        context["t"] = ProjectType.objects.all()
+        return context
+     
+######################################### END OF CCBV #########################################
+
+
+@login_required(login_url='/login/')
 def department(request):
    try:
       if request.method=='POST':
@@ -474,7 +494,7 @@ def department(request):
       return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def deletedepartment(request,pk):
    try:
       Department.objects.filter(id=pk).delete()
@@ -484,7 +504,7 @@ def deletedepartment(request,pk):
        messages.error(request,'something went wrong')
        return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def editdepartment(request,pk):
    try:
       if request.method=='POST':
@@ -496,62 +516,57 @@ def editdepartment(request,pk):
        messages.error(request,'something went wrong') 
        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))     
 
-@login_required(login_url='/login')
-def project_type(request):
-   t = Project_type.objects.values('department__name','name','id').order_by('id')
-   p = Permission.objects.all()
-   d = Department.objects.all()
-   return render(request,'html/dist/project_type.html',{'side':'project_type','d':d,'t':t})
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def addprojecttype(request):
  try:
    
    if request.method == "POST":
       name = request.POST.get("name")
       department = request.POST.get("department") 
-      Project_type.objects.create(name=name,department_id=department)
+      ProjectType.objects.create(name=name,department_id=department)
       messages.success(request,'Project Type added successful')
       return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
  except:
       messages.error(request,'something is wrong')
       return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
-@login_required(login_url='/login')
+   
+@login_required(login_url='/login/')
 def editprojecttype(request,pk):
   try:
    if request.method == "POST":
       name = request.POST.get("name")
       department = request.POST.get("department") 
       if request.user.is_superuser == True:
-       Project_type.objects.filter(id=pk).update(name=name,department_id=department)
+       ProjectType.objects.filter(id=pk).update(name=name,department_id=department)
        messages.success(request,'Project Type edited successful')
        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
       else:
-        Project_type.objects.filter(id=pk).update(name=name)
+        ProjectType.objects.filter(id=pk).update(name=name)
         messages.success(request,'Project Type edited successful')
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))  
   except:
     messages.error(request,'Something went wrong')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
- 
 
-@login_required(login_url='/login')
+
+@login_required(login_url='/login/')
 def deleteprojecttype(request,pk):
  try:
-      Project_type.objects.filter(id=pk).delete()
+      ProjectType.objects.filter(id=pk).delete()
       messages.success(request,'Project Type deleted successful')
       return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
  except:
       messages.error(request,'something is wrong')
       return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def level(request):
    
    levels = Level.objects.all().order_by('id')
    return render(request,'html/dist/level.html',{'side':'level','level':levels})
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def deletelevel(request,pk):
    try:
       Level.objects.filter(id=pk).delete()
@@ -561,7 +576,7 @@ def deletelevel(request,pk):
        messages.error(request,'something went wrong')
        return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def editlevel(request,pk):
    try:
       if request.method=='POST':
@@ -572,8 +587,8 @@ def editlevel(request,pk):
    except:
        messages.error(request,'something went wrong') 
        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))  
-    
-@login_required(login_url='/login')
+
+@login_required(login_url='/login/')
 def addlevel(request):
    try:
       if request.method=='POST':
@@ -585,15 +600,14 @@ def addlevel(request):
        messages.error(request,'something went wrong') 
        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))    
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def deletestudent(request,pk):
    User.objects.filter(id=pk).delete()
    messages.success(request,'User deleted successful')
    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def delete_level(request,pk):
    try:
       Level.objects.filter(id=pk).delete()
@@ -602,7 +616,7 @@ def delete_level(request,pk):
    except:
        messages.error(request,'something went wrong')
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def update_level(request,pk):
    try:
       if request.method=='POST':
@@ -612,8 +626,8 @@ def update_level(request,pk):
          return redirect('/level')
    except:
        messages.error(request,'something went wrong')
- 
- 
+
+
 @login_required(login_url='login/')
 def manageroles(request):
    try: 
@@ -648,7 +662,7 @@ def addroles(request):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def editroles(request,pk):
    
   try:
@@ -681,7 +695,7 @@ def editroles(request,pk):
   except:
       messages.error(request,'Something is wrong')
 
-@login_required(login_url='/login')     
+@login_required(login_url='/login/')     
 def blockuser(request,pk):
        
      
@@ -700,7 +714,7 @@ def blockuser(request,pk):
        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-@login_required(login_url='/login')   
+@login_required(login_url='/login/')   
 def deleteroles(request,pk):
    try: 
     g = Group.objects.filter(id=pk).delete()
@@ -711,7 +725,7 @@ def deleteroles(request,pk):
    except:
     messages.error(request,'Something went wrong')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def reset_password(request,pk):
    password = make_password("@DIT123")
    User.objects.filter(id=pk).update(password=password)
@@ -719,14 +733,7 @@ def reset_password(request,pk):
    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-@login_required(login_url='/login')
-def logout(request):
-    auth.logout(request)
-    messages.success(request,'logout successful')
-    
-    return redirect('login')
- 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def editstaff(request,pk):
  try:
    if request.method == "POST":
@@ -736,8 +743,7 @@ def editstaff(request,pk):
       staff_id = request.POST.get('staff_id')
       mobile = request.POST.get('mobile')
       level = request.POST.get('level')
-      # NTA_Level = request.POST.get('NTA_Level')
-      # course = request.POST.get('course')
+
       departments = request.POST.get('department')
       gender = request.POST.get('gender')
       
@@ -748,9 +754,6 @@ def editstaff(request,pk):
       password = make_password("@DIT123")
       users = User.objects.filter(username=email).exists()
       user = Staff.objects.filter(staff_id=staff_id).exists()
-      # if users and user:
-      #    messages.error(request,'Staff exists')
-      #    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
          
       User.objects.filter(id=pk).update(username=email,email=email,first_name=name)
       Staff.objects.filter(user_id=pk).update(staff_id=staff_id,mobile=mobile,department_id=departments,gender=gender,level=level)
@@ -764,7 +767,7 @@ def editstaff(request,pk):
     messages.error(request,'Something went wrong')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def upload_addstaff(request):
       try:
         if request.method == 'POST':
@@ -773,8 +776,6 @@ def upload_addstaff(request):
          if path.endswith('.xlsx'):
             df = pd.read_excel(file_data)
             
-            # decoded_file = file_data.read().decode('utf-8').splitlines()
-            # reader = csv.DictReader(decoded_file)
             for index, row in df.iterrows():
                 dept_id = Department.objects.get(name=row['department'])
                 role_id = Group.objects.get(name=row['role'])
@@ -810,13 +811,12 @@ def upload_addstaff(request):
         messages.error(request,'something went wrong')
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def upload_student(request):
       try:
         if request.method == 'POST':
          file_data = request.FILES['file']
-         # decoded_file = file_data.read().decode('utf-8').splitlines()
-         # reader = csv.DictReader(decoded_file)
+
          path = str(file_data)
          if path.endswith('.xlsx'):
             df = pd.read_excel(file_data)
@@ -862,53 +862,13 @@ def upload_student(request):
          return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-@login_required(login_url='/login')
-def projects(request):
- try:
-   d = Document.objects.all()
-   l = Document.objects.all().count()
-   f = Department.objects.all()
-   s = Student.objects.values_list('academic_year',flat=True).distinct()
-   s = list(s)
-   g = Project_type.objects.all()
-   level = Level.objects.all()
-   name = request.POST.get('department')
-   g = Project_type.objects.filter(department__name = name)
-   return render(request,'html/dist/projects.html',{'side':'projects','d':d,'f':f,'s':s,'g':g,'l':l,'level':level})
- except:
-    messages.error(request,'Something went wrong')
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
-@login_required(login_url='/login')
-def changepassword(request):
- try:
-   if request.method =='POST':
-      old = request.POST.get("old")
-      new = request.POST.get("new")
-      comf = request.POST.get("comf")
-      # print(request.user.check_password(old))
-      if (request.user.check_password(old)):
-       if (new == comf): 
-         User.objects.filter(username=request.user.username).update(password=make_password(new))
-         messages.success(request,'successful password changed login again')
-         return redirect('/login')
-       else:
-           messages.error(request,'Password Dont Match')
-           return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-      else:
-         messages.error(request,'Check Your Old Password')
-         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
- except:
-    messages.error(request,'Something went wrong')
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-      
 def upload(request):
  try:
    if request.method == 'POST':
       
       
       image= request.FILES.get("file")
-      Document.objects.create(project_id=1, file=image)
+      ProjectDocument.objects.create(project_id=1, file=image)
    s = Student.objects.all().count()
    d = Department.objects.all().count()
    p = Project.objects.all().count()
@@ -919,14 +879,6 @@ def upload(request):
  except:
     messages.error(request,'Something went wrong')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-import PyPDF2
-import docx2txt
-from fuzzywuzzy import fuzz
-import fitz
-
-# To get better resolution
-  # zoom factor 2 in each dimension
-
 
 
 def check_file_similarity(file_path):
@@ -946,7 +898,7 @@ def check_file_similarity(file_path):
     else:
         raise ValueError('Unsupported file type')
     
-    for obj in Document.objects.all():
+    for obj in ProjectDocument.objects.all():
         # extract text content from object file
         if obj.file.path.endswith('.pdf'):
             with open(obj.file.path, 'rb') as f:
@@ -965,116 +917,6 @@ def check_file_similarity(file_path):
     return similarity_scores
 
 
-  
-
-
-# def upload(request):
-#     above= []
-   
-#     if request.method == 'POST':  
-#         file = request.FILES['file'].read()
-#         fileName= request.POST['filename']
-#         existingPath = request.POST['existingPath']
-#         end = request.POST['end']
-#         nextSlice = request.POST['nextSlice']
-        
-#         if fileName == "":
-#             res = JsonResponse({'data':'Invalid Request'})
-#             return res
-#         else:
-#             if existingPath == 'null':
-#                 path = 'media/projects/' + fileName
-                
-#                 if path.endswith('.pdf'):
-#                   with open(path, 'wb+') as destination: 
-#                      destination.write(file)
-#                   FileFolder = Document()
-#                   project = Project()
-#                   similarity_scores = check_file_similarity(path)
-#                   print(request.user.student.id)
-#                   if len(similarity_scores)==0:
-#                         project.student_id = request.user.student.id
-#                         project.department_id = request.user.student.department.id
-#                         project.save()
-#                         FileFolder.project_id = project.id
-#                         FileFolder.file = f'projects\\{fileName}'
-                        
-#                         #  FileFolder.project_id = end
-#                         #  FileFolder.name = fileName
-                        
-#                         images = convert_from_path(path,poppler_path=poppler_path)
-#                         r = random.randint(1,100)
-#                         name = f'page{r}'+'.jpg'
-#                         path = f'{cover}\\{name}' 
-                        
-                        
-#                         # Save pages as images in the pdf
-#                         images[0].save(path) 
-#                         FileFolder.cover = name
-                        
-#                         FileFolder.save()
-#                         if int(end):
-#                            res = JsonResponse({'data':'Uploaded Successfully','existingPath': fileName})
-                           
-                           
-#                         else:
-#                            res = JsonResponse({'existingPath': fileName})
-#                         return res   
-#                   else:
-#                      if max(similarity_scores,key=lambda x:x[1])[1] == 100:
-#                             res = JsonResponse({'data':'File Exists','existingPath': fileName})
-                      
-#                      elif max(similarity_scores,key=lambda x:x[1])[1] > 80:
-#                         res = JsonResponse({'data':max(similarity_scores,key=lambda x:x[1]),'existingPath': fileName})
-                        
-#                      else:
-#                         FileFolder.file = f'projects\\{fileName}'
-                        
-#                         #  FileFolder.project_id = end
-#                         #  FileFolder.name = fileName
-                        
-#                         images = convert_from_path(path,poppler_path=poppler_path)
-#                         r = random.randint(1,100)
-#                         name = f'page{r}'+'.jpg'
-#                         path = f'{cover}\\{name}' 
-                        
-                        
-#                         # Save pages as images in the pdf
-#                         images[0].save(path) 
-#                         FileFolder.cover = name
-#                         FileFolder.save()
-#                         if int(end):
-#                            res = JsonResponse({'data':'Uploaded Successfully','existingPath': fileName})
-#                         else:
-#                            res = JsonResponse({'existingPath': fileName})
-#                         return res
-#                      return res
-#                 else:
-#                   res = JsonResponse({'messages':messages.success(request,'ONly pdf required')})
-#                   return res
-
-#             else:
-#                 path = 'media/' + existingPath
-#                 model_id = File.objects.get(existingPath=existingPath)
-#                 if model_id.name == fileName:
-#                     if not model_id.eof:
-#                         with open(path, 'ab+') as destination: 
-#                             destination.write(file)
-#                         if int(end):
-#                             model_id.eof = int(end)
-#                             model_id.save()
-#                             res = JsonResponse({'data':'Uploadeds Successfully','existingPath':model_id.existingPath})
-#                         else:
-#                             res = JsonResponse({'existingPath':model_id.existingPath})    
-#                         return res
-#                     else:
-#                         res = JsonResponse({'data':'EOF found. Invalid request'})
-#                         return res
-#                 else:
-#                     res = JsonResponse({'data':'No such file exists in the existingPath'})
-#                     return res
-#     return render(request, 'html/dist/upload.html')
-import re 
 t = 'SPECIFIC OBJECTIVES'
 k = 'OBJECTIVES'
 u = 'SPECIFIC OBJECTIVE'
@@ -1088,10 +930,8 @@ objectives = [ab,t,k]
 
 dsm = [g]
 pattern = '|'.join(objectives)
-# patt = '|'.join(title)
 ds = '|'.join(dsm)
-# pdf2 = PyPDF2.PdfReader(file_path)
-# no = len(pdf2.pages)
+
 
 def split_merge(input,output):
     pages = [0]
@@ -1121,7 +961,7 @@ def split_merge(input,output):
         pdf_w.write(output_file)
         
     return pages  
-  
+
 def pdf_upload(request):
     
     
@@ -1131,7 +971,7 @@ def pdf_upload(request):
     zoom_y = 2.0  # vertical zoom
     mat = fitz.Matrix(zoom_x, zoom_y)
     if request.method == 'POST' and request.FILES['pdf']:
-      j = Document.objects.filter(project__student_id=request.user.student.id).exists() 
+      j = ProjectDocument.objects.filter(project__student_id=request.user.student.id).exists() 
       role = Group.objects.get(name='Student')  
       title = request.POST.get('title')
       type = request.POST.get('type')
@@ -1152,15 +992,13 @@ def pdf_upload(request):
                      destination.write(file)
          pdf2 = PyPDF2.PdfReader(path)
          text2 = ''
-         # for page in range(number_of_pages):
+
          text2 += pdf2.pages[0].extract_text()
          dar = pdf2.pages[0].extract_text()
          patts = '|'.join(tit)
          m = '|'.join(n)
          match = re.findall(ds, dar,re.IGNORECASE)
-         
-         # print(text2.strip())
-         # if 'DAR ES SALAAM INSTITUTE OF TECHNOLOGY' in text2:
+
          
          if match: 
             matches = re.findall(patts, dar,re.IGNORECASE)
@@ -1170,11 +1008,11 @@ def pdf_upload(request):
                project = Project()
                similarity_scores = check_file_similarity(path)         
                if len(similarity_scores)==0:
-                  #images = convert_from_path(path,poppler_path=poppler_path)
+   
                   name = str(pdf)[-6:-4]
                   pdfs=  str(pdf)[:-4]
                   doc = fitz.open(path)  # open document
-      # iterate through the pages
+
                   
                   names = f'{request.user.student.regNo}.jpg'
                   paths = f'media/coverpage/{str(request.user.student.regNo)}.jpg' 
@@ -1201,7 +1039,7 @@ def pdf_upload(request):
                   split_merge(input,output)
                
                
-                  pdf_file = Document(cover=pic,file=patt,project_id = project.id, preview=out, submitted=True)
+                  pdf_file = ProjectDocument(cover=pic,file=patt,project_id = project.id, preview=out, submitted=True)
                   pdf_file.save()
             
                   Progress.objects.create(document_id=pdf_file.id)
@@ -1210,22 +1048,16 @@ def pdf_upload(request):
                   return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
                   #return render(request, 'html/dist/pdf_upload.html', {'pdf_file': pdf_file,'j':j})
                else:
-                           # if max(similarity_scores,key=lambda x:x[1])[1] == 100:
-                           #       messages.error(request, 'File Exists')
-                           #       return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
                            
                            if max(similarity_scores,key=lambda x:x[1])[1] > 80:
                               print(f'projects/{max(similarity_scores,key=lambda x:x[1])[0]}')
-                              d = Document.objects.get(file=f'projects/{max(similarity_scores,key=lambda x:x[1])[0]}')
+                              d = ProjectDocument.objects.get(file=f'projects/{max(similarity_scores,key=lambda x:x[1])[0]}')
                               
                               messages.error(request, f'Your file is {max(similarity_scores,key=lambda x:x[1])[1]} %  resemble with project with title {d.project.title.title()} of year {d.project.student.academic_year} {d.project.student.level.name.title()} from {d.project.student.department.name.title()} Department')
-                              # profile = os.path.join(PROJECT_DIR, '..', 'media','projects')
-                              # os.remove(f'{profile}\\{str(pdf)}') 
-                              # res = JsonResponse({'data':max(similarity_scores,key=lambda x:x[1]),'existingPath': fileName})
+                            
                               return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
                               
                            else:
-                              #images = convert_from_path(path,poppler_path=poppler_path)
                               name = str(pdf)[-6:-4]
                               name = f'{request.user.student.regNo}.jpg'
                               doc = fitz.open(path) 
@@ -1242,23 +1074,19 @@ def pdf_upload(request):
                               for i in Group.objects.all():
                                  p.groups.remove(i.id)
                               p.groups.add(role)  
-                              # Save pages as images in the pdf
-                              #images[0].save(paths) 
+              
                               pix = doc[0].get_pixmap(matrix=mat)  # render page to an image
                               pix.save(paths)
                               profile = os.path.join(PROJECT_DIR, '..', 'media','projects')
-                              #os.remove(f'{profile}\\{str(pdf)}')           
+             
                               input = path
                               output = f'media/preview/{str(request.user.student.regNo)}.pdf'
                               out = f'preview/{str(request.user.student.regNo)}.pdf'
-                              # print(output)
-                              # pagez = pages
-                              # pagez = pages
-                              #print(pagez)
+        
                               split_merge(input,output)
                               
                
-                              pdf_file = Document(cover=pic,file=patt,project_id = project.id, preview=out, submitted=True)
+                              pdf_file = ProjectDocument(cover=pic,file=patt,project_id = project.id, preview=out, submitted=True)
                               pdf_file.save()
                               
                               Progress.objects.create(document_id=pdf_file.id)
@@ -1285,35 +1113,31 @@ def pdf_upload(request):
           
     if request.user.is_superuser:
            
-     p  = Project_type.objects.all()
+     p  = ProjectType.objects.all()
      sub = Submission.objects.all()
-      #s = Student.objects.filter(NTA_Level = 8)
+
     elif request.user.is_staff:
             
-            p  = Project_type.objects.filter(department_id=request.user.staff.department.id)
+            p  = ProjectType.objects.filter(department_id=request.user.staff.department.id)
             sub = Submission.objects.filter(level=request.user.staff.level.id) 
     else:
        sub = Submission.objects.filter(level_id=request.user.student.level.id,department_id=request.user.student.department.id)
        
-       p  = Project_type.objects.filter(department_id=request.user.student.department.id)
-       j = Document.objects.filter(project__student_id=request.user.student.id).exists() 
+       p  = ProjectType.objects.filter(department_id=request.user.student.department.id)
+       j = ProjectDocument.objects.filter(project__student_id=request.user.student.id).exists() 
         
     role = Group.objects.get(name='Student')    
-    return render(request, 'html/dist/pdf_upload.html',{'side':'upload_project','p':p,'sub':sub,'j':j})
-   # except:
-     
-   #  messages.error(request,'Something went wrong')
-   #  return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
- 
- 
+    return render(request, 'html/dist/pdf_upload.html',{'side':'upload_project','p':p,'sub':sub})
+
+
 def preview_pdf(request,pk):
  try: 
-   d = Document.objects.filter(id=pk)     
+   d = ProjectDocument.objects.filter(id=pk)     
    return render(request, 'html/dist/previewed.html',{'side':'a','d':d,'id':pk})
  except:
     messages.error(request,'Something went wrong')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
- 
+
 
 def submissionTime(request):
    try:
@@ -1333,8 +1157,6 @@ def submissionTime(request):
           dates = str(dates)
 
           dates = f'{first}/{dates}'
-         #  tz = pytz.timezone('Africa/Dar_es_Salaam')
-         #  date = tz.localize(date)
           
           if request.user.staff.level.id == '':
             messages.error(request, 'Data') 
@@ -1357,7 +1179,7 @@ def submissionTime(request):
    except:
     messages.error(request,'Something went wrong')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))      
-    
+
 def editSubmittionTime(request,pk):
       try:
        if request.method == 'POST':
@@ -1365,7 +1187,6 @@ def editSubmittionTime(request,pk):
           
           time = request.POST.get('time')
           
-          #pytz.timezone('Africa/Dar_es_Salaam') 
           y,m,d = date.split("-")
           h,mm = time.split(":")
           role = Group.objects.get(name='Final_Year')
@@ -1432,7 +1253,7 @@ def deletesub(request,pk):
       messages.success(request, 'data deleted successful') 
       return HttpResponseRedirect(request.META.get('HTTP_REFERER'))  
 
-    
+
 def deadlines(request):
  try:
   
@@ -1441,7 +1262,6 @@ def deadlines(request):
   sb = Submission.objects.get(level_id=request.user.student.level.id)
   d = Submission.objects.get(department_id=request.user.student.department.id)
  
-#   print(sb.level_id)
   date =  datetime.datetime.now().year
   first = str(date-1)
   date = str(date)
@@ -1455,25 +1275,24 @@ def deadlines(request):
                      s.user.groups.remove(i.id)   
          s.user.groups.add(role.id) 
          messages.error(request, 'TIMEOUT') 
-         #return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
+
          return render(request,'html/dist/deadline.html')
       elif s.NTA_Level == 6 and s.level.id==sb.level_id and s.academic_year==date and s.department_id==d.department_id:
             for i in Group.objects.all():
                      s.user.groups.remove(i.id)
             s.user.groups.add(role) 
             messages.error(request, 'TIMEOUT') 
-      #return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
+
             return render(request,'html/dist/deadline.html')
       
  except:
    messages.error(request, 'something went wrong') 
    return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
- 
+
 def my_view(request):
-    # Retrieve a Time model instance (assuming it exists)
+
    time_instance = Submission.objects.filter(level_id=request.user.staff.level.id).first()
 
-    # Pass the date and time values to the template
     
    date=time_instance.date.strftime('%Y-%m-%d')
    
@@ -1486,35 +1305,10 @@ def my_view(request):
    return render(request, 'html/dist/b.html', {'date':datt,'now':now})
 
 def get_project_types(request, department):
-    project_types = Project_type.objects.filter(department__name=department)
+    project_types = ProjectType.objects.filter(department__name=department)
     data = [{'id': p.id, 'name': p.name} for p in project_types]
     return JsonResponse({'project_types': data})
- 
- 
-def manage_project(request):
-  try:
-   f = Department.objects.all()
-   s = Student.objects.values_list('academic_year',flat=True).distinct()
-  
-   s = list(s)
-   if request.user.is_superuser:
-    g = Project_type.objects.all()
-   
-    d = Document.objects.all()
-   elif request.user.is_staff:
-        
-         g= Project_type.objects.filter(department_id=request.user.staff.department.id)
-         d = Document.objects.filter(project__department_id = request.user.staff.department.id)  
-   else:
-          g = Project_type.objects.filter(department_id = request.user.student.department.id)
-          
-          d = Document.objects.filter(project__department_id = request.user.student.department.id)
-   name = request.POST.get('department')
-   g = Project_type.objects.filter(department__name = name)
-   return render(request,'html/dist/manage_project.html',{'side':'manage_project','d':d,'f':f,'s':s,'g':g})
-  except:
-    messages.error(request,'Something went wrong')
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
 
 def deletepdf(request,pk):
  try:
@@ -1524,13 +1318,6 @@ def deletepdf(request,pk):
  except:
    messages.error(request, 'something went wrong') 
    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
-
-# def deadlines(request):
-   
-   
-#    return render(request,'html/dist/deadline.html')
-
 
 
 def progress(request):
@@ -1552,7 +1339,7 @@ def progress(request):
         sum = sum+int(sad)
         
         Progress.objects.filter(id=id).update(prog=sum,status=True)
-      #   return render(request, 'form_success.html')
+
         return redirect('/assessment')
     else:
         return redirect('/assessment')
@@ -1561,11 +1348,10 @@ def progress(request):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-     
 def autocomplete(request):
       if 'q' in request.GET:
         q = request.GET['q']
-        # data = Data.objects.filter(last_name__icontains=q)
+
         multiple_q = Q(Q(document__project__title__icontains=q) | Q(last_name__icontains=q))
         data = Progress.objects.filter(multiple_q)
         titles = list()
@@ -1586,11 +1372,9 @@ def save_pdf(request):
     if request.method == 'POST' and request.FILES['pdf_file']:
         pdf_file = request.FILES['pdf_file']
       
-        # Save the file to a specific location on the server
         with open('media/projects/' + pdf_file.name, 'wb') as destination:
             shutil.copyfileobj(pdf_file.file, destination)
-            # for chunk in pdf_file.chunks():
-            #     destination.write(chunk)
+
         messages.success(request,'Pdf edited successful')
         return redirect('/assessment')
          
@@ -1598,10 +1382,6 @@ def save_pdf(request):
         messages.error(request,'Something went wrong')
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-
-
-
-from django.http import JsonResponse
 
 def get_level(request):
     level = request.GET.get('level')
@@ -1618,28 +1398,190 @@ def get_level(request):
 def get_courses(request):
     department = request.GET.get('department')
     department = department.upper()
-    
+
     level = request.GET.get('level')
-   
+
     dept = Department.objects.get(name=department)
-    
-    
-    # Retrieve the courses based on department and level
+
     if level=="":
-     pass
+        pass
     else:
-     lev = Level.objects.get(name=level)
-     courses = Awards.objects.filter(department_id=dept.id,level_id=lev.id).values('id', 'name')
-     typ = Project_type.objects.filter(department_id=dept.id).values('id', 'name')
-    # Serialize the courses as JSON
+        lev = Level.objects.get(name=level)
+        courses = Awards.objects.filter(department_id=dept.id,level_id=lev.id).values('id', 'name')
+        typ = ProjectType.objects.filter(department_id=dept.id).values('id', 'name')
+
     courses = list(courses)
     types = list(typ)
-    
+
     print(types)       
-    #print(types)
-   #   print(courses)
-    # Return the response
+
     return JsonResponse({'courses': courses,'types':types})
- 
-#def get_level(request):
-   
+
+
+# def login(request):
+#  try:
+#    user = User()
+#    students = Student()
+#    staffs = Staff()
+#    projects = Project()
+
+#    role8 = Group.objects.get(name='Final_Year')
+#    role = Group.objects.get(name='Student')
+#    is_connected = check_connection()
+
+#    if is_connected==True:
+#     if request.method == 'POST':
+#      if is_connected==True:
+#       email=request.POST.get("username")
+#       password=request.POST.get("password")
+#       users = User.objects.filter(username=email).exists()
+
+#       u = User.objects.filter(username=email)
+
+#       u = user.first_name.split(',')
+#       u = u
+
+#       current_date = datetime.datetime.now().date()
+#       october = datetime.datetime(current_date.year,10,1).date()
+
+
+#       if users:
+#          us = User.objects.get(username=email)
+#          if us.is_staff==False:
+#             if current_date >=october:
+#                rex.studentInfo(email=request.POST.get("username"), password=request.POST.get("password"))
+
+
+#                # if rex.error == "no internet connection":
+#                #    messages.error(request,rex.error)
+#                #    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+#                if rex.error == "Login Failed: invalid credentials":
+#                   messages.error(request,rex.error)
+#                   return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+#                elif rex.error == 'invalid status code':
+#                   messages.error(request,rex.error)
+#                   return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+#                else:
+#                   Student.objects.filter(user__email=request.POST.get("username")).update(NTA_Level = rex,academic_year = rex.academic_year)
+#                   user = auth.authenticate(username=email,password=password)
+#                   if user is not None:
+#                      auth.login(request,user)
+#                      messages.success(request,'Login successful')
+#                      return redirect('/')
+
+
+#                   return redirect('/login/')
+#             else:
+#                userr = auth.authenticate(username=email,password=password)
+#                if userr is not None:
+#                   auth.login(request,userr)
+#                   messages.success(request,'Login successful')
+#                   return redirect('/')
+#                else:
+#                   messages.error(request,'Unknown information')
+#                   return redirect('/login/')
+#          else:
+#                userr = auth.authenticate(username=email,password=password)
+#                if userr is not None:
+#                   auth.login(request,userr)
+#                   messages.success(request,'Login successful')
+#                   return redirect('/')
+#                else:
+#                   messages.error(request,'Unknown information')
+#                   return redirect('/login/')
+#       else:
+
+#          rex.studentInfo(email=request.POST.get("username"), password=request.POST.get("password"))
+#          # if rex.error == "no internet connection":
+#          #       messages.error(request,rex.error)
+#          #       return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+#          if rex.error == "Login Failed: invalid credentials":
+#                messages.error(request,rex.error)
+#                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+#          elif rex.error == 'invalid status code':
+#                messages.error(request,rex.error)
+#                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+#          else:
+
+#             user.first_name = rex.name
+#             user.username = rex.email
+#             user.email = rex.email
+#             user.password = make_password(request.POST.get("password"))
+#             user.save()
+#             # print(f'{rex.NTA_level},{rex.regno}')
+
+#             # if rex.NTA_level == '8' or (rex.NTA_level=='6' and 'diploma' in (rex.level).lower()):
+#             #        user.groups.add(role8)
+#             # else:
+#             user.groups.add(role)
+#             # course = (rex.level).split()
+#             # course = course[-2] +" "+ course[-1]
+#             # print(course)
+#             students.user = user
+#             students.regNo = rex.regno
+#             students.NTA_Level = rex.NTA_level
+
+#             students.academic_year = rex.academic_year
+#             students.mobile = rex.mobile
+#             students.gender = rex.gender
+#             students.course = rex.level
+
+#             if 'computer' in (rex.level).lower() or 'information' in (rex.level).lower() or 'multimedia' in (rex.level).lower():
+#                students.department_id = 2
+#             elif 'civil' in (rex.level).lower() or 'mining' in (rex.level).lower() or 'gas' in (rex.level).lower():
+#                students.department_id = 1
+#             elif 'electrical' in (rex.level).lower() or 'biomedical' in (rex.level).lower() or 'renewable' in (rex.level).lower():
+#                students.department_id = 3
+#             elif 'electronics' in (rex.level).lower() or 'communication' in (rex.level).lower():
+#                students.department_id = 4
+#             elif 'mechanical' in (rex.level).lower():
+#                 students.department_id = 5
+#             elif 'food' in (rex.level).lower() or 'laboratory' in (rex.level).lower() or 'biotechnology' in (rex.level).lower():
+#                students.department_id = 6
+#             if 'bachelor' in (rex.level).lower():
+#                    students.level_id = 1
+#             else:
+#                    students.level_id = 2
+#             students.save()
+#             # us = Student.objects.get(user__username=email)
+#             # print(f'{rex.NTA_level}:{rex.level}')
+#             # if rex.NTA_level == '6' and 'diploma' in (rex.level).lower():
+#             #        projects.student_id = us.id
+#             #        projects.department_id = us.department_id
+
+#             #       #  projects.save()
+#             #       #  doc = Document.objects.create(project=projects)
+#             #       #  Progress.objects.create(document=doc)
+#             # if 'bachelor' in (rex.level).lower() and rex.NTA_level == '8':
+#             #         projects.student_id = us.id
+#             #         projects.department_id = us.department_id
+
+#             # projects.save()
+#             # p = Project.objects.get(student_id=us.id)
+#             # Document.objects.create(project_id=p.id)
+#             # f = Document.objects.get(project_id=p.id)
+#             # Progress.objects.create(document_id=f.id)
+#             rex.studentImage(email=request.POST.get("username"), password=request.POST.get("password"))
+
+#             with open(rex.regno+".jpg", 'rb') as f:
+
+#                django_file = File(f)
+#                students.photo.save(rex.regno+".jpg", django_file, save=True)
+#             os.remove(rex.regno+".jpg")
+#             user = auth.authenticate(username=email,password=password)
+#             if user is not None:
+#                auth.login(request,user)
+#                messages.success(request,'Login successful')
+#                return redirect('/')
+
+#             return redirect('/login/')
+#      else:
+#         messages.error(request,'No internet Connection')
+#         return render(request,'html/dist/login/.html')
+#     return render(request,'html/dist/login/.html')
+#    else:
+#       messages.error(request,'No internet Connection')
+#       return render(request,'html/dist/login/.html')
+#  except:
+#     messages.error(request,'Something went wrong')
+#     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
