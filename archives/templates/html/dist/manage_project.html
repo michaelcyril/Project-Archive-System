@@ -24,9 +24,9 @@
                             <th>Project Title</th>
                             <th>Project Type</th>
                             <th>Document File</th>
-                            {% if perms.archives.change_project_type and perms.archives.delete_project_type %}
+                            <th>Upvotes</th>
                             <th>Action</th>
-                            {% endif %}
+                           
                         </tr>
                     </thead>
                     <tbody>
@@ -35,8 +35,10 @@
                             <td>{{t.project.student.user.first_name}} {{t.project.student.user.last_name}}</td>
                             <td>{{t.project.student.regNo}}</td>
                             <td>{{t.project.title| title}}</td>
-                            <td>{{t.project.project_type}}</td>               
-                            <td><a href="preview_pdf/{{t.id}}"><i class="fa fa-file font-14"></i></a></td>
+                            <td>{{t.project.project_type}}</td>   
+                                    
+                            <td><a href="{% url "preview_pdf" t.id %}"><i class="fa fa-file font-14"></i></a></td>
+                            <td>0</td>
                             {% if perms.archives.change_project_type and perms.archives.delete_project_type %}
                             <td class="px-2 ">
                                 <button class="btn" data-toggle="modal" data-target="#modal-dangerv{{t.id}}">

@@ -59,43 +59,32 @@
                     <i class="fa fa-angle-left arrow"></i>
                 </a>
                 <ul class="nav-2-level collapse"> 
-                    <li class="active">
-                        <a class="active" href="{% url "project_type" %}">
+                    <li class="ac">
+                        <a class="" href="{% url "project_type" %}">
                             <i class="sidebar-item-icon fa fa-list"></i>
                             <span class="nav-label">Project Types</span>
                         </a>
                     </li>
-                    <li class="{% if side == 'projects' %} active {% endif %}">
-                        <a class="{% if side == 'projects' %} active {% endif %}" href="{% url 'projects' %}">
-                            <i class="sidebar-item-icon fa fa-eye"></i>
-                            <span class="nav-label">Project List</span>
-                        </a>
-                    </li>
+                   
                     {% if perms.archives.add_document %}
                      
-                    {% comment %} <li class="{% if side == 'upload_project' %} active {% endif %}">
-                        <a class="{% if side == 'upload_project' %} active {% endif %}" href="{% url "pdf_upload" %}">
-                            <i class="sidebar-item-icon fa fa-cloud-upload"></i>
-                            <span class="nav-label">New Project</span>
-                        </a>
-                    </li> {% endcomment %}
+
                     {% endif %}
                     {% if perms.archives.change_document %}
                     <li class="{% if side == 'manage_project' %} active {% endif %}">
                         <a class="{% if side == 'manage_project' %} active {% endif %}" href="{% url "manage_project" %}">
                             <i class="sidebar-item-icon fa fa-database"></i>
-                            <span class="nav-label">Manage Project</span>
+                            <span class="nav-label">Project List</span>
                         </a>
                     </li>
                     {% endif %}
-                    {% if perms.archives.add_progress %}
-                    <li class="{% if side == 'assessment' %} active {% endif %}">
-                        <a class="{% if side == 'assessment' %} active {% endif %}" href="{% url "assessment" %}">
-                            <i class="sidebar-item-icon fa fa-bar-chart"></i>
-                            <span class="nav-label">Submitted Projects</span>
+       
+                    <li class="{% if side == 'projects' %} active {% endif %}">
+                        <a class="{% if side == 'projects' %} active {% endif %}" href="{% url 'projects' %}">
+                            <i class="sidebar-item-icon fa fa-eye"></i>
+                            <span class="nav-label">Completed Projects</span>
                         </a>
                     </li>
-                    {% endif %}
                 </ul>
             </li>
             {% endif %}
@@ -109,7 +98,7 @@
             {% endif %}
             {% if perms.archives.view_level %}
             <li>
-                <a href="{% url 'level' %}" class="{% if side == 'level' %} active {% endif %}">
+                <a href="" class="{% if side == 'level' %} active {% endif %}">
                     <i class="sidebar-item-icon fa fa-bookmark"></i>
                     <span class="nav-label">Academic Level</span>
                 </a>

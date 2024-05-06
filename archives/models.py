@@ -107,9 +107,6 @@ class Project(models.Model):
     def __str__(self):
         return self.title
 
-    def total_upvotes(self):
-        return self.upvote_set.count()
-
 
 class Upvote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -127,11 +124,10 @@ class ProjectDocument(models.Model):
     )
     project = models.OneToOneField(Project,null=True, blank=True, on_delete=models.CASCADE)
     file = models.FileField(upload_to='Document/Projects',null=True,blank=True)
-    # preview = models.FileField(upload_to='Document/Preview',null=True,blank=True)
     submitted = models.BooleanField(null=True,blank=True,default=False)
     date_created = models.DateField(auto_now_add=True)
     document_type = models.CharField(choices=DOCUMENT_TYPE, max_length=20, null=True, blank=True)
-    # cover = models.ImageField(upload_to='Document/Cover', null=True, blank=True)
+    cover = models.ImageField(upload_to='Document/Cover', null=True, blank=True)
 
     class Meta:
         db_table = "document"       

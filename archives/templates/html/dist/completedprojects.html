@@ -1,0 +1,41 @@
+{% load static %}
+{% include "includes/header.html" %}
+{% include "includes/sidebar.html" %}
+
+<div class="container-fluid">
+  {% if l == 0 %}
+    <h1> NO Document Available </h1>
+  {% else %}
+    <div class="">
+      <div class="m-2">
+        <h4>Completed Projects</h4>
+      </div>
+      <div class="">
+        {% if d %}
+          <div class="row">
+            {% for d in d %}
+              <div class="col-lg-3 col-md-6 col-sm-6 mt-2 mb-2">
+                <div class="card">
+                  <a href="{% url "preview_pdf" d.id %}">
+                    <img src="{{d.cover.url}}" class="card-img-top rounded-bottom" alt="project cover image">
+                  </a>
+                  <div class="card-body">
+                    <h5 class="card-title">{{d.project.title}}</h5>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                  </div>
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item">{{d.project.project_type.name | title}}</li>
+                  </ul>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %} 
+      </div> 
+    </div>
+  {% endif %}
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" charset="utf-8"></script>
+
+{% include "includes/footer.html" %}
