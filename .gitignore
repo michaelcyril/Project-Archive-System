@@ -172,5 +172,5 @@ cython_debug/
 #.idea/
 
 # my personal testing files
-lovecalculator.py
+
 # End of https://www.toptal.com/developers/gitignore/api/django
