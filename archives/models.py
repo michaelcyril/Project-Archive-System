@@ -37,7 +37,6 @@ class Awards(models.Model):
     def __str__(self):
         return self.name
 
-
 class Student(models.Model):
     GENDER = (
         ('Male','Male'),
@@ -131,6 +130,9 @@ class ProjectDocument(models.Model):
 
     class Meta:
         db_table = "document"       
+        
+    def __str__(self):
+        return self.project.title
 
 class Progress(models.Model):
     STATUS = (
@@ -139,7 +141,6 @@ class Progress(models.Model):
         ('Rejected','Rejected')
     )
     document = models.OneToOneField(ProjectDocument,on_delete=models.CASCADE,null=True,blank=True)
-    prog = models.IntegerField(default=0,null=True,blank=True) 
     date_created = models.DateField(auto_now_add=True)
     status = models.CharField(choices=STATUS, max_length=20)
 
@@ -147,7 +148,7 @@ class Progress(models.Model):
         db_table = "progress"
 
     def __str__(self):
-        return str(self.prog)
+        return str(self.status)
 
 class Submission(models.Model):
     when = models.DateTimeField(auto_now=False,auto_now_add=False)
@@ -158,3 +159,15 @@ class Submission(models.Model):
     
     class Meta:
         db_table = "submission"
+        
+class StudentRequest(models.Model):
+    student = models.ForeignKey(Student,on_delete=models.CASCADE)
+    project = models.ForeignKey(Project,on_delete=models.CASCADE)
+    description = models.TextField()
+    date_created = models.DateField(auto_now_add=True)
+    
+    class Meta:
+        db_table = "student_request"
+    
+    def __str__(self):
+        return self.student.regNo
