@@ -15,16 +15,29 @@
           <div class="row">
             {% for d in d %}
               <div class="col-lg-3 col-md-6 col-sm-6 mt-2 mb-2">
-                <div class="card">
+                <div class="card h-100">
                   <a href="{% url "preview_pdf" d.id %}">
                     <img src="{{d.cover.url}}" class="card-img-top rounded-bottom" alt="project cover image">
                   </a>
                   <div class="card-body">
                     <h5 class="card-title">{{d.project.title}}</h5>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    <p class="card-text">Some quick example text to build ake up the bulk of the card's content.</p>
                   </div>
                   <ul class="list-group list-group-flush">
-                    <li class="list-group-item">{{d.project.project_type.name | title}}</li>
+                    <li class="list-group-item">
+                      {{d.project.project_type.name | title}}
+                      <span class="float-right">
+                        9
+                        <i class="fa fa-heart-o" aria-hidden="true"></i>
+                      </span>
+                    </li>
+                    {% if request.user.student %}
+                    <li class="list-group-item">
+                      <a href="#" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">
+                        <i class="fa fa-clone" aria-hidden="true"></i>
+                      </a>
+                    </li>
+                    {% endif %}
                   </ul>
                 </div>
               </div>
@@ -34,8 +47,44 @@
       </div> 
     </div>
   {% endif %}
-</div>
 
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Request this project</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form method="post" action="{% url "projects" %}">
+            {% csrf_token %}
+            <input type="hidden" id="projectId" name="project" value="{{d.project}}">
+            <input type="hidden" id="userId" name="student" value="{{request.user}}">
+
+            <div class="form-group">
+              <label for="message-text" class="col-form-label">Description</label>
+              <textarea class="form-control" id="message-text" placeholder="Explain what you will add to this project" required></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Send Request</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        lorem ipsum dolor sit amet consectetur adipisicing elit
+      </div>
+    </div>
+  </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" charset="utf-8"></script>
 
 {% include "includes/footer.html" %}

@@ -137,10 +137,10 @@ class DashboardView(LoginRequiredView, TemplateView):
     def get_context_data(self, **kwargs):
       context = super().get_context_data(**kwargs)
       try:
-         context["s"] = Student.objects.all().count()
-         context["d"] = Department.objects.all().count()
-         context["p"] = Progress.objects.all().count()
-         context["f"] = Staff.objects.all().count()
+         context["student"] = Student.objects.all().count()
+         context["department"] = Department.objects.all().count()
+         context["project"] = Project.objects.all().count()
+         context["staff"] = Staff.objects.all().count()
          context["b"] = Progress.objects.all()
          context["o"] = Student.objects.filter(NTA_Level=6)
          context["side"] = "dashboard"
@@ -269,7 +269,6 @@ class AddStudentView(LoginRequiredMixin, FormView):
     def create_student(self, user, data):
       department = data.get("department")
       department = Department.objects.filter(name=department).first()
-      print(department.id)
       Student.objects.create(
             user=user,
             regNo=data["regNo"],
@@ -302,6 +301,22 @@ class CompleteProjectView(LoginRequiredView, TemplateView):
             messages.error(self.request, "Something went wrong")
             return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
         return context
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            if request.method == "POST":
+                student = request.POST.get("student")
+                project = request.POST.get("project")
+                adescription = request.POST.get("description")
+                student_request = StudentRequest.objects.create(
+                    student=student, project=project, description=adescription
+                )
+                student_request.save()
+                messages.success(request, "Request sent successfully")
+                return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+        except:
+            messages.error(request, "Something went wrong")
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 class ManageProjectView(LoginRequiredView, ListView):
     template_name = 'html/dist/manage_project.html'
@@ -314,7 +329,7 @@ class ManageProjectView(LoginRequiredView, ListView):
         elif self.request.user.is_staff:
             return ProjectDocument.objects.filter(project__department_id=self.request.user.staff.department.id)
         else:
-            return ProjectDocument.objects.filter(project__department_id=self.request.user.student.department.id)
+            return ProjectDocument.objects.filter(project__student_id=self.request.user.student.id)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -325,6 +340,17 @@ class ManageProjectView(LoginRequiredView, ListView):
         context['g'] = ProjectType.objects.filter(department__name=name)
         context['side'] = 'manage_project'
         return context
+
+class ProjectListView(LoginRequiredView, ListView):
+    template_name = 'html/dist/project_list.html'
+    context_object_name = 'projects'
+    login_url = '/login/'
+
+    # return all projects with a specific project type
+    def get_queryset(self):
+        project_type = self.kwargs.get('project_type')
+        return ProjectDocument.objects.filter(project__project_type_id=project_type)
+ 
 
 class EditStudentView(LoginRequiredMixin, FormView):
     template_name = "html/dist/students.html"
@@ -490,6 +516,8 @@ class ProjectTypeView(LoginRequiredView, TemplateView):
         context = super().get_context_data(**kwargs)
         context["d"] = Department.objects.all()
         context["t"] = ProjectType.objects.all()
+        project = ProjectType.objects.all()
+     
         return context
 
 ######################################### END OF CCBV #########################################
@@ -1250,7 +1278,6 @@ def deletesub(request,pk):
        
        if s.NTA_Level == 8 and s.level_id==request.user.staff.level.id and s.academic_year==date:
             for i in Group.objects.all():
-                        #print(i.id)
                         s.user.groups.remove(i.id)   
             s.user.groups.add(role.id) 
        elif s.NTA_Level == 6 and s.level_id==request.user.staff.level.id and s.academic_year==date:

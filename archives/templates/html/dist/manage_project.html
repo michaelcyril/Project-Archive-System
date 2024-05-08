@@ -6,14 +6,14 @@
 <div class="page-content fade-in-up">
     <div class="ibox">
         <div class="ibox-head">
-            <div class="ibox-title">Projects</div>
-        </div>
-        <div class="ibox-head">
-            <div class="ibox-title">Project Type</div>
- 
+            {% if request.user.student %}
+            <div class="ibox-title">My Projects</div>
+            {% else %}
+            <div class="ibox-title">Submitted Projects</div>
+            {% endif %}
             <button class="btn btn-primary" data-toggle="modal" data-target="#modal-lg1"><i class="fa fa-plus"></i> New </button>
-
         </div>
+
         <div class="ibox-body">
             <div class="table-wrapper" role="group" aria-labelledby="caption">
                 <table id="data-tabler" class="table table-striped table-bordered" style="width:100%">
@@ -25,7 +25,9 @@
                             <th>Project Type</th>
                             <th>Document File</th>
                             <th>Upvotes</th>
+                            {% if perms.archives.change_project_type and perms.archives.delete_project_type %}
                             <th>Action</th>
+                            {% endif %}
                            
                         </tr>
                     </thead>

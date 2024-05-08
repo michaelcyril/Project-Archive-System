@@ -19,6 +19,8 @@
                             <th>Name</th>
                             {% if perms.archives.change_project_type and perms.archives.delete_project_type %}
                             <th>Action</th>
+                            {% else %}
+                            <th>Project No</th>
                             {% endif %}
                         </tr>
                     </thead>
@@ -26,7 +28,8 @@
                         {% for t in t %}
                         <tr>
                             <td>{{ t.department.name }}</td>
-                            <td>{{ t.name }}</td>
+                            <td> {% if perms.archives.change_project_type and perms.archives.delete_project_type %}<a href="{% url "projectlist" t.id %}"> {{ t.name }}</a> {% endif %} {{t.name}}</td> 
+                            <td>{{ t.project_no }}</td>
                             {% if perms.archives.change_project_type and perms.archives.delete_project_type %}
                             <td>
                                 {% if perms.archives.change_project_type %}

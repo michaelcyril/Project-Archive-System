@@ -28,11 +28,20 @@ urlpatterns = [
     path("project_type/", ProjectTypeView.as_view(), name="project_type"),
     path("addprojecttype/", views.addprojecttype, name="addprojecttype"),
     path("editprojecttype/<str:pk>/", views.editprojecttype, name="editprojecttype"),
-    path("deleteprojecttype/<str:pk>/", views.deleteprojecttype, name="deleteprojecttype"),
+    path(
+        "deleteprojecttype/<str:pk>/", views.deleteprojecttype, name="deleteprojecttype"
+    ),
     path("deletepdf/<str:pk>/", views.deletepdf, name="deletepdf"),
     path("completedprojects/", CompleteProjectView.as_view(), name="projects"),
-    path("manage_project/", ManageProjectView.as_view(), name="manage_project"),
+    path(
+        "manage_project/<str:user_id>/",
+        ManageProjectView.as_view(),
+        name="manage_project",
+    ),
     path("preview_pdf/<str:pk>/", views.preview_pdf, name="preview_pdf"),
+    path(
+        "projectlist/<str:project_type>/", ProjectListView.as_view(), name="projectlist"
+    ),
     ######################## ROLES URLS ############################
     path("manageroles/", views.manageroles, name="manageroles"),
     path("addroles/", views.addroles, name="addroles"),
