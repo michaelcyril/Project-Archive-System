@@ -41,14 +41,7 @@
                   </ul>
                 </div>
               </div>
-            {% endfor %}
-          </div>
-        {% endif %} 
-      </div> 
-    </div>
-  {% endif %}
-
-  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -60,30 +53,31 @@
         <div class="modal-body">
           <form method="post" action="{% url "projects" %}">
             {% csrf_token %}
-            <input type="hidden" id="projectId" name="project" value="{{d.project}}">
-            <input type="hidden" id="userId" name="student" value="{{request.user}}">
+            <input type="hidden" id="projectId" name="project" value="{{d.project.id}}">
+            <input type="hidden" id="userId" name="student" value="{{request.user.student}}">
 
             <div class="form-group">
               <label for="message-text" class="col-form-label">Description</label>
-              <textarea class="form-control" id="message-text" placeholder="Explain what you will add to this project" required></textarea>
+              <textarea name="description" class="form-control" id="message-text" placeholder="Explain what you will add to this project" required></textarea>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Send Request</button>
             </div>
           </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Send Request</button>
-        </div>
+      
       </div>
     </div>
   </div>
+            {% endfor %}
+          </div>
+        {% endif %} 
+      </div> 
+    </div>
+  {% endif %}
 
-  <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        lorem ipsum dolor sit amet consectetur adipisicing elit
-      </div>
-    </div>
-  </div>
+  
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" charset="utf-8"></script>
 

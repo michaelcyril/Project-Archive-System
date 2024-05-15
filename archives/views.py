@@ -6,6 +6,7 @@ import datetime
 from django.shortcuts import HttpResponseRedirect
 from django.contrib.auth.decorators import *
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 import shutil
 from fuzzywuzzy import fuzz
 import requests
@@ -69,7 +70,6 @@ def preview_pdf(request, pk):
     except:
         messages.error(request, "Something went wrong")
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-
 
 
 ######################################### CCBV #########################################
@@ -301,20 +301,23 @@ class CompleteProjectView(LoginRequiredView, TemplateView):
             messages.error(self.request, "Something went wrong")
             return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
         return context
-    
+
     def post(self, request, *args, **kwargs):
         try:
             if request.method == "POST":
-                student = request.POST.get("student")
-                project = request.POST.get("project")
-                adescription = request.POST.get("description")
+                student_id = request.POST.get("student")
+                project_id = request.POST.get("project")
+                student = get_object_or_404(Student, regNo=student_id)
+                project = get_object_or_404(Project, pk=project_id)
+                description = request.POST.get("description")
                 student_request = StudentRequest.objects.create(
-                    student=student, project=project, description=adescription
+                    student=student, project=project, description=description
                 )
                 student_request.save()
                 messages.success(request, "Request sent successfully")
                 return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-        except:
+        except Exception as e:
+            print(e)
             messages.error(request, "Something went wrong")
             return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
@@ -350,7 +353,7 @@ class ProjectListView(LoginRequiredView, ListView):
     def get_queryset(self):
         project_type = self.kwargs.get('project_type')
         return ProjectDocument.objects.filter(project__project_type_id=project_type)
- 
+
 
 class EditStudentView(LoginRequiredMixin, FormView):
     template_name = "html/dist/students.html"
@@ -453,6 +456,7 @@ class StaffView(LoginRequiredMixin, TemplateView):
 class AddStaffView(LoginRequiredMixin, FormView):
     template_name = "html/dist/staffs.html"
     form_class = StaffForm
+    success_url = reverse_lazy("staff")
 
     def form_valid(self, form):
         data = form.cleaned_data
@@ -519,6 +523,22 @@ class ProjectTypeView(LoginRequiredView, TemplateView):
         project = ProjectType.objects.all()
      
         return context
+    
+    
+class StudentRequestView(LoginRequiredView, ListView):
+    template_name = "html/dist/student_request.html"
+    context_object_name = "requests"
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return StudentRequest.objects.all()
+        elif self.request.user.is_staff:
+            return StudentRequest.objects.filter(
+                project__department_id=self.request.user.staff.department.id
+            )
+        else:
+            return StudentRequest.objects.filter(student=self.request.user.student)
+
 
 ######################################### END OF CCBV #########################################
 
@@ -825,12 +845,12 @@ def upload_addstaff(request):
                 dept_id = Department.objects.get(name=row['department'])
                 role_id = Group.objects.get(name=row['role'])
                 if User.objects.filter(email=row['email']).exists():
-                       continue
+                    continue
                 else:
                   user = User.objects.create(
                     first_name=row['name'],
                     email=row['email'],
-                    username=row['email'],
+                    username=row['username'],
                     is_staff = True  ,
                     password = make_password('@DIT123'),
                     
@@ -1401,7 +1421,6 @@ def autocomplete(request):
      
       
       return render(request,'html/dist/completedprojects.html',context)
-
 
 
 def get_level(request):

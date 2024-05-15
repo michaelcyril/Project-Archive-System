@@ -118,8 +118,10 @@ class Upvote(models.Model):
 
 class ProjectDocument(models.Model):
     DOCUMENT_TYPE = (
-        ('Proposal','Proposal'),
-        ('Final','Final'),
+        ("Proposal", "Proposal"),
+        ("Mini One", "Mini One"),
+        ("Mini Two", "Mini Two"),
+        ("Final", "Final"),
     )
     project = models.OneToOneField(Project,null=True, blank=True, on_delete=models.CASCADE)
     file = models.FileField(upload_to='Document/Projects',null=True,blank=True)
@@ -130,7 +132,7 @@ class ProjectDocument(models.Model):
 
     class Meta:
         db_table = "document"       
-        
+
     def __str__(self):
         return self.project.title
 
@@ -159,12 +161,13 @@ class Submission(models.Model):
     
     class Meta:
         db_table = "submission"
-        
+
 class StudentRequest(models.Model):
     student = models.ForeignKey(Student,on_delete=models.CASCADE)
     project = models.ForeignKey(Project,on_delete=models.CASCADE)
     description = models.TextField()
     date_created = models.DateField(auto_now_add=True)
+    is_accepted = models.BooleanField(default=False)
     
     class Meta:
         db_table = "student_request"

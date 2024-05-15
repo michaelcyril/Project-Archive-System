@@ -42,6 +42,7 @@ urlpatterns = [
     path(
         "projectlist/<str:project_type>/", ProjectListView.as_view(), name="projectlist"
     ),
+    path("student_request/", StudentRequestView.as_view(), name="student_request"),
     ######################## ROLES URLS ############################
     path("manageroles/", views.manageroles, name="manageroles"),
     path("addroles/", views.addroles, name="addroles"),

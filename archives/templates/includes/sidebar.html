@@ -11,10 +11,12 @@
             </div>
             <div class="admin-info">
                 <div class="font-strong">{{request.user.first_name}} {{request.user.last_name}} </div>
+                {% if request.user.student %}
                 <small>{{request.user.student.course}}  {{request.user.student.academic_year}}</small>
-            </div>
-          
-                 
+                {% else %}
+                <small>{{request.user.staff.department}}</small>
+                {% endif %}
+            </div>     
         </div>
         <ul class="side-menu metismenu">
             <li>
@@ -24,7 +26,7 @@
                 </a>
                 <i class="fa-duotone fa-screen-users"></i>
             </li>
-            {% if perms.archives.add_user %}
+            {% if request.user.is_staff %}
             <li class="{% if side == 'being' or side == 'staff' or side == 'role' %} active {% endif %}">
                 <a href="javascript:;" class="{% if side == 'being' or side == 'staff' %} active {% endif %}">
                     <i class="sidebar-item-icon fa fa-user-circle-o"></i>
@@ -88,6 +90,12 @@
                     <span class="nav-label">Department</span>
                 </a>
             </li>
+            <li>
+                <a href="{% url 'student_request' %}" class="{% if side == 'department' %} active {% endif %}">
+                    <i class="sidebar-item-icon fa fa-university"></i>
+                    <span class="nav-label">Student Requests</span>
+                </a>
+            </li>
             {% endif %}
             {% if request.user.student %}
             <li class="ac">
@@ -106,6 +114,12 @@
                 <a class="{% if side == 'projects' %} active {% endif %}" href="{% url 'projects' %}">
                     <i class="sidebar-item-icon fa fa-file-text-o"></i>
                     <span class="nav-label">Completed Projects</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'student_request' %}" class="{% if side == 'department' %} active {% endif %}">
+                    <i class="sidebar-item-icon fa fa-university"></i>
+                    <span class="nav-label">My Requests</span>
                 </a>
             </li>
             {% endif %}

@@ -28,17 +28,14 @@
                         {% for t in t %}
                         <tr>
                             <td>{{ t.department.name }}</td>
-                            <td> {% if perms.archives.change_project_type and perms.archives.delete_project_type %}<a href="{% url "projectlist" t.id %}"> {{ t.name }}</a> {% endif %} {{t.name}}</td> 
-                            <td>{{ t.project_no }}</td>
+                            <td> {% if perms.archives.change_project_type and perms.archives.delete_project_type %}<a href="{% url "projectlist" t.id %}"> {{ t.name }}</a> {% else %} {{t.name}} {% endif %} </td> 
                             {% if perms.archives.change_project_type and perms.archives.delete_project_type %}
                             <td>
-                                {% if perms.archives.change_project_type %}
                                 <button class="btn btn-default" data-toggle="modal" data-target="#modal-lg16{{ t.id }}"><i class="fa fa-pencil font-14"></i></button>
-                                {% endif %}
-                                {% if perms.archives.delete_project_type %}
-                                <button class="btn btn-default" data-toggle="modal" data-target="#modal-dangerv{{ t.id }}"><i class="fa fa-trash font-14"></i></button>
-                                {% endif %}
+                                <button class="btn btn-default" data-toggle="modal" data-target="#modal-dangerv{{ t.id }}"><i class="fa fa-trash font-14"></i></button>   
                             </td>
+                            {% else %}
+                            <td>{{ t.project_no }}</td> 
                             {% endif %}
                         </tr>
                         {% endfor %}
