@@ -133,21 +133,32 @@ class ChangePasswordView(LoginRequiredView, PasswordChangeView):
 
 class DashboardView(LoginRequiredView, TemplateView):
     template_name = "html/dist/index.html"
- 
+
+    def get_student_data(self):
+        # This method will now return counts instead of querysets.
+        if hasattr(self.request.user, 'student'):
+            document_count = ProjectDocument.objects.filter(project__student=self.request.user.student).count()
+            request_count = StudentRequest.objects.filter(student=self.request.user.student).count()
+            return document_count, request_count
+        return 0, 0 
+
     def get_context_data(self, **kwargs):
-      context = super().get_context_data(**kwargs)
-      try:
-         context["student"] = Student.objects.all().count()
-         context["department"] = Department.objects.all().count()
-         context["project"] = Project.objects.all().count()
-         context["staff"] = Staff.objects.all().count()
-         context["b"] = Progress.objects.all()
-         context["o"] = Student.objects.filter(NTA_Level=6)
-         context["side"] = "dashboard"
-      except:
-         messages.error(self.request, "Something went wrong")
-         return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
-      return context
+        context = super().get_context_data(**kwargs)
+        try:
+            context['document_count'], context['request_count'] = self.get_student_data()
+            context["student"] = Student.objects.all().count()
+            context["department"] = Department.objects.all().count()
+            context["project"] = Project.objects.all().count()
+            context["staff"] = Staff.objects.all().count()
+            context["b"] = Progress.objects.all()
+            context["o"] = Student.objects.filter(NTA_Level=6)
+            context["projecttype"] = ProjectType.objects.all().count()
+            context["completedprojects"] = ProjectDocument.objects.filter(document_type="Final").count()
+            context["side"] = "dashboard"
+        except:
+            messages.error(self.request, "Something went wrong")
+            return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
+        return context
 
 
 class AssessmentView(LoginRequiredView, TemplateView):
@@ -523,8 +534,8 @@ class ProjectTypeView(LoginRequiredView, TemplateView):
         project = ProjectType.objects.all()
      
         return context
-    
-    
+
+
 class StudentRequestView(LoginRequiredView, ListView):
     template_name = "html/dist/student_request.html"
     context_object_name = "requests"

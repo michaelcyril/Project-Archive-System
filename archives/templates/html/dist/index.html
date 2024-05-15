@@ -50,6 +50,54 @@
                     </div>
                     {% endif %}
                 </div>
+
+                {% if request.user.student %}
+                <div class="row">
+              
+                    <div class="col-lg-3 col-md-6">
+                        <div class="ibox bg-success color-white widget-stat">
+                            <div class="ibox-body">
+                                <h2 class="m-b-5 font-strong">{{document_count}}</h2>
+                                <div class="m-b-5">Project Documents</div><i class="ti-files widget-stat-icon"></i>
+                                
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="col-lg-3 col-md-6">
+                        <div class="ibox bg-info color-white widget-stat">
+                            <div class="ibox-body">
+                                <h2 class="m-b-5 font-strong">{{request_count}}</h2>
+                                <div class="m-b-5">Project Requests</div><i class="ti-receipt widget-stat-icon"></i>
+                               
+                            </div>
+                        </div>
+                    </div>
+                 
+              
+                    <div class="col-lg-3 col-md-6">
+                        <div class="ibox bg-warning color-white widget-stat">
+                            <div class="ibox-body">
+                                <h2 class="m-b-5 font-strong">{{projecttype}}</h2>
+                                <div class="m-b-5">Project Types</div><i class="ti-package widget-stat-icon"></i>
+                                
+                            </div>
+                        </div>
+                    </div>
+             
+        
+                    <div class="col-lg-3 col-md-6">
+                        <div class="ibox bg-danger color-white widget-stat">
+                            <div class="ibox-body">
+                                <h2 class="m-b-5 font-strong">{{completedprojects}}</h2>
+                                <div class="m-b-5">Completed Projects</div><i class="ti-book widget-stat-icon"></i>
+                              
+                            </div>
+                        </div>
+                    </div>
+                   
+                </div>
+                {% endif %}
                 
                     <div class="col-md-12">
                         <h5><b>Welcome, {{request.user.first_name}}</b></h5>
