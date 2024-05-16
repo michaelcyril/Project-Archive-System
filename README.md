@@ -1,30 +1,56 @@
 # pams
-# project archives management system
-Download the Project 
-Install all project dependencies using the requirements.txt file using the command
-pip install -r requirements.txt
 
-check on settings.py file and update the database part with your credentials
+## Project Archives Management System
 
-create database
+### Download the Project
 
-migrate the table using the commang 
-python manage.py migrate
+- Clone or download the project from the repository.
 
+### Install Dependencies
 
-crete superuser
-python manage.py createsuperuser
+- Install all project dependencies using the requirements.txt file by running the following command:
 
-load seeders
-python manage.py loaddata seeders.json
+    ```
+    pip install -r requirements.txt
+    ```
 
-run the server
-python manage.py runserver
+### Update Database Settings
 
+- Open the settings.py file and update the database configuration with your credentials.
 
-NB
-The system contain Three kind of users 
-1.Admin
-2.Coordinator
-3.Student
+### Create Database
+
+- Create a new database for the project.
+
+### Migrate the Database
+
+- Migrate the database tables by running the following command:
+
+    ```
+    python manage.py migrate
+    ```
+
+### Create Superuser
+
+- Create a superuser account for administrative access by running the following command:
+
+    ```
+    python manage.py createsuperuser
+    ```
+
+### Load Seed Data
+
+- Load seed data into the database by running the following command:
+
+    ```
+    python manage.py loaddata seeders.json
+    ```
+
+### Run the Server
+
+- Start the development server by running the following command:
+
+    ```
+    python manage.py runserver
+    ```
 
