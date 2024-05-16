@@ -2,16 +2,7 @@
 {% load static %}
 {% include "includes/header.html" %}
 {% include "includes/sidebar.html" %}
-  <!-- START PAGE CONTENT-->
-  {% comment %} <div class="page-heading">
-    <h1 class="page-title">DataTables</h1>
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="index.html"><i class="la la-home font-20"></i></a>
-        </li>
-        <li class="breadcrumb-item">DataTables</li>
-    </ol>
-</div> {% endcomment %}
+
 {% include "includes/messages.html" %}
 <div class="page-content fade-in-up">
     <div class="ibox">
@@ -47,7 +38,7 @@
                         <button class="btn btn-default" data-toggle="modal"
                         data-target="#modal-lg2{{d.id}}"><i class="fa fa-pencil font-14"></i></button>
                         <button class="btn btn-default"data-toggle="modal" data-target="#modal-dangerx{{d.id}}"><i class="fa fa-trash font-14"></i></button>
-                                    </td>
+                      </td>
                     </tr>
                     {% endfor %}
                    
@@ -89,9 +80,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h4 class="modal-title">Edit Department</h4>
-                        {% comment %} <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button> {% endcomment %}
+
                     </div>
                     <div class="modal-body">
                         <p>
@@ -122,8 +111,6 @@
     </form>
 </div>
     {% endfor %}
-
-
     <form method="post" action="/department/">
         {% csrf_token %}
         <div class="modal fade" id="modal-lg1">

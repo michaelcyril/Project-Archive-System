@@ -1,0 +1,83 @@
+{% load static %}
+{% include "includes/header.html" %}
+{% include "includes/sidebar.html" %}
+
+<div class="container-fluid">
+  {% if l == 0 %}
+    <h1> NO Document Available </h1>
+  {% else %}
+    <div class="">
+      <div class="m-2">
+        <h4>Completed Projects</h4>
+      </div>
+      <div class="">
+        {% if d %}
+          <div class="row">
+            {% for d in d %}
+              <div class="col-lg-3 col-md-6 col-sm-6 mt-2 mb-2">
+                <div class="card h-100">
+                  <a href="{% url "preview_pdf" d.id %}">
+                    <img src="{{d.cover.url}}" class="card-img-top rounded-bottom" alt="project cover image">
+                  </a>
+                  <div class="card-body">
+                    <h5 class="card-title">{{d.project.title}}</h5>
+                    <p class="card-text">Some quick example text to build ake up the bulk of the card's content.</p>
+                  </div>
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                      {{d.project.project_type.name | title}}
+                      <span class="float-right">
+                        9
+                        <i class="fa fa-heart-o" aria-hidden="true"></i>
+                      </span>
+                    </li>
+                    {% if request.user.student %}
+                    <li class="list-group-item">
+                      <a href="#" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">
+                        <i class="fa fa-clone" aria-hidden="true"></i>
+                      </a>
+                    </li>
+                    {% endif %}
+                  </ul>
+                </div>
+              </div>
+              <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Request this project</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form method="post" action="{% url "projects" %}">
+                  {% csrf_token %}
+                  <input type="hidden" id="projectId" name="project" value="{{d.project.id}}">
+                  <input type="hidden" id="userId" name="student" value="{{request.user.student}}">
+
+                  <div class="form-group">
+                    <label for="message-text" class="col-form-label">Description</label>
+                    <textarea name="description" class="form-control" id="message-text" placeholder="Explain what you will add to this project" required></textarea>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Send Request</button>
+                  </div>
+                </form>
+              </div>
+      </div>
+    </div>
+  </div>
+            {% endfor %}
+          </div>
+        {% endif %} 
+      </div> 
+    </div>
+  {% endif %}
+
+  
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" charset="utf-8"></script>
+
+{% include "includes/footer.html" %}

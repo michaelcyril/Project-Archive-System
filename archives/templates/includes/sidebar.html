@@ -10,9 +10,13 @@
                 {% endif %}
             </div>
             <div class="admin-info">
-                <div class="font-strong">{{request.user.first_name}} </div>
-                <small>{{request.user.student.course}}</small>
-            </div>
+                <div class="font-strong">{{request.user.first_name}} {{request.user.last_name}} </div>
+                {% if request.user.student %}
+                <small>{{request.user.student.course}}  {{request.user.student.academic_year}}</small>
+                {% else %}
+                <small>{{request.user.staff.department}}</small>
+                {% endif %}
+            </div>     
         </div>
         <ul class="side-menu metismenu">
             <li>
@@ -22,11 +26,11 @@
                 </a>
                 <i class="fa-duotone fa-screen-users"></i>
             </li>
-            {% if perms.archives.add_user %}
+            {% if request.user.is_staff %}
             <li class="{% if side == 'being' or side == 'staff' or side == 'role' %} active {% endif %}">
                 <a href="javascript:;" class="{% if side == 'being' or side == 'staff' %} active {% endif %}">
                     <i class="sidebar-item-icon fa fa-user-circle-o"></i>
-                    <span class="nav-label">User Management</span>
+                    <span class="nav-label">Manage User</span>
                     <i class="fa fa-angle-left arrow"></i>
                 </a>
                 <ul class="nav-2-level collapse"> 
@@ -55,67 +59,71 @@
             <li class="{% if side == 'upload_project' or side == 'projects' or side == 'manage_project' or side == 'assessment' %} active {% endif %}">
                 <a href="javascript:;" class="{% if side == 'upload_project' or side == 'project' or side == 'manage_project' or side == 'assessment' %} active {% endif %}">
                     <i class="sidebar-item-icon fa fa-book"></i>
-                    <span class="nav-label">Project Management</span>
+                    <span class="nav-label">Manage Projects</span>
                     <i class="fa fa-angle-left arrow"></i>
                 </a>
                 <ul class="nav-2-level collapse"> 
-                    <li class="{% if side == 'projects' %} active {% endif %}">
-                        <a class="{% if side == 'projects' %} active {% endif %}" href="{% url 'projects' %}">
-                            <i class="sidebar-item-icon fa fa-eye"></i>
+                
+                    <li class="ac">
+                        <a class="" href="{% url "project_type" %}">
+                            <i class="sidebar-item-icon fa fa-list"></i>
+                            <span class="nav-label">Project Types</span>
+                        </a>
+                    </li>
+                    <li class="{% if side == 'manage_project' %} active {% endif %}">
+                        <a class="{% if side == 'manage_project' %} active {% endif %}" href="{% url "manage_project" request.user.id %}">
+                            <i class="sidebar-item-icon fa fa-database"></i>
                             <span class="nav-label">Project List</span>
                         </a>
                     </li>
-                    {% if perms.archives.add_document %}
-                    <li class="{% if side == 'upload_project' %} active {% endif %}">
-                        <a class="{% if side == 'upload_project' %} active {% endif %}" href="{% url "pdf_upload" %}">
-                            <i class="sidebar-item-icon fa fa-cloud-upload"></i>
-                            <span class="nav-label">New Project</span>
+                    <li class="{% if side == 'projects' %} active {% endif %}">
+                        <a class="{% if side == 'projects' %} active {% endif %}" href="{% url 'projects' %}">
+                            <i class="sidebar-item-icon fa fa-file-text-o"></i>
+                            <span class="nav-label">Completed Projects</span>
                         </a>
                     </li>
-                    {% endif %}
-                    {% if perms.archives.change_document %}
-                    <li class="{% if side == 'manage_project' %} active {% endif %}">
-                        <a class="{% if side == 'manage_project' %} active {% endif %}" href="{% url "manage_project" %}">
-                            <i class="sidebar-item-icon fa fa-database"></i>
-                            <span class="nav-label">Manage Project</span>
-                        </a>
-                    </li>
-                    {% endif %}
-                    {% if perms.archives.add_progress %}
-                    <li class="{% if side == 'assessment' %} active {% endif %}">
-                        <a class="{% if side == 'assessment' %} active {% endif %}" href="{% url "assessment" %}">
-                            <i class="sidebar-item-icon fa fa-bar-chart"></i>
-                            <span class="nav-label">Submitted Projects</span>
-                        </a>
-                    </li>
-                    {% endif %}
                 </ul>
             </li>
-            {% endif %}
-            {% if perms.archives.view_department %}
             <li>
                 <a href="{% url 'department' %}" class="{% if side == 'department' %} active {% endif %}">
                     <i class="sidebar-item-icon fa fa-university"></i>
                     <span class="nav-label">Department</span>
                 </a>
             </li>
-            {% endif %}
-            {% if perms.archives.view_level %}
             <li>
-                <a href="{% url 'level' %}" class="{% if side == 'level' %} active {% endif %}">
-                    <i class="sidebar-item-icon fa fa-bookmark"></i>
-                    <span class="nav-label">Academic Level</span>
+                <a href="{% url 'student_request' %}" class="{% if side == 'department' %} active {% endif %}">
+                    <i class="sidebar-item-icon fa fa-university"></i>
+                    <span class="nav-label">Student Requests</span>
                 </a>
             </li>
             {% endif %}
-            {% if perms.archives.add_project_type %}
+            {% if request.user.student %}
+            <li class="ac">
+                <a class="" href="{% url "manage_project" request.user.id %}">
+                    <i class="sidebar-item-icon fa fa-list"></i>
+                    <span class="nav-label">My Project</span>
+                </a>
+            </li>
             <li>
                 <a href="{% url 'project_type' %}" class="{% if side == 'project_type' %} active {% endif %}">
                     <i class="sidebar-item-icon fa fa-sitemap"></i>
                     <span class="nav-label">Project type</span>
                 </a>
             </li>
+            <li class="{% if side == 'projects' %} active {% endif %}">
+                <a class="{% if side == 'projects' %} active {% endif %}" href="{% url 'projects' %}">
+                    <i class="sidebar-item-icon fa fa-file-text-o"></i>
+                    <span class="nav-label">Completed Projects</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'student_request' %}" class="{% if side == 'department' %} active {% endif %}">
+                    <i class="sidebar-item-icon fa fa-university"></i>
+                    <span class="nav-label">My Requests</span>
+                </a>
+            </li>
             {% endif %}
+          
         </ul>
     </div>
 </nav>

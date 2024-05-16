@@ -6,6 +6,7 @@ import datetime
 from django.shortcuts import HttpResponseRedirect
 from django.contrib.auth.decorators import *
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 import shutil
 from fuzzywuzzy import fuzz
 import requests
@@ -25,7 +26,7 @@ from django.views.generic import View
 from django.views.generic import ListView
 
 from django.views.generic import View
-
+from django.db.models import Count
 from django.contrib.auth.hashers import make_password
 from .forms import StudentForm, StaffForm
 from django.contrib.auth.models import User, Group, Permission
@@ -47,15 +48,29 @@ cover = os.path.join(PROJECT_DIR, '..', 'media','coverpage')
 profile = os.path.join(PROJECT_DIR, '..', 'media','profile_pic')
 
 
-def check_connection():
-    try:
-        response = requests.get('http://www.google.com')
-        if response.status_code == 200:
-            return True
-    except:
-        pass
+# def check_connection():
+#     try:
+#         response = requests.get('http://www.google.com')
+#         if response.status_code == 200:
+#             return True
+#     except:
+#         pass
 
-    return False
+#     return False
+
+######################################### FUNCTION VIEWS #########################################
+
+
+def preview_pdf(request, pk):
+    try:
+        d = ProjectDocument.objects.filter(id=pk)
+        return render(
+            request, "html/dist/preview-document.html", {"side": "a", "d": d, "id": pk}
+        )
+    except:
+        messages.error(request, "Something went wrong")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
 
 ######################################### CCBV #########################################
 
@@ -118,21 +133,32 @@ class ChangePasswordView(LoginRequiredView, PasswordChangeView):
 
 class DashboardView(LoginRequiredView, TemplateView):
     template_name = "html/dist/index.html"
- 
+
+    def get_student_data(self):
+        # This method will now return counts instead of querysets.
+        if hasattr(self.request.user, 'student'):
+            document_count = ProjectDocument.objects.filter(project__student=self.request.user.student).count()
+            request_count = StudentRequest.objects.filter(student=self.request.user.student).count()
+            return document_count, request_count
+        return 0, 0 
+
     def get_context_data(self, **kwargs):
-      context = super().get_context_data(**kwargs)
-      try:
-         context["s"] = Student.objects.all().count()
-         context["d"] = Department.objects.all().count()
-         context["p"] = Progress.objects.all().count()
-         context["f"] = Staff.objects.all().count()
-         context["b"] = Progress.objects.all()
-         context["o"] = Student.objects.filter(NTA_Level=6)
-         context["side"] = "dashboard"
-      except:
-         messages.error(self.request, "Something went wrong")
-         return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
-      return context
+        context = super().get_context_data(**kwargs)
+        try:
+            context['document_count'], context['request_count'] = self.get_student_data()
+            context["student"] = Student.objects.all().count()
+            context["department"] = Department.objects.all().count()
+            context["project"] = Project.objects.all().count()
+            context["staff"] = Staff.objects.all().count()
+            context["b"] = Progress.objects.all()
+            context["o"] = Student.objects.filter(NTA_Level=6)
+            context["projecttype"] = ProjectType.objects.all().count()
+            context["completedprojects"] = ProjectDocument.objects.filter(document_type="Final").count()
+            context["side"] = "dashboard"
+        except:
+            messages.error(self.request, "Something went wrong")
+            return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
+        return context
 
 
 class AssessmentView(LoginRequiredView, TemplateView):
@@ -217,8 +243,8 @@ class AddStudentView(LoginRequiredMixin, FormView):
                self.create_student(user, data)
                messages.success(self.request, "Student created successfully")
                return super().form_valid(form)
-            except:
-                messages.error(self.request, "Something went wrong")
+            except Exception as e:
+                messages.error(self.request, e)
                 return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
 
     def form_invalid(self, form):
@@ -254,7 +280,6 @@ class AddStudentView(LoginRequiredMixin, FormView):
     def create_student(self, user, data):
       department = data.get("department")
       department = Department.objects.filter(name=department).first()
-      print(department.id)
       Student.objects.create(
             user=user,
             regNo=data["regNo"],
@@ -265,9 +290,9 @@ class AddStudentView(LoginRequiredMixin, FormView):
             department=department,
             gender=data["gender"],
       )
-         
-class ProjectsView(LoginRequiredView, TemplateView):
-    template_name = "html/dist/projects.html"
+
+class CompleteProjectView(LoginRequiredView, TemplateView):
+    template_name = "html/dist/completedprojects.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -288,6 +313,25 @@ class ProjectsView(LoginRequiredView, TemplateView):
             return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
         return context
 
+    def post(self, request, *args, **kwargs):
+        try:
+            if request.method == "POST":
+                student_id = request.POST.get("student")
+                project_id = request.POST.get("project")
+                student = get_object_or_404(Student, regNo=student_id)
+                project = get_object_or_404(Project, pk=project_id)
+                description = request.POST.get("description")
+                student_request = StudentRequest.objects.create(
+                    student=student, project=project, description=description
+                )
+                student_request.save()
+                messages.success(request, "Request sent successfully")
+                return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+        except Exception as e:
+            print(e)
+            messages.error(request, "Something went wrong")
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
 class ManageProjectView(LoginRequiredView, ListView):
     template_name = 'html/dist/manage_project.html'
     context_object_name = 'd'
@@ -299,16 +343,28 @@ class ManageProjectView(LoginRequiredView, ListView):
         elif self.request.user.is_staff:
             return ProjectDocument.objects.filter(project__department_id=self.request.user.staff.department.id)
         else:
-            return ProjectDocument.objects.filter(project__department_id=self.request.user.student.department.id)
+            return ProjectDocument.objects.filter(project__student_id=self.request.user.student.id)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         context['f'] = Department.objects.all()
         context['s'] = list(Student.objects.values_list('academic_year', flat=True).distinct())
         name = self.request.POST.get('department')
         context['g'] = ProjectType.objects.filter(department__name=name)
         context['side'] = 'manage_project'
         return context
+
+class ProjectListView(LoginRequiredView, ListView):
+    template_name = 'html/dist/project_list.html'
+    context_object_name = 'projects'
+    login_url = '/login/'
+
+    # return all projects with a specific project type
+    def get_queryset(self):
+        project_type = self.kwargs.get('project_type')
+        return ProjectDocument.objects.filter(project__project_type_id=project_type)
+
 
 class EditStudentView(LoginRequiredMixin, FormView):
     template_name = "html/dist/students.html"
@@ -411,6 +467,7 @@ class StaffView(LoginRequiredMixin, TemplateView):
 class AddStaffView(LoginRequiredMixin, FormView):
     template_name = "html/dist/staffs.html"
     form_class = StaffForm
+    success_url = reverse_lazy("staff")
 
     def form_valid(self, form):
         data = form.cleaned_data
@@ -474,8 +531,26 @@ class ProjectTypeView(LoginRequiredView, TemplateView):
         context = super().get_context_data(**kwargs)
         context["d"] = Department.objects.all()
         context["t"] = ProjectType.objects.all()
-        return context
+        project = ProjectType.objects.all()
      
+        return context
+
+
+class StudentRequestView(LoginRequiredView, ListView):
+    template_name = "html/dist/student_request.html"
+    context_object_name = "requests"
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return StudentRequest.objects.all()
+        elif self.request.user.is_staff:
+            return StudentRequest.objects.filter(
+                project__department_id=self.request.user.staff.department.id
+            )
+        else:
+            return StudentRequest.objects.filter(student=self.request.user.student)
+
+
 ######################################### END OF CCBV #########################################
 
 
@@ -530,7 +605,7 @@ def addprojecttype(request):
  except:
       messages.error(request,'something is wrong')
       return HttpResponseRedirect(request.META.get('HTTP_REFERER')) 
-   
+
 @login_required(login_url='/login/')
 def editprojecttype(request,pk):
   try:
@@ -655,9 +730,8 @@ def addroles(request):
       for s in s_id:
            p.permissions.add(Permission.objects.get(id=s))   
       messages.success(request,'Role added successful')
-      return redirect('/manageroles')  
+      return redirect('manageroles')  
   except:
-      
     messages.error(request,'Something went wrong')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
@@ -689,16 +763,29 @@ def editroles(request,pk):
     for s in s_id:
            y.permissions.add(Permission.objects.get(id=s))  
     messages.success(request,'Login successful')
-    return redirect('/manageroles')
+    return redirect('manageroles')
            
    return render(request,'html/dist/editroles.html',{'r':r,'p':p})
   except:
       messages.error(request,'Something is wrong')
 
+
+@login_required(login_url='/login/')   
+def deleteroles(request,pk):
+   try: 
+    g = Group.objects.filter(id=pk).delete()
+    if g:
+       messages.success(request,'Role deleted successful')
+    
+    return redirect('manageroles')
+   except:
+    messages.error(request,'Something went wrong')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
 @login_required(login_url='/login/')     
 def blockuser(request,pk):
        
-     
       try:
          u = User.objects.filter(id=pk).filter(is_active='True')
          if u:      
@@ -714,17 +801,6 @@ def blockuser(request,pk):
        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-@login_required(login_url='/login/')   
-def deleteroles(request,pk):
-   try: 
-    g = Group.objects.filter(id=pk).delete()
-    if g:
-       messages.success(request,'Role deleted successful')
-    
-    return redirect('/manageroles')
-   except:
-    messages.error(request,'Something went wrong')
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 @login_required(login_url='/login/')
 def reset_password(request,pk):
    password = make_password("@DIT123")
@@ -780,12 +856,12 @@ def upload_addstaff(request):
                 dept_id = Department.objects.get(name=row['department'])
                 role_id = Group.objects.get(name=row['role'])
                 if User.objects.filter(email=row['email']).exists():
-                       continue
+                    continue
                 else:
                   user = User.objects.create(
                     first_name=row['name'],
                     email=row['email'],
-                    username=row['email'],
+                    username=row['username'],
                     is_staff = True  ,
                     password = make_password('@DIT123'),
                     
@@ -1130,15 +1206,6 @@ def pdf_upload(request):
     return render(request, 'html/dist/pdf_upload.html',{'side':'upload_project','p':p,'sub':sub})
 
 
-def preview_pdf(request,pk):
- try: 
-   d = ProjectDocument.objects.filter(id=pk)     
-   return render(request, 'html/dist/previewed.html',{'side':'a','d':d,'id':pk})
- except:
-    messages.error(request,'Something went wrong')
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
-
 def submissionTime(request):
    try:
     
@@ -1242,7 +1309,6 @@ def deletesub(request,pk):
        
        if s.NTA_Level == 8 and s.level_id==request.user.staff.level.id and s.academic_year==date:
             for i in Group.objects.all():
-                        #print(i.id)
                         s.user.groups.remove(i.id)   
             s.user.groups.add(role.id) 
        elif s.NTA_Level == 6 and s.level_id==request.user.staff.level.id and s.academic_year==date:
@@ -1365,22 +1431,7 @@ def autocomplete(request):
       }
      
       
-      return render(request,'html/dist/projects.html',context)
-
-@csrf_exempt
-def save_pdf(request):
-    if request.method == 'POST' and request.FILES['pdf_file']:
-        pdf_file = request.FILES['pdf_file']
-      
-        with open('media/projects/' + pdf_file.name, 'wb') as destination:
-            shutil.copyfileobj(pdf_file.file, destination)
-
-        messages.success(request,'Pdf edited successful')
-        return redirect('/assessment')
-         
-    else:
-        messages.error(request,'Something went wrong')
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+      return render(request,'html/dist/completedprojects.html',context)
 
 
 def get_level(request):
@@ -1416,172 +1467,3 @@ def get_courses(request):
     print(types)       
 
     return JsonResponse({'courses': courses,'types':types})
-
-
-# def login(request):
-#  try:
-#    user = User()
-#    students = Student()
-#    staffs = Staff()
-#    projects = Project()
-
-#    role8 = Group.objects.get(name='Final_Year')
-#    role = Group.objects.get(name='Student')
-#    is_connected = check_connection()
-
-#    if is_connected==True:
-#     if request.method == 'POST':
-#      if is_connected==True:
-#       email=request.POST.get("username")
-#       password=request.POST.get("password")
-#       users = User.objects.filter(username=email).exists()
-
-#       u = User.objects.filter(username=email)
-
-#       u = user.first_name.split(',')
-#       u = u
-
-#       current_date = datetime.datetime.now().date()
-#       october = datetime.datetime(current_date.year,10,1).date()
-
-
-#       if users:
-#          us = User.objects.get(username=email)
-#          if us.is_staff==False:
-#             if current_date >=october:
-#                rex.studentInfo(email=request.POST.get("username"), password=request.POST.get("password"))
-
-
-#                # if rex.error == "no internet connection":
-#                #    messages.error(request,rex.error)
-#                #    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-#                if rex.error == "Login Failed: invalid credentials":
-#                   messages.error(request,rex.error)
-#                   return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-#                elif rex.error == 'invalid status code':
-#                   messages.error(request,rex.error)
-#                   return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-#                else:
-#                   Student.objects.filter(user__email=request.POST.get("username")).update(NTA_Level = rex,academic_year = rex.academic_year)
-#                   user = auth.authenticate(username=email,password=password)
-#                   if user is not None:
-#                      auth.login(request,user)
-#                      messages.success(request,'Login successful')
-#                      return redirect('/')
-
-
-#                   return redirect('/login/')
-#             else:
-#                userr = auth.authenticate(username=email,password=password)
-#                if userr is not None:
-#                   auth.login(request,userr)
-#                   messages.success(request,'Login successful')
-#                   return redirect('/')
-#                else:
-#                   messages.error(request,'Unknown information')
-#                   return redirect('/login/')
-#          else:
-#                userr = auth.authenticate(username=email,password=password)
-#                if userr is not None:
-#                   auth.login(request,userr)
-#                   messages.success(request,'Login successful')
-#                   return redirect('/')
-#                else:
-#                   messages.error(request,'Unknown information')
-#                   return redirect('/login/')
-#       else:
-
-#          rex.studentInfo(email=request.POST.get("username"), password=request.POST.get("password"))
-#          # if rex.error == "no internet connection":
-#          #       messages.error(request,rex.error)
-#          #       return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-#          if rex.error == "Login Failed: invalid credentials":
-#                messages.error(request,rex.error)
-#                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-#          elif rex.error == 'invalid status code':
-#                messages.error(request,rex.error)
-#                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-#          else:
-
-#             user.first_name = rex.name
-#             user.username = rex.email
-#             user.email = rex.email
-#             user.password = make_password(request.POST.get("password"))
-#             user.save()
-#             # print(f'{rex.NTA_level},{rex.regno}')
-
-#             # if rex.NTA_level == '8' or (rex.NTA_level=='6' and 'diploma' in (rex.level).lower()):
-#             #        user.groups.add(role8)
-#             # else:
-#             user.groups.add(role)
-#             # course = (rex.level).split()
-#             # course = course[-2] +" "+ course[-1]
-#             # print(course)
-#             students.user = user
-#             students.regNo = rex.regno
-#             students.NTA_Level = rex.NTA_level
-
-#             students.academic_year = rex.academic_year
-#             students.mobile = rex.mobile
-#             students.gender = rex.gender
-#             students.course = rex.level
-
-#             if 'computer' in (rex.level).lower() or 'information' in (rex.level).lower() or 'multimedia' in (rex.level).lower():
-#                students.department_id = 2
-#             elif 'civil' in (rex.level).lower() or 'mining' in (rex.level).lower() or 'gas' in (rex.level).lower():
-#                students.department_id = 1
-#             elif 'electrical' in (rex.level).lower() or 'biomedical' in (rex.level).lower() or 'renewable' in (rex.level).lower():
-#                students.department_id = 3
-#             elif 'electronics' in (rex.level).lower() or 'communication' in (rex.level).lower():
-#                students.department_id = 4
-#             elif 'mechanical' in (rex.level).lower():
-#                 students.department_id = 5
-#             elif 'food' in (rex.level).lower() or 'laboratory' in (rex.level).lower() or 'biotechnology' in (rex.level).lower():
-#                students.department_id = 6
-#             if 'bachelor' in (rex.level).lower():
-#                    students.level_id = 1
-#             else:
-#                    students.level_id = 2
-#             students.save()
-#             # us = Student.objects.get(user__username=email)
-#             # print(f'{rex.NTA_level}:{rex.level}')
-#             # if rex.NTA_level == '6' and 'diploma' in (rex.level).lower():
-#             #        projects.student_id = us.id
-#             #        projects.department_id = us.department_id
-
-#             #       #  projects.save()
-#             #       #  doc = Document.objects.create(project=projects)
-#             #       #  Progress.objects.create(document=doc)
-#             # if 'bachelor' in (rex.level).lower() and rex.NTA_level == '8':
-#             #         projects.student_id = us.id
-#             #         projects.department_id = us.department_id
-
-#             # projects.save()
-#             # p = Project.objects.get(student_id=us.id)
-#             # Document.objects.create(project_id=p.id)
-#             # f = Document.objects.get(project_id=p.id)
-#             # Progress.objects.create(document_id=f.id)
-#             rex.studentImage(email=request.POST.get("username"), password=request.POST.get("password"))
-
-#             with open(rex.regno+".jpg", 'rb') as f:
-
-#                django_file = File(f)
-#                students.photo.save(rex.regno+".jpg", django_file, save=True)
-#             os.remove(rex.regno+".jpg")
-#             user = auth.authenticate(username=email,password=password)
-#             if user is not None:
-#                auth.login(request,user)
-#                messages.success(request,'Login successful')
-#                return redirect('/')
-
-#             return redirect('/login/')
-#      else:
-#         messages.error(request,'No internet Connection')
-#         return render(request,'html/dist/login/.html')
-#     return render(request,'html/dist/login/.html')
-#    else:
-#       messages.error(request,'No internet Connection')
-#       return render(request,'html/dist/login/.html')
-#  except:
-#     messages.error(request,'Something went wrong')
-#     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

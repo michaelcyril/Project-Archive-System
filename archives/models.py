@@ -15,7 +15,7 @@ class Level(models.Model):
     
     def __str__(self):
         return self.name
-    
+
 
 class Department(models.Model):
     name = models.CharField(max_length=100)
@@ -25,7 +25,7 @@ class Department(models.Model):
 
     def __str__(self):
         return self.name
-    
+
 
 class Awards(models.Model):
     name = models.CharField(max_length=100)
@@ -36,7 +36,6 @@ class Awards(models.Model):
     
     def __str__(self):
         return self.name
-    
 
 class Student(models.Model):
     GENDER = (
@@ -93,13 +92,13 @@ class ProjectType(models.Model):
 
 
 class Project(models.Model):
-    title = models.CharField(null=True,blank=True,max_length=200)
+    title = models.CharField(null=True, blank=True, max_length=200)
     student = models.OneToOneField(Student, on_delete=models.CASCADE)
-    project_type = models.ForeignKey(ProjectType,on_delete=models.CASCADE,null=True,blank=True)
-    department = models.ForeignKey(Department,on_delete=models.CASCADE,null=True,blank=True)
+    project_type = models.ForeignKey(ProjectType, on_delete=models.CASCADE, null=True, blank=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
     date_created = models.DateField(auto_now_add=True)
     accepted = models.BooleanField(default=False)
-    note = models.TextField(null=True,blank=True)
+    note = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "project"
@@ -108,16 +107,34 @@ class Project(models.Model):
         return self.title
 
 
+class Upvote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    date_created = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
+
+
 class ProjectDocument(models.Model):
+    DOCUMENT_TYPE = (
+        ("Proposal", "Proposal"),
+        ("Mini One", "Mini One"),
+        ("Mini Two", "Mini Two"),
+        ("Final", "Final"),
+    )
     project = models.OneToOneField(Project,null=True, blank=True, on_delete=models.CASCADE)
     file = models.FileField(upload_to='Document/Projects',null=True,blank=True)
-    # preview = models.FileField(upload_to='Document/Preview',null=True,blank=True)
     submitted = models.BooleanField(null=True,blank=True,default=False)
     date_created = models.DateField(auto_now_add=True)
-    # cover = models.ImageField(upload_to='Document/Cover', null=True, blank=True)
+    document_type = models.CharField(choices=DOCUMENT_TYPE, max_length=20, null=True, blank=True)
+    cover = models.ImageField(upload_to='Document/Cover', null=True, blank=True)
 
     class Meta:
         db_table = "document"       
+
+    def __str__(self):
+        return self.project.title
 
 class Progress(models.Model):
     STATUS = (
@@ -126,7 +143,6 @@ class Progress(models.Model):
         ('Rejected','Rejected')
     )
     document = models.OneToOneField(ProjectDocument,on_delete=models.CASCADE,null=True,blank=True)
-    prog = models.IntegerField(default=0,null=True,blank=True) 
     date_created = models.DateField(auto_now_add=True)
     status = models.CharField(choices=STATUS, max_length=20)
 
@@ -134,7 +150,7 @@ class Progress(models.Model):
         db_table = "progress"
 
     def __str__(self):
-        return str(self.prog)
+        return str(self.status)
 
 class Submission(models.Model):
     when = models.DateTimeField(auto_now=False,auto_now_add=False)
@@ -146,9 +162,15 @@ class Submission(models.Model):
     class Meta:
         db_table = "submission"
 
-# class Upvote(models.Model):
-#     user = models.ForeignKey(User,on_delete=models.CASCADE)
-#     document = models.ManyToManyField(ProjectDocument)
+class StudentRequest(models.Model):
+    student = models.ForeignKey(Student,on_delete=models.CASCADE)
+    project = models.ForeignKey(Project,on_delete=models.CASCADE)
+    description = models.TextField()
+    date_created = models.DateField(auto_now_add=True)
+    is_accepted = models.BooleanField(default=False)
     
-#     class Meta:
-#         db_table = "Likes"
+    class Meta:
+        db_table = "student_request"
+    
+    def __str__(self):
+        return self.student.regNo

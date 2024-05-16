@@ -19,23 +19,23 @@
                             <th>Name</th>
                             {% if perms.archives.change_project_type and perms.archives.delete_project_type %}
                             <th>Action</th>
+                            {% else %}
+                            <th>Project No</th>
                             {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for t in t %}
                         <tr>
-                            <td>{{ t.department__name }}</td>
-                            <td>{{ t.name }}</td>
+                            <td>{{ t.department.name }}</td>
+                            <td> {% if perms.archives.change_project_type and perms.archives.delete_project_type %}<a href="{% url "projectlist" t.id %}"> {{ t.name }}</a> {% else %} {{t.name}} {% endif %} </td> 
                             {% if perms.archives.change_project_type and perms.archives.delete_project_type %}
                             <td>
-                                {% if perms.archives.change_project_type %}
                                 <button class="btn btn-default" data-toggle="modal" data-target="#modal-lg16{{ t.id }}"><i class="fa fa-pencil font-14"></i></button>
-                                {% endif %}
-                                {% if perms.archives.delete_project_type %}
-                                <button class="btn btn-default" data-toggle="modal" data-target="#modal-dangerv{{ t.id }}"><i class="fa fa-trash font-14"></i></button>
-                                {% endif %}
+                                <button class="btn btn-default" data-toggle="modal" data-target="#modal-dangerv{{ t.id }}"><i class="fa fa-trash font-14"></i></button>   
                             </td>
+                            {% else %}
+                            <td>{{ t.project_no }}</td> 
                             {% endif %}
                         </tr>
                         {% endfor %}
@@ -45,7 +45,8 @@
         </div>
     </div>
     {% for t in t %}
-    <form method="POST" action="/deleteprojecttype/{{ t.id }}">
+    <form method="POST" action="{% url "deleteprojecttype" t.id %}">
+        {% csrf_token %}
         <div class="modal fade" id="modal-dangerv{{ t.id }}" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -64,7 +65,7 @@
         </div>
     </form>
 
-    <form method="POST" action="editprojecttype/{{ t.id }}">
+    <form method="POST" action="{% url "editprojecttype" t.id %}">
         {% csrf_token %}
         <div class="modal fade" id="modal-lg16{{ t.id }}">
             <div class="modal-dialog modal-lg1">
@@ -106,7 +107,7 @@
         </div>
     </form>
     {% endfor %}
-    <form method="post" action="addprojecttype">
+    <form method="post" action="{% url "addprojecttype" %}">
         {% csrf_token %}
         <div class="modal fade" id="modal-lg1">
             <div class="modal-dialog modal-lg1">
