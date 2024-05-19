@@ -29,7 +29,6 @@ class Department(models.Model):
 
 class Awards(models.Model):
     name = models.CharField(max_length=100)
-    # level = models.ForeignKey(Level,on_delete=models.CASCADE)
     department = models.ForeignKey(Department,on_delete=models.CASCADE)
     class Meta:
         db_table = "Awards"
@@ -46,7 +45,6 @@ class Student(models.Model):
     gender = models.CharField(choices=GENDER, max_length=20)
     regNo =  models.CharField(unique=True,max_length=14)
     NTA_Level = models.IntegerField(null=True,blank=True)
-    # level = models.ForeignKey(Level,null=True,blank=True,on_delete=models.CASCADE)
     department = models.ForeignKey(Department,null=True,on_delete=models.CASCADE)
     academic_year = models.CharField(max_length=12)
     mobile = models.CharField(max_length=14, null=True,blank=True)
@@ -70,7 +68,7 @@ class Staff(models.Model):
     department = models.ForeignKey(Department,on_delete=models.CASCADE)
     mobile = models.CharField(max_length=14, null=True,blank=True)
     photo = models.ImageField(upload_to='Images/Profile/Staff',default='default.jpg', null=True, blank=True)
-    # level = models.ForeignKey(Level,null=True,blank=True,on_delete=models.CASCADE)
+
     
     class Meta:
         db_table = "Staff"
@@ -154,7 +152,6 @@ class Progress(models.Model):
 
 class Submission(models.Model):
     when = models.DateTimeField(auto_now=False,auto_now_add=False)
-    # level = models.ForeignKey(Level,on_delete=models.CASCADE, null=True,blank=True)
     academic_year =  models.CharField(max_length=50,null=True,blank=True,default=date)
     status = models.BooleanField(default=True)
     department = models.ForeignKey(Department,on_delete=models.CASCADE, null=True,blank=True)
@@ -163,11 +160,16 @@ class Submission(models.Model):
         db_table = "submission"
 
 class StudentRequest(models.Model):
+    REQUEST_STATUS = (
+        ('Pending','Pending'),
+        ('Accepted','Accepted'),
+        ('Rejected','Rejected')
+    )
     student = models.ForeignKey(Student,on_delete=models.CASCADE)
     project = models.ForeignKey(Project,on_delete=models.CASCADE)
     description = models.TextField()
     date_created = models.DateField(auto_now_add=True)
-    is_accepted = models.BooleanField(default=False)
+    status = models.CharField(choices=REQUEST_STATUS, max_length=20, default='Pending')
     
     class Meta:
         db_table = "student_request"

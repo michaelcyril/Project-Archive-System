@@ -551,6 +551,29 @@ class StudentRequestView(LoginRequiredView, ListView):
         else:
             return StudentRequest.objects.filter(student=self.request.user.student)
 
+   
+    def post(self, request, *args, **kwargs):
+        try:
+            if request.POST.get("_method") == "DELETE": # Check if the request is for deletion
+                request_id = request.POST.get("request_id")
+                student_request = get_object_or_404(StudentRequest, pk=request_id)
+                student_request.delete()
+                messages.success(request, "Request deleted successfully")
+                
+            else:  # it's for updating status
+                request_id = request.POST.get("request_id")
+                status = request.POST.get("status")
+                student_request = get_object_or_404(StudentRequest, pk=request_id)
+                student_request.status = status
+                student_request.save()
+                if status == "Accepted":
+                    messages.success(request, "Request Accepted")
+                else:
+                    messages.success(request, "Request Rejected")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
 
 ######################################### END OF CCBV #########################################
 
