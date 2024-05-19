@@ -20,16 +20,21 @@ urlpatterns = [
     path("addstaff/", AddStaffView.as_view(), name="addstaff"),
     path("editstaff/<str:pk>/", views.editstaff, name="editstaff"),
     path("upload_addstaff/", views.upload_addstaff, name="upload_addstaff"),
+    # path("blockuser/<str:pk>/", views.blockuser, name="blockuser"),
     ########################### DEPARTMENT URLS #############################
     path("department/", views.department, name="department"),
     path("edit_department/<str:pk>/", views.editdepartment, name="editdepartment"),
-    path("delete_department/<str:pk>/", views.deletedepartment, name="deletedepartment"),
+    path(
+        "delete_department/<str:pk>/", views.deletedepartment, name="deletedepartment"
+    ),
     ############################ PROJECT URLS ############################
     path("project_type/", ProjectTypeView.as_view(), name="project_type"),
     path("add_project_type/", views.addprojecttype, name="addprojecttype"),
     path("edit_project_type/<str:pk>/", views.editprojecttype, name="editprojecttype"),
     path(
-        "delete_project_type/<str:pk>/", views.deleteprojecttype, name="deleteprojecttype"
+        "delete_project_type/<str:pk>/",
+        views.deleteprojecttype,
+        name="deleteprojecttype",
     ),
     path("delete_pdf/<str:pk>/", views.deletepdf, name="deletepdf"),
     path("completed_projects/", CompleteProjectView.as_view(), name="projects"),
@@ -40,7 +45,9 @@ urlpatterns = [
     ),
     path("preview_pdf/<str:pk>/", views.preview_pdf, name="preview_pdf"),
     path(
-        "project_list/<str:project_type>/", ProjectListView.as_view(), name="projectlist"
+        "project_list/<str:project_type>/",
+        ProjectListView.as_view(),
+        name="projectlist",
     ),
     path("student_request/", StudentRequestView.as_view(), name="student_request"),
     ######################## ROLES URLS ############################
@@ -70,7 +77,6 @@ urlpatterns = [
     # path("addlevel/", views.addlevel, name="addlevel"),
     # path("editlevel/<str:pk>/", views.editlevel, name="editlevel"),
     # path("deletelevel/<str:pk>/", views.deletelevel, name="deletelevel"),
-    # path("blockuser/<str:pk>/", views.blockuser, name="blockuser"),
     # path("q/", views.my_view, name="my_view"),
     # path("student_od/", StudentODView.as_view(), name="student_od"),
 ]
