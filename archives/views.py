@@ -7,12 +7,8 @@ from django.shortcuts import HttpResponseRedirect
 from django.contrib.auth.decorators import *
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-import shutil
 from fuzzywuzzy import fuzz
-import requests
-from django.views.decorators.csrf import csrf_exempt
 import PyPDF2
-from fuzzywuzzy import fuzz
 import fitz
 import re
 from django.contrib.auth.forms import AuthenticationForm
@@ -24,9 +20,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.views.generic import View
 from django.views.generic import ListView
-
 from django.views.generic import View
-from django.db.models import Count
 from django.contrib.auth.hashers import make_password
 from .forms import StudentForm, StaffForm
 from django.contrib.auth.models import User, Group, Permission
@@ -364,6 +358,13 @@ class ProjectListView(LoginRequiredView, ListView):
     def get_queryset(self):
         project_type = self.kwargs.get('project_type')
         return ProjectDocument.objects.filter(project__project_type_id=project_type)
+    
+    # return the project type name
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        project_type = ProjectType.objects.get(pk=self.kwargs.get('project_type'))
+        context['project_type'] = project_type
+        return context
 
 
 class EditStudentView(LoginRequiredMixin, FormView):

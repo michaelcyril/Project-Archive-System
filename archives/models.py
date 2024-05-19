@@ -57,7 +57,7 @@ class Student(models.Model):
         db_table = "Student"
         
     def __str__(self):
-        return self.regNo
+        return self.user.first_name + " " + self.user.last_name
 
 class Staff(models.Model):
     GENDER = (
@@ -76,7 +76,7 @@ class Staff(models.Model):
         db_table = "Staff"
 
     def __str__(self):
-        return self.user.first_name
+        return self.user.first_name + " " + self.user.last_name
 
 
 class ProjectType(models.Model):
@@ -173,4 +173,4 @@ class StudentRequest(models.Model):
         db_table = "student_request"
     
     def __str__(self):
-        return self.student.regNo
+        return self.student.user.first_name + " " + self.student.user.last_name
