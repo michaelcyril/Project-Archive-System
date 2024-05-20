@@ -65,14 +65,14 @@
                             <td>{{t.project.student.regNo}}</td>
                             <td>{{t.project.title| title}}</td>
                             <td>{{t.project.project_type}}</td>
-
                             <td><a href="{% url "preview_pdf" t.id %}"><i class="fa fa-file font-14"></i></a> {{t.document_type}}</td>
                             <td>0</td>
-                            {% if  request.user.is_superuser or request.user.student  %}
                             <td class="px-2 ">
+                                {% if request.user.is_superuser %}
                                 <button class="btn" data-toggle="modal" data-target="#modal-upvote{{t.id}}">
                                     <i class="fa fa-heart-o font-14"></i>
                                 </button>
+                                {% endif %}
                                 <button class="btn" data-toggle="modal" data-target="#modal-edit{{t.id}}">
                                     <i class="fa fa-pencil font-14"></i>
                                 </button>
@@ -80,7 +80,7 @@
                                     <i class="fa fa-trash font-14"></i>
                                 </button>
                             </td>
-                            {% endif %}
+                          
                         </tr>
                         {% endfor %}
                     </tbody>
