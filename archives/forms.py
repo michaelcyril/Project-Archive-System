@@ -13,6 +13,7 @@ class StudentForm(forms.ModelForm):
             "firstname",
             "lastname",
             "regNo",
+            "NTA_Level",
             "email",
             "mobile",
             "course",

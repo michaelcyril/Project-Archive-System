@@ -5,6 +5,10 @@
             <div class="page-content fade-in-up">
                 {% include "includes/messages.html" %}
                 <div class="row">
+                    <div class="col-md-12">
+                        <h5><b>Welcome, {{request.user.first_name}}</b></h5>
+                          <p>You have successfully logged into Project Archives Management System (PAMS)</p>  
+                    </div>
                     {% if perms.archives.view_student %}
                     <div class="col-lg-3 col-md-6">
                         <div class="ibox bg-success color-white widget-stat">
@@ -48,6 +52,12 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
+                    {% if request.user.is_superuser %}
+                        <h5><b>Project Management</b></h5>
+                        <p>View , Search diffrent projects based on your choice</p>
+                        <h5><b>Project Type</b></h5>
+                        <p>Manage all Project Type of your department</p>
                     {% endif %}
                 </div>
 
@@ -97,22 +107,7 @@
                     </div>
                    
                 </div>
-                {% endif %}
-                
-                    <div class="col-md-12">
-                        <h5><b>Welcome, {{request.user.first_name}}</b></h5>
-                        
-                    
-                          <p>You have successfully logged into Project Archives Management System (PAMS)</p>
-               
-                          {% if request.user.is_superuser %}
-                          <h5><b>Project Management</b></h5>
-                          <p>View , Search diffrent projects based on your choice</p>
-                          <h5><b>Project Type</b></h5>
-                          <p>View available Project Type of diffrent department</p>
-                          {% endif %}
-                          
-                    </div>  
+                {% endif %}  
                     
                     {% for s in o %}
                 

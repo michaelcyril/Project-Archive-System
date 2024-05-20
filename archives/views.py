@@ -7,12 +7,8 @@ from django.shortcuts import HttpResponseRedirect
 from django.contrib.auth.decorators import *
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-import shutil
 from fuzzywuzzy import fuzz
-import requests
-from django.views.decorators.csrf import csrf_exempt
 import PyPDF2
-from fuzzywuzzy import fuzz
 import fitz
 import re
 from django.contrib.auth.forms import AuthenticationForm
@@ -24,9 +20,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.views.generic import View
 from django.views.generic import ListView
-
 from django.views.generic import View
-from django.db.models import Count
 from django.contrib.auth.hashers import make_password
 from .forms import StudentForm, StaffForm
 from django.contrib.auth.models import User, Group, Permission
@@ -236,7 +230,6 @@ class AddStudentView(LoginRequiredMixin, FormView):
                 self.create_student(user, data)
                 messages.success(self.request, "Student created successfully")
                 return super().form_valid(form)
-
         else:
             try:
                user = self.create_user( data["email"], data["firstname"], data["lastname"], data["regNo"])
@@ -245,6 +238,7 @@ class AddStudentView(LoginRequiredMixin, FormView):
                return super().form_valid(form)
             except Exception as e:
                 messages.error(self.request, e)
+                print(e)
                 return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
 
     def form_invalid(self, form):
@@ -269,8 +263,8 @@ class AddStudentView(LoginRequiredMixin, FormView):
         user = User.objects.create(
            username=lastname,
            email=email, 
-           first_name=firstname, 
-           last_name=lastname, 
+           first_name=firstname,
+           last_name=lastname,
            password=password
          )
         student_group, _ = Group.objects.get_or_create(name="Student")
@@ -278,9 +272,9 @@ class AddStudentView(LoginRequiredMixin, FormView):
         return user
 
     def create_student(self, user, data):
-      department = data.get("department")
-      department = Department.objects.filter(name=department).first()
-      Student.objects.create(
+        department = data.get("department")
+        department = Department.objects.filter(name=department).first()
+        Student.objects.create(
             user=user,
             regNo=data["regNo"],
             mobile=data["mobile"],
@@ -289,15 +283,24 @@ class AddStudentView(LoginRequiredMixin, FormView):
             course=data["course"],
             department=department,
             gender=data["gender"],
-      )
+        )
 
-class CompleteProjectView(LoginRequiredView, TemplateView):
+class CompletedProjectView(LoginRequiredView, TemplateView):
     template_name = "html/dist/completedprojects.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         try:
-            context["d"] = ProjectDocument.objects.all()
+            if self.request.user.is_superuser:
+                cover = ProjectDocument.objects.filter(cover__isnull=False)
+            elif self.request.user.is_staff:
+                cover = ProjectDocument.objects.filter(cover__isnull=False, project__department_id=self.request.user.staff.department.id)
+                print(cover[0].cover.url)
+            else:
+                cover = ProjectDocument.objects.filter(cover__isnull=False, project__student_id=self.request.user.student.id)
+        
+            context['cover'] = cover[0].cover.url
+            context["d"] = ProjectDocument.objects.filter(document_type="Final")
             context["l"] = ProjectDocument.objects.all().count()
             context["f"] = Department.objects.all()
             context["s"] = list(
@@ -308,17 +311,18 @@ class CompleteProjectView(LoginRequiredView, TemplateView):
             name = self.request.POST.get("department")
             context["g"] = ProjectType.objects.filter(department__name=name)
             context["side"] = "projects"
+            return context
         except:
             messages.error(self.request, "Something went wrong")
             return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
-        return context
+        
 
     def post(self, request, *args, **kwargs):
         try:
             if request.method == "POST":
-                student_id = request.POST.get("student")
+                student_reg = request.POST.get("student")
                 project_id = request.POST.get("project")
-                student = get_object_or_404(Student, regNo=student_id)
+                student = get_object_or_404(Student, regNo=student_reg)
                 project = get_object_or_404(Project, pk=project_id)
                 description = request.POST.get("description")
                 student_request = StudentRequest.objects.create(
@@ -347,13 +351,45 @@ class ManageProjectView(LoginRequiredView, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+        # return cover of project document with cover
+        if self.request.user.is_staff:
+            pass
+        else:
+            cover = ProjectDocument.objects.filter(cover__isnull=False, project__student_id=self.request.user.student.id)
+            # print the url of the cover
+            print(cover[0].cover.url)
+            context['cover'] = cover[0].cover.url
+            
         context['f'] = Department.objects.all()
         context['s'] = list(Student.objects.values_list('academic_year', flat=True).distinct())
         name = self.request.POST.get('department')
         context['g'] = ProjectType.objects.filter(department__name=name)
         context['side'] = 'manage_project'
         return context
+    
+    # fuction to add new project document
+    def post(self, request, *args, **kwargs):
+        try:
+            if request.method == 'POST':
+                project_id = request.POST.get('project')
+                project = get_object_or_404(Project, pk=project_id)
+                document_type = request.POST.get('document_type')
+                file = request.FILES.get('file')
+                cover = request.FILES.get('cover')
+                project_document = ProjectDocument.objects.create(
+                    project=project,
+                    file=file,
+                    document_type=document_type,
+                    cover=cover
+                )
+                project_document.save()
+                messages.success(request, 'Document added successfully')
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        except Exception as e:
+            print(e)
+            messages.error(request, 'Something went wrong')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        
 
 class ProjectListView(LoginRequiredView, ListView):
     template_name = 'html/dist/project_list.html'
@@ -364,6 +400,13 @@ class ProjectListView(LoginRequiredView, ListView):
     def get_queryset(self):
         project_type = self.kwargs.get('project_type')
         return ProjectDocument.objects.filter(project__project_type_id=project_type)
+    
+    # return the project type name
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        project_type = ProjectType.objects.get(pk=self.kwargs.get('project_type'))
+        context['project_type'] = project_type
+        return context
 
 
 class EditStudentView(LoginRequiredMixin, FormView):
@@ -390,7 +433,8 @@ class EditStudentView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         try:
-            user = self.request.user
+            pk = self.kwargs.get("pk")
+            user = User.objects.get(pk=pk)
             student = Student.objects.get(user=user)
 
             # Update student information
@@ -550,6 +594,28 @@ class StudentRequestView(LoginRequiredView, ListView):
         else:
             return StudentRequest.objects.filter(student=self.request.user.student)
 
+    def post(self, request, *args, **kwargs):
+        try:
+            if request.POST.get("_method") == "DELETE": # Check if the request is for deletion
+                request_id = request.POST.get("request_id")
+                student_request = get_object_or_404(StudentRequest, pk=request_id)
+                student_request.delete()
+                messages.success(request, "Request deleted successfully")
+                
+            else:  # it's for updating status
+                request_id = request.POST.get("request_id")
+                status = request.POST.get("status")
+                student_request = get_object_or_404(StudentRequest, pk=request_id)
+                student_request.status = status
+                student_request.save()
+                if status == "Accepted":
+                    messages.success(request, "Request Accepted")
+                else:
+                    messages.success(request, "Request Rejected")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
 
 ######################################### END OF CCBV #########################################
 
@@ -570,7 +636,7 @@ def department(request):
 
 
 @login_required(login_url='/login/')
-def deletedepartment(request,pk):
+def deletedepartment(request, pk):
    try:
       Department.objects.filter(id=pk).delete()
       messages.success(request,'deleted successful')
