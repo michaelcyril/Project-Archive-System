@@ -1,4 +1,4 @@
-# pams
+# PAMS
 
 ## Project Archives Management System
 
