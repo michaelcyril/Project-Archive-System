@@ -17,7 +17,7 @@
               <div class="col-lg-3 col-md-6 col-sm-6 mt-2 mb-2">
                 <div class="card h-100">
                   <a href="{% url "preview_pdf" d.id %}">
-                    <img src="{{d.cover.url}}" class="card-img-top rounded-bottom" alt="project cover image">
+                    <img src="{{cover}}" class="card-img-top rounded-bottom" alt="project cover image">
                   </a>
                   <div class="card-body">
                     <h5 class="card-title">{{d.project.title}}</h5>
@@ -45,7 +45,7 @@
               <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Request this project</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Request {{d.project.title}} project</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
@@ -54,13 +54,13 @@
                 <form method="post" action="{% url "projects" %}">
                   {% csrf_token %}
                   <input type="hidden" id="projectId" name="project" value="{{d.project.id}}">
-                  <input type="hidden" id="userId" name="student" value="{{request.user.student}}">
+                  <input type="hidden" id="userId" name="student" value="{{request.user.student.regNo}}">
 
                   <div class="form-group">
                     <label for="message-text" class="col-form-label">Description</label>
-                    <textarea name="description" class="form-control" id="message-text" placeholder="Explain what you will add to this project" required></textarea>
+                    <textarea name="description" rows="8" class="form-control" id="message-text" placeholder="Explain what you will add to this project" required></textarea>
                   </div>
-                  <div class="modal-footer">
+                  <div class="text-right mt-4">
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Send Request</button>
                   </div>

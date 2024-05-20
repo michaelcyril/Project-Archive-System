@@ -4,11 +4,11 @@
 
 {% include "includes/messages.html" %}
 <style>
-        .img-modal {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-        }
+  .img-modal {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+  }
 </style>
 
 <div class="page-content fade-in-up">
@@ -29,31 +29,27 @@
                 <th>Email</th>
                 <th>Course</th>
                 <th>NTA_Level</th>
-                {% comment %} <th>Status</th> {% endcomment %}
+                {% if request.user.is_superuser %}
                 <th>Action</th>
+                {% endif %}
               </tr>
             </thead>
             <tbody>
               {% for student in students %}
               <tr>
                 <td>{{ student.regNo }}</td>
-                <td>{{ student.user.first_name }}</td>
-                <td>{{ student.user.username }}</td>
+                <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                <td>{{ student.user.email }}</td>
                 <td>{{ student.course | title }}</td>
                 <td>{{ student.NTA_Level }}</td>
-                {% comment %} <td>
-                  {% if student.user.is_active %}
-                  <a data-toggle="modal" style="color:green" data-target="#modals-block{{ student.user.id }}">Active</a>
-                  {% else %}
-                  <a data-toggle="modal" style="color:red" data-target="#modals-block{{ student.user.id }}">Blocked</a>
-                  {% endif %}
-                </td> {% endcomment %}
+                {% if request.user.is_superuser %}
                 <td>
                   <button class="btn" data-toggle="modal" data-target="#modal-views{{ student.user.id }}"><i class="fa fa-eye font-14"></i></button>
                   <button class="btn" data-toggle="modal" data-target="#modal-lg1s{{ student.user.id }}"><i class="fa fa-pencil font-14"></i></button>
                   <button class="btn" data-toggle="modal" data-target="#modal-danger{{ student.user.id }}"><i class="fa fa-trash font-14"></i></button>
                   <a class="btn" href="{% url 'resetpassword' pk=student.user.id %}"><i class="fa fa-key font-14"></i></a>
                 </td>
+                {% endif %}
               </tr>
               {% endfor %}
             </tbody>
@@ -73,7 +69,7 @@
           <h5 class="modal-title" id="deleteModalLabel">Block Confirmation</h5>
         </div>
         <div class="modal-body">
-          Are you sure you want to block {{student.user.first_name}} {{student.user.last_name}}?
+          Block {{student.user.first_name}} {{student.user.last_name}}
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -90,7 +86,7 @@
           <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
         </div>
         <div class="modal-body">
-          Are you sure you want to delete {{student.user.first_name}} {{student.user.last_name}}?
+          Delete {{student.user.first_name}} {{student.user.last_name}}
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -211,7 +207,7 @@
                   </div>
                   <div class="col col-md-6">
                     {% comment %} <label>Course</label> {% endcomment %}
-                    <input type="text" name="course" pattern="[A-Za-z]+\" title="" class="form-control" value="{{ student.course }}">
+                    <input type="text" name="course" class="form-control" value="{{ student.course }}">
                   </div>
                   <div class="col col-md-6">
                     {% comment %} <label>Academic Year</label> {% endcomment %}
@@ -248,8 +244,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-              <button name="addproduct" class="btn btn-primary">Submit</button>
+              <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Submit</button>
             </div>
           </div>
           <!-- /.modal-content -->
@@ -290,41 +286,41 @@
         <div class="modal-body">
           <p>
             <div class="row">
-              <div class="col col-md-6">
+              <div class="col col-md-6 pb-2">
                 {% comment %} <label>First Name</label> {% endcomment %}
                 <input name="firstname" class="form-control" type="text" placeholder="First Name" title="Text only required| write full name separate with white space" required>
               </div>
-               <div class="col col-md-6">
+               <div class="col col-md-6 pb-2">
                 {% comment %} <label>Last Name</label> {% endcomment %}
                 <input name="lastname" class="form-control" type="text" placeholder="FLast Name" title="Text only required| write full name separate with white space" required>
               </div>
-              <div class="col col-md-6">
+              <div class="col col-md-6 pb-2">
                 {% comment %} <label>Registration Number</label> {% endcomment %}
-                <input type="text" name="regNo" class="form-control" placeholder="Registration Number" title="Only number required |12 digits required">
+                <input type="text" name="regNo" class="form-control" placeholder="Registration Number" title="Only number required |12 digits required" required>
               </div>
-              <div class="col col-md-6">
+              <div class="col col-md-6 pb-2">
                 {% comment %} <label>Email</label> {% endcomment %}
                 <input name="email" class="form-control" type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" title="Valid email format required" placeholder="Email" required>
               </div>
             </div>
             <div class="row">
-              <div class="col col-md-6">
+              <div class="col col-md-6 pb-2">
                 {% comment %} <label>Mobile</label> {% endcomment %}
                 <input name="mobile" class="form-control" type="tel" pattern="[0-9]{10}" title="Insert number, maximum number is 10 digits" placeholder="Phone Number" required>
               </div>
-              <div class="col col-md-6">
+              <div class="col col-md-6 pb-2">
                 {% comment %} <label>NAT Level</label> {% endcomment %}
-                <input type="number" min="4" max="8" name="NTA_Level" class="form-control" placeholder="NTA Level" required>
+                <input name="NTA_Level" type="number" class="form-control" title="Only number between 4 and 9" placeholder="NTA Level" required>
               </div>
-              <div class="col col-md-6">
+              <div class="col col-md-6 pb-2">
                 {% comment %} <label>Course</label> {% endcomment %}
                 <input type="text" name="course" pattern="[A-Za-z]{1,}" title="Text only required" class="form-control" placeholder="Course" required>
               </div>
-              <div class="col col-md-6">
+              <div class="col col-md-6 pb-2">
                 {% comment %} <label>Academic Year</label> {% endcomment %}
                 <input type="text" name="academic_year" pattern="\d{4}\/\d{4}" title="Eg. 2022/2023" class="form-control" placeholder="Academic Year" required>
               </div>
-              <div class="col col-md-6">
+              <div class="col col-md-6 pb-2">
                 {% comment %} <label>Department</label> {% endcomment %}
                 <select class="form-control" name="department" required>
                   <option disabled selected value>Select department</option>
@@ -333,7 +329,7 @@
                   {% endfor %}
                 </select>
               </div>
-              <div class="col col-md-6">
+              <div class="col col-md-6 pb-2">
                 {% comment %} <label>Gender</label> {% endcomment %}
                 <select class="form-control" name="gender" required>
                   <option disabled selected value>Select gender</option>

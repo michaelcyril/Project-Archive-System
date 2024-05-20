@@ -121,7 +121,7 @@ class ProjectDocument(models.Model):
         ("Mini Two", "Mini Two"),
         ("Final", "Final"),
     )
-    project = models.OneToOneField(Project,null=True, blank=True, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project,null=True, blank=True, on_delete=models.CASCADE)
     file = models.FileField(upload_to='Document/Projects',null=True,blank=True)
     submitted = models.BooleanField(null=True,blank=True,default=False)
     date_created = models.DateField(auto_now_add=True)
