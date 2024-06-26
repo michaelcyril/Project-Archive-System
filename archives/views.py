@@ -297,7 +297,7 @@ class CompletedProjectView(LoginRequiredView, TemplateView):
                 cover = ProjectDocument.objects.filter(cover__isnull=False, project__department_id=self.request.user.staff.department.id)
                 print(cover[0].cover.url)
             else:
-                cover = ProjectDocument.objects.filter(cover__isnull=False, project__student_id=self.request.user.student.id)
+                cover = ProjectDocument.objects.filter(cover__isnull=False)
         
             context['cover'] = cover[0].cover.url
             context["d"] = ProjectDocument.objects.filter(document_type="Final")
@@ -314,7 +314,7 @@ class CompletedProjectView(LoginRequiredView, TemplateView):
             return context
         except:
             messages.error(self.request, "Something went wrong")
-            return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
+            # return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
         
 
     def post(self, request, *args, **kwargs):
@@ -342,24 +342,33 @@ class ManageProjectView(LoginRequiredView, ListView):
     login_url = '/login/'
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            return ProjectDocument.objects.all()
-        elif self.request.user.is_staff:
-            return ProjectDocument.objects.filter(project__department_id=self.request.user.staff.department.id)
-        else:
-            return ProjectDocument.objects.filter(project__student_id=self.request.user.student.id)
-
+        try:
+            if self.request.user.is_superuser:
+                return ProjectDocument.objects.all()
+            elif self.request.user.is_staff:
+                return ProjectDocument.objects.filter(project__department_id=self.request.user.staff.department.id)
+            else:
+                return ProjectDocument.objects.filter(project__student_id=self.request.user.student.id)
+        except:
+            messages.error(self.request, "Something went wrong")
+            return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
+        
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # return cover of project document with cover
         if self.request.user.is_staff:
             pass
         else:
-            cover = ProjectDocument.objects.filter(cover__isnull=False, project__student_id=self.request.user.student.id)
-            # print the url of the cover
-            print(cover[0].cover.url)
-            context['cover'] = cover[0].cover.url
-            
+            try:
+                cover = ProjectDocument.objects.filter(cover__isnull=False, project__student_id=self.request.user.student.id)
+                # print the url of the cover
+                print(cover[0].cover.url)
+                context['cover'] = cover[0].cover.url
+            except Exception as e:
+                print(e)
+                pass
+                
+                
         context['f'] = Department.objects.all()
         context['s'] = list(Student.objects.values_list('academic_year', flat=True).distinct())
         name = self.request.POST.get('department')
