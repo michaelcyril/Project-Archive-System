@@ -51,7 +51,6 @@
                             <th>Registration</th>
                             <th>Project Title</th>
                             <th>Project Type</th>
-                            <th>Document File</th>
                             <th>Upvotes</th>
                             {% if request.user.is_superuser or request.user.student %}
                             <th>Action</th>
@@ -62,16 +61,17 @@
                         
                         {% for t in d %}
                         <tr>
-                            <td>{{t.project.student.user.first_name}} {{t.project.student.user.last_name}}</td>
-                            <td>{{t.project.student.regNo}}</td>
-                            <td>{{t.project.title| title}}</td>
-                            <td>{{t.project.project_type}}</td>
-                            <td><a href="{% url "preview_pdf" t.id %}"><i class="fa fa-file font-14"></i></a> {{t.document_type}}</td>
+                            <td>{{t.student.user.first_name}} {{t.student.user.last_name}}</td>
+                            <td>{{t.student.regNo}}</td>
+                            <td>{{t.title| title}}</td>
+                            <td>{{t.project_type}}</td>
+                            
                             <td>0</td>
                             <td class="px-2 ">
                                 {% if request.user.is_superuser %}
-                                <button class="btn" data-toggle="modal" data-target="#modal-upvote{{t.id}}">
-                                    <i class="fa fa-heart-o font-14"></i>
+                                <button class="btn">
+                                    <a href="{% url "student_projects" t.id %}"><i class="fa fa-eye font-14"></i></a>
+                                    
                                 </button>
                                 {% endif %}
                                 <button class="btn" data-toggle="modal" data-target="#modal-edit{{t.id}}">
@@ -91,7 +91,7 @@
         </div>
     </div>
     {% for t in d %}
-    <form method="POST" action="{% url "deletepdf" t.project_id %}">
+    <form method="POST" action="{% url "deletepdf" t.id %}">
         {% csrf_token %}
         <div class="modal fade" id="modal-dangerv{{t.id}}" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -100,7 +100,7 @@
                         <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
                     </div>
                     <div class="modal-body">
-                        Delete {{t.project.title}} ({{t.document_type}})
+                        Delete {{t.title}})
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
