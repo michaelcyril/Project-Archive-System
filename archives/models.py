@@ -170,9 +170,21 @@ class StudentRequest(models.Model):
     description = models.TextField()
     date_created = models.DateField(auto_now_add=True)
     status = models.CharField(choices=REQUEST_STATUS, max_length=20, default='Pending')
-    
+
     class Meta:
         db_table = "student_request"
-    
+
     def __str__(self):
         return self.student.user.first_name + " " + self.student.user.last_name
+
+class Comment(models.Model):
+    document = models.ForeignKey("ProjectDocument", on_delete=models.CASCADE)
+    supervisor = models.ForeignKey(Staff, on_delete=models.CASCADE)
+    text = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "comment"
+
+    def __str__(self):
+        return f"Comment by {self.supervisor.user.username} on {self.document.project.title}"

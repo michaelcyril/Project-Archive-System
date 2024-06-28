@@ -1,5 +1,5 @@
 from django import forms
-from .models import Student, Staff
+from .models import Student, Staff, Comment
 
 
 class StudentForm(forms.ModelForm):
@@ -38,3 +38,4 @@ class StaffForm(forms.ModelForm):
             "department",
             "gender",
         ]
+

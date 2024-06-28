@@ -15,7 +15,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.views.generic import View
@@ -344,9 +344,13 @@ class ManageProjectView(LoginRequiredView, ListView):
     def get_queryset(self):
         try:
             if self.request.user.is_superuser:
-                return ProjectDocument.objects.all()
+                # return only project and not project documents under that project
+                return Project.objects.all()
+                # return ProjectDocument.objects.all()
             elif self.request.user.is_staff:
-                return ProjectDocument.objects.filter(project__department_id=self.request.user.staff.department.id)
+                return Project.objects.filter(department_id=self.request.user.staff.department.id)
+                
+                # return ProjectDocument.objects.filter(project__department_id=self.request.user.staff.department.id)
             else:
                 return ProjectDocument.objects.filter(project__student_id=self.request.user.student.id)
         except:
@@ -398,7 +402,7 @@ class ManageProjectView(LoginRequiredView, ListView):
             print(e)
             messages.error(request, 'Something went wrong')
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        
+
 
 class ProjectListView(LoginRequiredView, ListView):
     template_name = 'html/dist/project_list.html'
@@ -624,6 +628,39 @@ class StudentRequestView(LoginRequiredView, ListView):
         except Exception as e:
             messages.error(request, f"An error occurred: {e}")
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+
+class StudentProjectCommentView(LoginRequiredMixin, TemplateView):
+    template_name = "html/dist/student_projects.html"
+    
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["documents"] = ProjectDocument.objects.filter(project__student_id=self.kwargs.get("pk"))
+        context["student"] = Student.objects.get(id=self.kwargs.get("pk"))
+        # context["side"] = "student_projects"
+        return context
+    
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            document = request.POST.get("document")
+            supervisor = request.POST.get("supervisor")
+            text = request.POST.get("comment")
+            # document = get_object_or_404(ProjectDocument, pk=document_id)
+            print(document, text, supervisor)
+            comment = Comment.objects.create(
+                document_id=document, supervisor_id=supervisor, text=text
+            )
+            
+            print("Comment added successfully")
+            messages.success(request, "Comment added successfully")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+            
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+        
+    
 
 
 ######################################### END OF CCBV #########################################
