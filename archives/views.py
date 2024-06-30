@@ -661,7 +661,39 @@ class StudentProjectCommentView(LoginRequiredMixin, TemplateView):
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
         
     
+class CommentListView(LoginRequiredMixin, ListView):
+    template_name = "html/dist/comments_list.html"
+    context_object_name = "comments"
 
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Comment.objects.all()
+        elif self.request.user.is_staff:
+            return Comment.objects.filter(supervisor__user=self.request.user)
+        else:
+            return Comment.objects.filter(document__project__student__user=self.request.user)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            if request.POST.get("_method") == "DELETE":
+                comment_id = request.POST.get("comment_id")
+                comment = get_object_or_404(Comment, pk=comment_id)
+                comment.delete()
+                messages.success(request, "Comment deleted successfully")
+                
+            if request.POST.get("_method") == "PUT":
+                comment_id = request.POST.get("comment_id")
+                text = request.POST.get("text")
+                comment = get_object_or_404(Comment, pk=comment_id)
+                comment.text = text
+                comment.save()
+                messages.success(request, "Comment updated successfully")
+                
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+                                    
+                                    
 
 ######################################### END OF CCBV #########################################
 

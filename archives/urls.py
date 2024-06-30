@@ -55,6 +55,8 @@ urlpatterns = [
         StudentProjectCommentView.as_view(),
         name="student_projects",
     ),
+    path("project_comment/", CommentListView.as_view(), name="project_comment"),
+    
     ######################## ROLES URLS ############################
     path("manage_roles/", views.manageroles, name="manageroles"),
     path("add_roles/", views.addroles, name="addroles"),

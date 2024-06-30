@@ -93,7 +93,7 @@
             </li>
             <li>
                 <a href="{% url 'student_request' %}" class="{% if side == 'department' %} active {% endif %}">
-                    <i class="sidebar-item-icon fa fa-university"></i>
+                    <i class="sidebar-item-icon fa fa-hourglass-end"></i>
                     <span class="nav-label">Student Requests</span>
                 </a>
             </li>
@@ -134,12 +134,19 @@
             </li>
             <li>
                 <a href="{% url 'student_request' %}" class="{% if side == 'department' %} active {% endif %}">
-                    <i class="sidebar-item-icon fa fa-university"></i>
+                    <i class="sidebar-item-icon fa fa-hourglass-end" aria-hidden="true"></i>
                     <span class="nav-label">My Requests</span>
                 </a>
             </li>
             {% endif %}
-          
+            
+            <li>
+                <a href="{% url 'project_comment' %}" class="{% if side == 'project_comment' %} active {% endif %}">
+                    <i class="sidebar-item-icon fa fa-comment-o" aria-hidden="true"></i>
+                    <span class="nav-label">Commeents</span>
+                </a>
+            </li>
+
         </ul>
     </div>
 </nav>
