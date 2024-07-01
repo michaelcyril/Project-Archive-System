@@ -106,12 +106,12 @@ class Project(models.Model):
 
 
 class Upvote(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    supervisor = models.ForeignKey(Staff, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     date_created = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.user.username
+        return f"{self.supervisor.user} upvoted {self.project.title}"
 
 
 class ProjectDocument(models.Model):

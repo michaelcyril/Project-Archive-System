@@ -31,6 +31,7 @@ from django.views.generic import FormView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import *
+from django.db.models import Sum
 
 # CCBV
 
@@ -371,8 +372,20 @@ class ManageProjectView(LoginRequiredView, ListView):
             except Exception as e:
                 print(e)
                 pass
-                
-                
+        
+        # give total number of upvotes per each project
+        all_upvotes = []
+        projects = Project.objects.all()
+        for project in projects:
+            upvotes = Upvote.objects.filter(project=project).count()
+            dictionary = {
+                "title": project.title,
+                "upvotes": upvotes
+                }
+            all_upvotes.append(dictionary)
+
+            
+        context['upvotes'] = all_upvotes
         context['f'] = Department.objects.all()
         context['s'] = list(Student.objects.values_list('academic_year', flat=True).distinct())
         name = self.request.POST.get('department')
@@ -638,6 +651,7 @@ class StudentProjectCommentView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["documents"] = ProjectDocument.objects.filter(project__student_id=self.kwargs.get("pk"))
         context["student"] = Student.objects.get(id=self.kwargs.get("pk"))
+        context["upvotes"] = Upvote.objects.filter(project__student_id=self.kwargs.get("pk")).count()
         # context["side"] = "student_projects"
         return context
     

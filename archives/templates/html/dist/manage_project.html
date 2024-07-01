@@ -52,9 +52,8 @@
                             <th>Project Title</th>
                             <th>Project Type</th>
                             <th>Upvotes</th>
-                            {% if request.user.is_superuser or request.user.student %}
                             <th>Action</th>
-                            {% endif %}
+                            {{upvotes}}
                         </tr>
                     </thead>
                     <tbody>
@@ -65,21 +64,25 @@
                             <td>{{t.student.regNo}}</td>
                             <td>{{t.title| title}}</td>
                             <td>{{t.project_type}}</td>
-                            
-                            <td>0</td>
+                            {% for upvote in upvotes %}
+                            {% if t.title == upvote.title %}
+                            <td>{{ upvote.upvotes }}</td>
+                            {% endif %}
+                            {% endfor %}
                             <td class="px-2 ">
-                                {% if request.user.is_superuser %}
+                                {% if request.user.is_staff %}
                                 <button class="btn">
                                     <a href="{% url "student_projects" t.id %}"><i class="fa fa-eye font-14"></i></a>
-                                    
                                 </button>
                                 {% endif %}
+                                {% if request.user.is_superadmin or request.user.student %}
                                 <button class="btn" data-toggle="modal" data-target="#modal-edit{{t.id}}">
                                     <i class="fa fa-pencil font-14"></i>
                                 </button>
                                 <button class="btn" data-toggle="modal" data-target="#modal-dangerv{{t.id}}">
                                     <i class="fa fa-trash font-14"></i>
                                 </button>
+                                {% endif %}
                             </td>
                           
                         </tr>
