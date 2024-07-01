@@ -35,6 +35,10 @@
           <div>
             <h4 class="text-center">Project</h4>
             <p class="text-center">{{student.project}} - {{ student.project.project_type}}</p>
+            <div class="text-center mb-2">
+            <i class="fa fa-heart-o" aria-hidden="true"></i>
+            <h4> {{ upvotes }} </h4>
+            </div>
           </div>
           <div class="row mb-3">
             {% for document in documents %}
