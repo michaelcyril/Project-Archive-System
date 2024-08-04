@@ -1,23 +1,21 @@
-{% load static %}
-{% include "includes/header.html" %}
-{% include "includes/sidebar.html" %}
+{% load static %} {% include "includes/header.html" %} {% include
+"includes/sidebar.html" %}
 
 <style>
   .card {
     border-radius: 10px;
   }
   .ctp {
-    color: #FFA500;
+    color: #ffa500;
   }
   .ctw {
     color: #007bff;
   }
- 
+
   svg {
     margin-top: 10px;
     margin-bottom: 10px;
   }
-
 </style>
 
 <div class="container-fluid mt-4">
@@ -25,19 +23,26 @@
     <div class="col-md-12">
       <div class="card">
         <div class="card-header text-center">
-            <img src="{{student.photo.url}}" alt="user" class="img-circle" style="width: 100px; height: 100px;">
-            <h6 class="mt-2">{{student}}</h6>
-            <h6>{{student.regNo}}</h6>
-            <h6>{{student.academic_year}}</h6>
-            <h6>Level: {{student.NTA_Level}}</h6>
+          <img
+            src="{{student.photo.url}}"
+            alt="user"
+            class="img-circle"
+            style="width: 100px; height: 100px"
+          />
+          <h6 class="mt-2">{{student}}</h6>
+          <h6>{{student.regNo}}</h6>
+          <h6>{{student.academic_year}}</h6>
+          <h6>Level: {{student.level}}</h6>
         </div>
         <div class="card-body">
           <div>
             <h4 class="text-center">Project</h4>
-            <p class="text-center">{{student.project}} - {{ student.project.project_type}}</p>
+            <p class="text-center">
+              {{student.project}} - {{ student.project.project_type}}
+            </p>
             <div class="text-center mb-2">
-            <i class="fa fa-heart-o" aria-hidden="true"></i>
-            <h4> {{ upvotes }} </h4>
+              <i class="fa fa-heart-o" aria-hidden="true"></i>
+              <h4>{{ upvotes }}</h4>
             </div>
           </div>
           <div class="row mb-3">
@@ -48,32 +53,62 @@
                 <div class="card-body">
                   <h5 class="card-title">{{document.document_type}}</h5>
                   <p class="card-text ctw">
-           
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-word" viewBox="0 0 16 16">
-                      <path d="M4.879 4.515a.5.5 0 0 1 .606.364l1.036 4.144.997-3.655a.5.5 0 0 1 .964 0l.997 3.655 1.036-4.144a.5.5 0 0 1 .97.242l-1.5 6a.5.5 0 0 1-.967.01L8 7.402l-1.018 3.73a.5.5 0 0 1-.967-.01l-1.5-6a.5.5 0 0 1 .364-.606z"/>
-                      <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      class="bi bi-file-word"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        d="M4.879 4.515a.5.5 0 0 1 .606.364l1.036 4.144.997-3.655a.5.5 0 0 1 .964 0l.997 3.655 1.036-4.144a.5.5 0 0 1 .97.242l-1.5 6a.5.5 0 0 1-.967.01L8 7.402l-1.018 3.73a.5.5 0 0 1-.967-.01l-1.5-6a.5.5 0 0 1 .364-.606z"
+                      />
+                      <path
+                        d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"
+                      />
                     </svg>
-               
                   </p>
-                    <button class="btn btn-outline-primary" data-toggle="modal" data-target="#modal-comment">Give Comment</button>
+                  <button
+                    class="btn btn-outline-primary"
+                    data-toggle="modal"
+                    data-target="#modal-comment"
+                  >
+                    Give Comment
+                  </button>
                 </div>
               </div>
-                {% else %}
+              {% else %}
               <div class="card text-center border-warning">
                 <div class="card-body">
                   <h5 class="card-title">{{document.document_type}}</h5>
-                  <p class="card-text ctp"> 
-
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-ppt" viewBox="0 0 16 16">
-                      <path d="M7 5.5a1 1 0 0 0-1 1V13a.5.5 0 0 0 1 0v-2h1.188a2.75 2.75 0 0 0 0-5.5zM8.188 10H7V6.5h1.188a1.75 1.75 0 1 1 0 3.5"/>
-                      <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z"/>
+                  <p class="card-text ctp">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      class="bi bi-file-earmark-ppt"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        d="M7 5.5a1 1 0 0 0-1 1V13a.5.5 0 0 0 1 0v-2h1.188a2.75 2.75 0 0 0 0-5.5zM8.188 10H7V6.5h1.188a1.75 1.75 0 1 1 0 3.5"
+                      />
+                      <path
+                        d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z"
+                      />
                     </svg>
-          
                   </p>
-                    <button class="btn btn-outline-warning" data-toggle="modal" data-target="#modal-comment">Give Comment</button>
+                  <button
+                    class="btn btn-outline-warning"
+                    data-toggle="modal"
+                    data-target="#modal-comment"
+                  >
+                    Give Comment
+                  </button>
                 </div>
               </div>
-                {% endif %}
+              {% endif %}
             </div>
 
             <!-- Modal -->
@@ -88,12 +123,32 @@
                             <form method="post">
                               {% csrf_token %}
                               <div class="mb-3">
-                                <input type="hidden" name="document" value="{{document.id}}">
-                                <input type="hidden" name="supervisor" value="{{request.user.staff.id}}">
-                                <label for="message-text" class="col-form-label">Comment:</label>
-                                <textarea class="form-control" id="message-text" name="comment" rows="4"></textarea>
+                                <input
+                                  type="hidden"
+                                  name="document"
+                                  value="{{document.id}}"
+                                />
+                                <input
+                                  type="hidden"
+                                  name="supervisor"
+                                  value="{{request.user.staff.id}}"
+                                />
+                                <label for="message-text" class="col-form-label"
+                                  >Comment:</label
+                                >
+                                <textarea
+                                  class="form-control"
+                                  id="message-text"
+                                  name="comment"
+                                  rows="4"
+                                ></textarea>
                               </div>
-                              <button type="submit" class="btn btn-outline-success">Submit</button>
+                              <button
+                                type="submit"
+                                class="btn btn-outline-success"
+                              >
+                                Submit
+                              </button>
                             </form>
                           </div>
                         </div>

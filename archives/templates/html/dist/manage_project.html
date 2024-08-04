@@ -53,12 +53,22 @@
                             <th>Project Type</th>
                             <th>Upvotes</th>
                             <th>Action</th>
-                            {{upvotes}}
                         </tr>
                     </thead>
                     <tbody>
                         
                         {% for t in d %}
+                        {% if request.user.student %}
+                          <td>{{t.project.student.user.first_name}} {{t.project.student.user.last_name}}</td>
+                            <td>{{t.project.student.regNo}}</td>
+                            <td>{{t.project.title| title}}</td>
+                            <td>{{t.project.project_type}}</td>
+                            {% for upvote in upvotes %}
+                            {% if t.project.title == upvote.title %}
+                            <td>{{ upvote.upvotes }}</td>
+                            {% endif %}
+                            {% endfor %}
+                        {% else %}
                         <tr>
                             <td>{{t.student.user.first_name}} {{t.student.user.last_name}}</td>
                             <td>{{t.student.regNo}}</td>
@@ -69,6 +79,7 @@
                             <td>{{ upvote.upvotes }}</td>
                             {% endif %}
                             {% endfor %}
+                            {% endif %}
                             <td class="px-2 ">
                                 {% if request.user.is_staff %}
                                 <button class="btn">
@@ -84,7 +95,6 @@
                                 </button>
                                 {% endif %}
                             </td>
-                          
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -148,7 +158,7 @@
                     </div>
                     <div class="col col-md-6">
                         {% comment %} <label>NAT Level</label> {% endcomment %}
-                        <input type="number" min="4" max="8" name="NTA_Level" class="form-control" value="{{ student.NTA_Level }}" required>
+                        <input type="number" min="4" max="8" name="level" class="form-control" value="{{ student.level }}" required>
                     </div>
                     <div class="col col-md-6">
                         {% comment %} <label>Course</label> {% endcomment %}

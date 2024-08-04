@@ -13,12 +13,13 @@ class StudentForm(forms.ModelForm):
             "firstname",
             "lastname",
             "regNo",
-            "NTA_Level",
+            # "level",
             "email",
             "mobile",
-            "course",
+            # "course",
             "academic_year",
-            "department",
+            # "department",
+            "program",
             "gender",
         ]
 
