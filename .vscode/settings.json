@@ -1,7 +1,30 @@
 {
     "cSpell.words": [
+        "addlevel",
+        "addprojecttype",
+        "addroles",
+        "addstaff",
+        "addstudent",
+        "CCBV",
         "completedprojects",
+        "deletedepartment",
+        "deletelevel",
+        "deletepdf",
+        "deleteprojecttype",
+        "deleteroles",
+        "deletestudent",
+        "editdepartment",
+        "editlevel",
+        "editprojecttype",
+        "editroles",
+        "editstaff",
+        "editstudent",
+        "manageroles",
+        "projectlist",
         "projecttype",
-        "upvoted"
+        "REFERER",
+        "regno",
+        "upvoted",
+        "upvotes"
     ]
 }

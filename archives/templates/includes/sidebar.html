@@ -27,7 +27,7 @@
                 <i class="fa-duotone fa-screen-users"></i>
             </li>
 
-            {% if request.user.is_superuser %}
+            {% if request.user.is_superuser or request.user.staff.type == 2 %}
             <li class="{% if side == 'being' or side == 'staff' or side == 'role' %} active {% endif %}">
                 <a href="javascript:;" class="{% if side == 'being' or side == 'staff' %} active {% endif %}">
                     <i class="sidebar-item-icon fa fa-user-circle-o"></i>
@@ -47,16 +47,16 @@
                             <span class="nav-label">Staff</span>
                         </a>
                     </li>
-                    <li class="{% if side == 'role' %} active {% endif %}">
+                    {% comment %} <li class="{% if side == 'role' %} active {% endif %}">
                         <a class="{% if side == 'role' %} active {% endif %}" href="{% url "manageroles" %}">
                             <i class="sidebar-item-icon fa fa-drivers-license-o"></i>
                             <span class="nav-label">Roles</span>
                         </a>
-                    </li>
+                    </li> {% endcomment %}
                 </ul>
             </li>
             {% endif %}
-            {% if request.user.is_superuser %}
+            {% if request.user.is_superuser or request.user.staff.type == 2 %}
             <li class="{% if side == 'upload_project' or side == 'projects' or side == 'manage_project' or side == 'assessment' %} active {% endif %}">
                 <a href="javascript:;" class="{% if side == 'upload_project' or side == 'project' or side == 'manage_project' or side == 'assessment' %} active {% endif %}">
                     <i class="sidebar-item-icon fa fa-book"></i>
@@ -86,9 +86,21 @@
                 </ul>
             </li>
             <li>
+                <a href="{% url 'level' %}" class="{% if side == 'level' %} active {% endif %}">
+                    <i class="sidebar-item-icon fa fa-university"></i>
+                    <span class="nav-label">Levels</span>
+                </a>
+            </li>
+            <li>
                 <a href="{% url 'department' %}" class="{% if side == 'department' %} active {% endif %}">
                     <i class="sidebar-item-icon fa fa-university"></i>
-                    <span class="nav-label">Department</span>
+                    <span class="nav-label">Departments</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'program' %}" class="{% if side == 'program' %} active {% endif %}">
+                    <i class="sidebar-item-icon fa fa-university"></i>
+                    <span class="nav-label">Programs</span>
                 </a>
             </li>
             <li>

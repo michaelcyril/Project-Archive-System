@@ -9,7 +9,7 @@
                         <h5><b>Welcome, {{request.user.first_name}}</b></h5>
                           <p>You have successfully logged into Project Archives Management System (PAMS)</p>  
                     </div>
-                    {% if perms.archives.view_student %}
+                    {% if request.user.is_superuser or request.user.staff.type == 2 %}
                     <div class="col-lg-3 col-md-6">
                         <div class="ibox bg-success color-white widget-stat">
                             <div class="ibox-body">
@@ -19,8 +19,8 @@
                             </div>
                         </div>
                     </div>
-                    {% endif %}
-                    {% if perms.archives.view_document %}
+                    {% comment %} {% endif %}
+                    {% if perms.archives.view_document %} {% endcomment %}
                     <div class="col-lg-3 col-md-6">
                         <div class="ibox bg-info color-white widget-stat">
                             <div class="ibox-body">
@@ -30,8 +30,8 @@
                             </div>
                         </div>
                     </div>
-                    {% endif %}
-                    {% if perms.archives.view_department %}
+                    {% comment %} {% endif %} {% endcomment %}
+                    {% comment %} {% if perms.archives.view_department %} {% endcomment %}
                     <div class="col-lg-3 col-md-6">
                         <div class="ibox bg-warning color-white widget-stat">
                             <div class="ibox-body">
@@ -41,8 +41,8 @@
                             </div>
                         </div>
                     </div>
-                    {% endif %}
-                    {% if perms.archives.view_staff %}
+                    {% comment %} {% endif %}
+                    {% if perms.archives.view_staff %} {% endcomment %}
                     <div class="col-lg-3 col-md-6">
                         <div class="ibox bg-danger color-white widget-stat">
                             <div class="ibox-body">
@@ -53,7 +53,7 @@
                         </div>
                     </div>
                     {% endif %}
-                    {% if request.user.is_superuser %}
+                    {% if request.user.is_superuser or request.user.staff.type == 2 %}
                         <h5><b>Project Management</b></h5>
                         <p>View , Search diffrent projects based on your choice</p>
                         <h5><b>Project Type</b></h5>

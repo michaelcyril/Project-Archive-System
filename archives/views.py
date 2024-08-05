@@ -32,6 +32,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import *
 from django.db.models import Sum
+from django.core.exceptions import ObjectDoesNotExist
+
 
 # CCBV
 
@@ -285,8 +287,8 @@ class AddStudentView(LoginRequiredMixin, FormView):
             last_name=lastname,
             password=password,
         )
-        student_group, _ = Group.objects.get_or_create(name="Student")
-        user.groups.add(student_group)
+        # student_group, _ = Group.objects.get_or_create(name="Student")
+        # user.groups.add(student_group)
         return user
 
     def create_student(self, user, data):
@@ -297,9 +299,9 @@ class AddStudentView(LoginRequiredMixin, FormView):
             regNo=data["regNo"],
             mobile=data["mobile"],
             academic_year=data["academic_year"],
-            level=data["level"],
-            course=data["course"],
-            department=department,
+            program=data["program"],
+            # course=data["course"],
+            # department=department,
             gender=data["gender"],
         )
 
@@ -362,31 +364,58 @@ class ManageProjectView(LoginRequiredView, ListView):
     template_name = "html/dist/manage_project.html"
     context_object_name = "d"
     login_url = "/login/"
-
+    
+    
     def get_queryset(self):
         try:
             if self.request.user.is_superuser:
-                # return only project and not project documents under that project
+                # Return only project and not project documents under that project
                 return Project.objects.all()
-                # return ProjectDocument.objects.all()
-            elif self.request.user.is_staff:
+            elif hasattr(self.request.user, 'staff') and self.request.user.staff:
                 return Project.objects.filter(
                     department_id=self.request.user.staff.department.id
                 )
-
-                # return ProjectDocument.objects.filter(project__department_id=self.request.user.staff.department.id)
-            else:
+            elif hasattr(self.request.user, 'student') and self.request.user.student:
                 return ProjectDocument.objects.filter(
                     project__student_id=self.request.user.student.id
                 )
-        except:
-            messages.error(self.request, "Something went wrong")
+            else:
+                # Handle the case where the user is neither staff nor student
+                messages.error(self.request, "User has no associated staff or student record.")
+                return Project.objects.none()  # or some appropriate empty queryset
+        except ObjectDoesNotExist as e:
+            messages.error(self.request, f"Related object does not exist: {e}")
             return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
+        except Exception as e:
+            messages.error(self.request, str(e))
+            return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
+
+
+    # def get_queryset(self):
+    #     try:
+    #         if self.request.user.is_superuser:
+    #             # return only project and not project documents under that project
+    #             return Project.objects.all()
+    #             # return ProjectDocument.objects.all()
+    #         elif self.request.user.staff:
+    #             return Project.objects.filter(
+    #                 department_id=self.request.user.staff.department.id
+    #             )
+
+    #             # return ProjectDocument.objects.filter(project__department_id=self.request.user.staff.department.id)
+    #         else:
+    #             return ProjectDocument.objects.filter(
+    #                 project__student_id=self.request.user.student.id
+    #             )
+    #     except Exception as e:
+    #         messages.error(self.request, e)
+    #         return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # return cover of project document with cover
-        if self.request.user.is_staff:
+        # Check if the user is staff
+        if hasattr(self.request.user, 'staff') and self.request.user.staff:
             pass
         else:
             try:
@@ -411,6 +440,8 @@ class ManageProjectView(LoginRequiredView, ListView):
 
         context["upvotes"] = all_upvotes
         context["f"] = Department.objects.all()
+        context["project_types"] = ProjectType.objects.filter(department=self.request.user.student.program.department)
+        context["document_types"] = ProjectDocument.DOCUMENT_TYPE
         context["s"] = list(
             Student.objects.values_list("academic_year", flat=True).distinct()
         )
@@ -421,9 +452,32 @@ class ManageProjectView(LoginRequiredView, ListView):
 
     # fuction to add new project document
     def post(self, request, *args, **kwargs):
-        try:
-            if request.method == "POST":
-                project_id = request.POST.get("project")
+        if request.POST.get("_type") == "project":
+            # create new projet
+            student = Student.objects.get(user=request.user)
+            title = request.POST.get("title")
+            note = request.POST.get("note")
+            department = request.POST.get("department")
+            project_type = request.POST.get("project_type")
+            
+            try:
+                project = Project.objects.create(
+                    title=title, student=student, note=note, department_id=department, project_type_id=project_type
+                )
+                project.save()
+                messages.success(request, "Project added successfully")
+                return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+            except Exception as e:
+                print(e)
+                messages.error(request, "Something went wrong")
+                return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+            
+         
+            
+        if request.POST.get("_type") == "document":
+            try:
+                # project_id = request.POST.get("project")
+                project_id = Project.objects.filter(student__user=request.user).last().id
                 project = get_object_or_404(Project, pk=project_id)
                 document_type = request.POST.get("document_type")
                 file = request.FILES.get("file")
@@ -434,10 +488,10 @@ class ManageProjectView(LoginRequiredView, ListView):
                 project_document.save()
                 messages.success(request, "Document added successfully")
                 return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-        except Exception as e:
-            print(e)
-            messages.error(request, "Something went wrong")
-            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+            except Exception as e:
+                print(e)
+                messages.error(request, e)
+                return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 
 class ProjectListView(LoginRequiredView, ListView):
@@ -522,7 +576,6 @@ class StaffView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         try:
-            level = Level.objects.all()
             exclude_perm = [
                 1,
                 2,
@@ -546,9 +599,9 @@ class StaffView(LoginRequiredMixin, TemplateView):
             context["side"] = "staff"
             context["s"] = Staff.objects.all()
             context["d"] = Department.objects.all()
+            context["type_choices"] = Staff.TYPE
             context["g"] = Group.objects.all()
             context["p"] = Permission.objects.exclude(id__in=exclude_perm)
-            context["l"] = level
         except:
             messages.error(self.request, "Something went wrong")
             return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
@@ -614,6 +667,7 @@ class AddStaffView(LoginRequiredMixin, FormView):
             mobile=data["mobile"],
             department=data["department"],
             gender=data["gender"],
+            type=data["type"],
         )
 
 
@@ -623,6 +677,7 @@ class ProjectTypeView(LoginRequiredView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["d"] = Department.objects.all()
+        context["mentors"] = Staff.objects.all()
         context["t"] = ProjectType.objects.all()
         project = ProjectType.objects.all()
 
@@ -633,15 +688,23 @@ class StudentRequestView(LoginRequiredView, ListView):
     template_name = "html/dist/student_request.html"
     context_object_name = "requests"
 
+
     def get_queryset(self):
         if self.request.user.is_superuser:
             return StudentRequest.objects.all()
-        elif self.request.user.is_staff:
-            return StudentRequest.objects.filter(
-                project__department_id=self.request.user.staff.department.id
-            )
+        
+        if hasattr(self.request.user, "staff") and self.request.user.staff:
+            if self.request.user.staff.type == 2:
+                if self.request.user.staff.department:
+                    department_id = self.request.user.staff.department.id
+                    return StudentRequest.objects.filter(project__department_id=department_id)
+                else:
+                    return StudentRequest.objects.none()
+        elif hasattr(self.request.user, "student") and self.request.user.student:
+            student = self.request.user.student
+            return StudentRequest.objects.filter(student=student)
         else:
-            return StudentRequest.objects.filter(student=self.request.user.student)
+            return StudentRequest.objects.none()
 
     def post(self, request, *args, **kwargs):
         try:
@@ -737,6 +800,58 @@ class CommentListView(LoginRequiredMixin, ListView):
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 
+class ProgramView(LoginRequiredView, TemplateView):
+    template_name = "html/dist/program.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["programs"] = Program.objects.all()
+        context["levels"] = Level.objects.all()
+        context["departments"] = Department.objects.all()
+        context["side"] = "program"
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if request.user.is_superuser or request.user.staff.type == 2:
+            try:
+                if request.POST.get("_method") == "DELETE":
+                    program_id = request.POST.get("program_id")
+                    program = get_object_or_404(Program, pk=program_id)
+                    program.delete()
+                    messages.success(request, "Program deleted successfully")
+
+                if request.POST.get("_method") == "PUT":
+                    program_id = request.POST.get("program_id")
+                    name = request.POST.get("name")
+                    code = request.POST.get("code")
+                    department = request.POST.get("department")
+                    level = request.POST.get("level")
+                    program = get_object_or_404(Program, pk=program_id)
+                    program.name = name
+                    program.code = code
+                    program.department = Department.objects.get(id=department)
+                    program.level = Level.objects.get(id=level)
+                    program.save()
+                    messages.success(request, "Program updated successfully")
+
+                if request.POST.get("_method") == "POST":
+                    name = request.POST.get("name")
+                    code = request.POST.get("code")
+                    department = request.POST.get("department")
+                    level = request.POST.get("level")
+                    Program.objects.create(
+                        name=name,
+                        code=code,
+                        department=Department.objects.get(id=department),
+                        level=Level.objects.get(id=level),
+                    )
+                    messages.success(request, "Program added successfully")
+
+            except Exception as e:
+                messages.error(request, f"An error occurred: {e}")
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+
 ######################################### END OF CCBV #########################################
 
 
@@ -788,11 +903,13 @@ def addprojecttype(request):
         if request.method == "POST":
             name = request.POST.get("name")
             department = request.POST.get("department")
-            ProjectType.objects.create(name=name, department_id=department)
+            mentor = request.POST.get("mentor")
+            ProjectType.objects.create(name=name, department_id=department, mentor_id=mentor)
             messages.success(request, "Project Type added successful")
             return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-    except:
-        messages.error(request, "something is wrong")
+    except Exception as e:
+        print(e)
+        messages.error(request, e)
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 
@@ -802,9 +919,10 @@ def editprojecttype(request, pk):
         if request.method == "POST":
             name = request.POST.get("name")
             department = request.POST.get("department")
-            if request.user.is_superuser == True:
+            mentor = request.POST.get("mentor")
+            if request.user.is_superuser or request.user.staff.type ==2:
                 ProjectType.objects.filter(id=pk).update(
-                    name=name, department_id=department
+                    name=name, department_id=department, mentor_id=mentor
                 )
                 messages.success(request, "Project Type edited successful")
                 return HttpResponseRedirect(request.META.get("HTTP_REFERER"))

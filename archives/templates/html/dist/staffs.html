@@ -14,8 +14,10 @@
   <div class="ibox">
     <div class="ibox-head">
       <div class="ibox-title">Staff List</div>
+      <span>
       <button class="btn btn-primary" data-toggle="modal" data-target="#upload"><i class="fa fa-plus"></i> Upload </button>
       <button class="btn btn-primary" data-toggle="modal" data-target="#modal-lg2"><i class="fa fa-plus"></i> New </button>
+      </span>
     </div>
     <div class="ibox-body">
       <div class="table-wrapper" role="group" aria-labelledby="caption">      
@@ -40,11 +42,7 @@
             <td>{{s.user.first_name}}</td>
             <td>{{s.user.username}}</td>
             <td>{{s.department.name | title}}</td>
-            <td>
-            {% for s in  s.user.groups.all %}
-            {{s.name}}
-            {% endfor %}
-            </td>
+            <td>{{s.get_user_type_display}}</td>
             <td>
             {% if s.user.is_active == True %}
             <a data-toggle="modal" style="color:green" data-target="#modal-block{{s.user.id}}">Active</i></a>
@@ -106,7 +104,7 @@
   <div class="modal-dialog" role="document">
   <div class="modal-content">
     <div class="modal-header">
-    <h5 class="modal-title" id="deleteModalLabel">delete Confirmation</h5>
+    <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
     </div>
     <div class="modal-body">
     Delete {{s.user.first_name}} {{s.user.last_name}}
@@ -271,7 +269,7 @@
   <div class="modal-dialog modal-lg1">
     <div class="modal-content">
     <div class="modal-header">
-      <h4 class="modal-title">New Staff</h4>
+      <h4 class="modal-title">Add New Staff</h4>
     </div>
     <div class="modal-body">
   
@@ -308,6 +306,15 @@
         </select>
         </div>
         <div class="col col-md-6">
+        {% comment %} <label>Department</label> {% endcomment %}
+        <select class="form-control" name="type">
+          <option disabled selected value>role</option>
+          {% for value, display in type_choices %}
+            <option value="{{ value }}">{{ display }}</option>
+          {% endfor %}
+        </select>
+        </div>
+        <div class="col col-md-6">
         {% comment %} <label>Gender</label> {% endcomment %}
         <select class="form-control" name="gender" required>
           <option disabled selected value>select gender</option>
@@ -315,9 +322,7 @@
           <option value="Female">Female</option>
         </select>
         </div>
-       
       </div>
- 
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>

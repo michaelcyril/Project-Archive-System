@@ -38,5 +38,6 @@ class StaffForm(forms.ModelForm):
             "mobile",
             "department",
             "gender",
+            "type",
         ]
 

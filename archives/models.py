@@ -102,6 +102,9 @@ class Staff(models.Model):
     def __str__(self):
         return self.user.first_name + " " + self.user.last_name
 
+    def get_user_type_display(self):
+        return dict(self.TYPE).get(self.type, 'Unknown')
+
 
 class ProjectType(models.Model):
     name = models.CharField(max_length=30)
