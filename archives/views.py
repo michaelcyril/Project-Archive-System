@@ -364,8 +364,7 @@ class ManageProjectView(LoginRequiredView, ListView):
     template_name = "html/dist/manage_project.html"
     context_object_name = "d"
     login_url = "/login/"
-    
-    
+
     def get_queryset(self):
         try:
             if self.request.user.is_superuser:
@@ -406,7 +405,7 @@ class ManageProjectView(LoginRequiredView, ListView):
                 print(cover[0].cover.url)
                 context["cover"] = cover[0].cover.url
                 context["project_types"] = ProjectType.objects.filter(department=self.request.user.student.program.department)
-                
+
             except Exception as e:
                 print(e)
                 pass
@@ -421,14 +420,18 @@ class ManageProjectView(LoginRequiredView, ListView):
 
         context["upvotes"] = all_upvotes
         context["f"] = Department.objects.all()
-        
+
         context["document_types"] = ProjectDocument.DOCUMENT_TYPE
         context["s"] = list(
             Student.objects.values_list("academic_year", flat=True).distinct()
         )
+
         name = self.request.POST.get("department")
         context["g"] = ProjectType.objects.filter(department__name=name)
         context["side"] = "manage_project"
+        context["documents"] = ProjectDocument.objects.filter(
+            project__student=self.request.user.student
+        )
         return context
 
     # fuction to add new project document
@@ -440,7 +443,7 @@ class ManageProjectView(LoginRequiredView, ListView):
             note = request.POST.get("note")
             department = request.POST.get("department")
             project_type = request.POST.get("project_type")
-            
+
             try:
                 project = Project.objects.create(
                     title=title, student=student, note=note, department_id=department, project_type_id=project_type
@@ -452,9 +455,7 @@ class ManageProjectView(LoginRequiredView, ListView):
                 print(e)
                 messages.error(request, e)
                 return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-            
-         
-            
+
         if request.POST.get("_type") == "document":
             try:
                 # project_id = request.POST.get("project")
