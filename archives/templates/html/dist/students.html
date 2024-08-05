@@ -13,6 +13,7 @@
 
 <div class="page-content fade-in-up">
   <div class="ibox">
+    {% if request.user.is_superuser or request.user.staff.type == 2 %}
     <div class="ibox-head">
       <div class="ibox-title">Student List</div>
       <span>
@@ -20,6 +21,7 @@
       <button class="btn btn-primary" data-toggle="modal" data-target="#modal-lg2"><i class="fa fa-plus"></i> New</button>
       </span>
     </div>
+    {% endif %}
     <div class="ibox-body">
       <div class="table-wrapper" role="group" aria-labelledby="caption">
         <div class="content content-1">
@@ -29,9 +31,9 @@
                 <th>Registration Number</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Course</th>
-                <th>NTA_Level</th>
-                {% if request.user.is_superuser %}
+                <th>Program</th>
+                <th>NTA Level</th>
+                {% if request.user.is_superuser or request.user.staff.type == 2 %}
                 <th>Action</th>
                 {% endif %}
               </tr>
@@ -42,9 +44,9 @@
                 <td>{{ student.regNo }}</td>
                 <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
                 <td>{{ student.user.email }}</td>
-                <td>{{ student.course | title }}</td>
-                <td>{{ student.NTA_Level }}</td>
-                {% if request.user.is_superuser %}
+                <td>{{ student.program.name | title }} ({{ student.program.code }})</td>
+                <td>{{ student.level }}</td>
+                {% if request.user.is_superuser or request.user.staff.type == 2 %}
                 <td>
                   <button class="btn" data-toggle="modal" data-target="#modal-views{{ student.user.id }}"><i class="fa fa-eye font-14"></i></button>
                   <button class="btn" data-toggle="modal" data-target="#modal-lg1s{{ student.user.id }}"><i class="fa fa-pencil font-14"></i></button>
@@ -132,21 +134,21 @@
                       </div>
                       <hr>
                       <div class="row text-justify">
-                        <div class="col-4 text-muted active">Course</div>
+                        <div class="col-4 text-muted active">Program</div>
                         <div class="col-2 text-muted active"></div>
-                        <div class="col-4 text-muted active">{{ student.course | title }}</div>
+                        <div class="col-4 text-muted active">{{ student.program.name | title }}</div>
                       </div>
                       <hr>
                       <div class="row text-justify">
                         <div class="col-4 text-muted active">Department</div>
                         <div class="col-2 text-muted active"></div>
-                        <div class="col-4 text-muted active">{{ student.department.name | title }}</div>
+                        <div class="col-4 text-muted active">{{ student.program.department.name | title }}</div>
                       </div>
                       <hr>
                       <div class="row text-justify">
-                        <div class="col-4 text-muted active">NTA_Level</div>
+                        <div class="col-4 text-muted active">NTA Level</div>
                         <div class="col-2 text-muted active"></div>
-                        <div class="col-4 text-muted active">{{ student.NTA_Level }}</div>
+                        <div class="col-4 text-muted active">{{ student.program.level }}</div>
                       </div>
                       <hr>
                       <div class="row text-justify">
@@ -203,23 +205,34 @@
                     {% comment %} <label>Mobile</label> {% endcomment %}
                     <input name="mobile" class="form-control" type="tel" pattern="[0-9]{10}" title="insert number,maximum number is 10 digits" value="{{ student.mobile }}" required>
                   </div>
+                  {% comment %} <div class="col col-md-6">
+                    <label>NTA Level</label>
+                    <input type="number" min="4" max="8" name="level" class="form-control" value="{{ student.level }}" required>
+                  </div> {% endcomment %}
                   <div class="col col-md-6">
-                    {% comment %} <label>NAT Level</label> {% endcomment %}
-                    <input type="number" min="4" max="8" name="NTA_Level" class="form-control" value="{{ student.NTA_Level }}" required>
-                  </div>
-                  <div class="col col-md-6">
-                    {% comment %} <label>Course</label> {% endcomment %}
-                    <input type="text" name="course" class="form-control" value="{{ student.course }}">
+                    {% comment %} <label>Program</label> {% endcomment %}
+                    {% comment %} <input type="text" name="program" class="form-control" value="{{ student.program }}"> {% endcomment %}
+                    <select class="form-control" name="academic_year">
+                      <option disabled selected value>program</option>
+                      {% for program in programs %}
+                      <option value="{{ program.id }}" selected>{{ program.name }}</option>
+                      {% endfor %}
+                    </select>
                   </div>
                   <div class="col col-md-6">
                     {% comment %} <label>Academic Year</label> {% endcomment %}
-                    <input type="text" name="academic_year" pattern="\d{4}\/\d{4}" title="eg 2022/2023" class="form-control" value="{{ student.academic_year }}">
+                    <select class="form-control" name="academic_year">
+                      <option disabled selected value>academic year</option>
+                      {% for academic_year in academic_years %}
+                      <option value="{{ academic_year.id }}" selected>{{ academic_year.academic_year }}</option>
+                      {% endfor %}
+                    </select>
                   </div>
 
                   <div class="col col-md-6">
                     {% comment %} <label>Department</label> {% endcomment %}
                     <select class="form-control" name="department">
-                      <option disabled selected value>select department</option>
+                      <option disabled selected value>department</option>
                       {% for department in departments %}
                       {% if student.department.name == department.name %}
                       <option value="{{ department.id }}" selected>{{ department.name }}</option>
@@ -232,7 +245,7 @@
                   <div class="col col-md-6">
                     {% comment %} <label>Gender</label> {% endcomment %}
                     <select class="form-control" name="gender">
-                      <option disabled selected value>select gender</option>
+                      <option disabled selected value>gender</option>
                       {% if student.gender == 'Male' %}
                       <option value="Male" selected>Male</option>
                       <option value="Female">Female</option>
@@ -283,7 +296,7 @@
     <div class="modal-dialog modal-lg1">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title">New Student</h4>
+          <h4 class="modal-title">Add New Student</h4>
         </div>
         <div class="modal-body">
           <p>
@@ -311,21 +324,29 @@
                 <input name="mobile" class="form-control" type="tel" pattern="[0-9]{10}" title="Insert number, maximum number is 10 digits" placeholder="Phone Number" required>
               </div>
               <div class="col col-md-6 pb-2">
-                {% comment %} <label>NAT Level</label> {% endcomment %}
-                <input name="NTA_Level" type="number" class="form-control" title="Only number between 4 and 9" placeholder="NTA Level" required>
-              </div>
-              <div class="col col-md-6 pb-2">
-                {% comment %} <label>Course</label> {% endcomment %}
-                <input type="text" name="course" pattern="[A-Za-z]{1,}" title="Text only required" class="form-control" placeholder="Course" required>
+                {% comment %} <label>Program</label> {% endcomment %}
+                {% comment %} <input type="text" name="program" pattern="[A-Za-z]{1,}" title="Text only required" class="form-control" placeholder="Program" required> {% endcomment %}
+                <select class="form-control" name="program">
+                  <option disabled selected value>Program</option>
+                  {% for program in programs %}
+                  <option value="{{ program.id }}">{{ program.name }}</option>
+                  {% endfor %}
+                </select>
               </div>
               <div class="col col-md-6 pb-2">
                 {% comment %} <label>Academic Year</label> {% endcomment %}
-                <input type="text" name="academic_year" pattern="\d{4}\/\d{4}" title="Eg. 2022/2023" class="form-control" placeholder="Academic Year" required>
+                <select class="form-control" name="academic_year">
+                  <option disabled selected value>Academic Year</option>
+                  {% for academic_year in academic_years %}
+                  <option value="{{ academic_year.id }}">{{ academic_year.academic_year }}</option>
+                  {% endfor %}
+                </select>
+                {% comment %} <input type="text" name="academic_year" pattern="\d{4}\/\d{4}" title="Eg. 2022/2023" class="form-control" placeholder="Academic Year" required> {% endcomment %}
               </div>
               <div class="col col-md-6 pb-2">
                 {% comment %} <label>Department</label> {% endcomment %}
                 <select class="form-control" name="department" required>
-                  <option disabled selected value>Select department</option>
+                  <option disabled selected value>Department</option>
                   {% for department in departments %}
                   <option value="{{ department.id }}">{{ department.name }}</option>
                   {% endfor %}
@@ -334,7 +355,7 @@
               <div class="col col-md-6 pb-2">
                 {% comment %} <label>Gender</label> {% endcomment %}
                 <select class="form-control" name="gender" required>
-                  <option disabled selected value>Select gender</option>
+                  <option disabled selected value>Gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                 </select>

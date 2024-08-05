@@ -15,143 +15,350 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Department',
+            name="Department",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
             ],
             options={
-                'db_table': 'Department',
+                "db_table": "Department",
             },
         ),
         migrations.CreateModel(
-            name='Level',
+            name="Level",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=30)),
-                ('date_created', models.DateField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=30)),
+                ("date_created", models.DateField(auto_now_add=True)),
             ],
             options={
-                'db_table': 'Level',
+                "db_table": "Level",
             },
         ),
         migrations.CreateModel(
-            name='Awards',
+            name="Awards",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('department', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='archives.department')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                (
+                    "department",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="archives.department",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'Awards',
+                "db_table": "Awards",
             },
         ),
         migrations.CreateModel(
-            name='Project',
+            name="Project",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(blank=True, max_length=200, null=True)),
-                ('date_created', models.DateField(auto_now_add=True)),
-                ('accepted', models.BooleanField(default=False)),
-                ('note', models.TextField(blank=True, null=True)),
-                ('department', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='archives.department')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(blank=True, max_length=200, null=True)),
+                ("date_created", models.DateField(auto_now_add=True)),
+                ("accepted", models.BooleanField(default=False)),
+                ("note", models.TextField(blank=True, null=True)),
+                (
+                    "department",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="archives.department",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'project',
+                "db_table": "project",
             },
         ),
         migrations.CreateModel(
-            name='ProjectDocument',
+            name="ProjectDocument",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file', models.FileField(blank=True, null=True, upload_to='Document/Projects')),
-                ('submitted', models.BooleanField(blank=True, default=False, null=True)),
-                ('date_created', models.DateField(auto_now_add=True)),
-                ('project', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='archives.project')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "file",
+                    models.FileField(
+                        blank=True, null=True, upload_to="Document/Projects"
+                    ),
+                ),
+                (
+                    "submitted",
+                    models.BooleanField(blank=True, default=False, null=True),
+                ),
+                ("date_created", models.DateField(auto_now_add=True)),
+                (
+                    "project",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="archives.project",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'document',
+                "db_table": "document",
             },
         ),
         migrations.CreateModel(
-            name='Progress',
+            name="Progress",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('prog', models.IntegerField(blank=True, default=0, null=True)),
-                ('date_created', models.DateField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')], max_length=20)),
-                ('document', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='archives.projectdocument')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("prog", models.IntegerField(blank=True, default=0, null=True)),
+                ("date_created", models.DateField(auto_now_add=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Pending", "Pending"),
+                            ("Approved", "Approved"),
+                            ("Rejected", "Rejected"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "document",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="archives.projectdocument",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'progress',
+                "db_table": "progress",
             },
         ),
         migrations.CreateModel(
-            name='ProjectType',
+            name="ProjectType",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=30)),
-                ('date_created', models.DateField(auto_now_add=True)),
-                ('department', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='archives.department')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=30)),
+                ("date_created", models.DateField(auto_now_add=True)),
+                (
+                    "department",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="archives.department",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'project_type',
+                "db_table": "project_type",
             },
         ),
         migrations.AddField(
-            model_name='project',
-            name='project_type',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='archives.projecttype'),
+            model_name="project",
+            name="project_type",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="archives.projecttype",
+            ),
         ),
         migrations.CreateModel(
-            name='Staff',
+            name="Staff",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('gender', models.CharField(choices=[('Male', 'Male'), ('Female', 'Female')], max_length=20)),
-                ('staff_id', models.CharField(max_length=10, unique=True)),
-                ('mobile', models.CharField(blank=True, max_length=14, null=True)),
-                ('photo', models.ImageField(blank=True, default='default.jpg', null=True, upload_to='Images/Profile/Staff')),
-                ('department', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='archives.department')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "gender",
+                    models.CharField(
+                        choices=[("Male", "Male"), ("Female", "Female")], max_length=20
+                    ),
+                ),
+                ("staff_id", models.CharField(max_length=10, unique=True)),
+                ("mobile", models.CharField(blank=True, max_length=14, null=True)),
+                (
+                    "photo",
+                    models.ImageField(
+                        blank=True,
+                        default="default.jpg",
+                        null=True,
+                        upload_to="Images/Profile/Staff",
+                    ),
+                ),
+                (
+                    "department",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="archives.department",
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'db_table': 'Staff',
+                "db_table": "Staff",
             },
         ),
         migrations.CreateModel(
-            name='Student',
+            name="Student",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('gender', models.CharField(choices=[('Male', 'Male'), ('Female', 'Female')], max_length=20)),
-                ('regNo', models.CharField(max_length=14, unique=True)),
-                ('NTA_Level', models.IntegerField(blank=True, null=True)),
-                ('academic_year', models.CharField(max_length=12)),
-                ('mobile', models.CharField(blank=True, max_length=14, null=True)),
-                ('photo', models.ImageField(blank=True, default='default.jpg', null=True, upload_to='Images/Profile/Student')),
-                ('course', models.CharField(max_length=100)),
-                ('department', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='archives.department')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "gender",
+                    models.CharField(
+                        choices=[("Male", "Male"), ("Female", "Female")], max_length=20
+                    ),
+                ),
+                ("regNo", models.CharField(max_length=14, unique=True)),
+                ("level", models.IntegerField(blank=True, null=True)),
+                ("academic_year", models.CharField(max_length=12)),
+                ("mobile", models.CharField(blank=True, max_length=14, null=True)),
+                (
+                    "photo",
+                    models.ImageField(
+                        blank=True,
+                        default="default.jpg",
+                        null=True,
+                        upload_to="Images/Profile/Student",
+                    ),
+                ),
+                ("course", models.CharField(max_length=100)),
+                (
+                    "department",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="archives.department",
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'db_table': 'Student',
+                "db_table": "Student",
             },
         ),
         migrations.AddField(
-            model_name='project',
-            name='student',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='archives.student'),
+            model_name="project",
+            name="student",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to="archives.student"
+            ),
         ),
         migrations.CreateModel(
-            name='Submission',
+            name="Submission",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('when', models.DateTimeField()),
-                ('academic_year', models.CharField(blank=True, default='2023/2024', max_length=50, null=True)),
-                ('status', models.BooleanField(default=True)),
-                ('department', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='archives.department')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("when", models.DateTimeField()),
+                (
+                    "academic_year",
+                    models.CharField(
+                        blank=True, default="2023/2024", max_length=50, null=True
+                    ),
+                ),
+                ("status", models.BooleanField(default=True)),
+                (
+                    "department",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="archives.department",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'submission',
+                "db_table": "submission",
             },
         ),
     ]

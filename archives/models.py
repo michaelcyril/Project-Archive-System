@@ -9,13 +9,19 @@ date = str(date)
 date = f'{first}/{date}'
 class Level(models.Model):
     name = models.CharField(max_length=30)
-    date_created = models.DateField(auto_now_add=True)
+    created_at = models.DateField(auto_now_add=True)
     class Meta:
         db_table = "Level"
     
     def __str__(self):
         return self.name
-
+    
+class AcademicYear(models.Model):
+    academic_year = models.CharField(max_length=20)
+    
+    def __str__(self):
+        return self.academic_year
+    
 
 class Department(models.Model):
     name = models.CharField(max_length=100)
@@ -26,6 +32,19 @@ class Department(models.Model):
     def __str__(self):
         return self.name
 
+class Program(models.Model):
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=10)
+    department = models.ForeignKey(Department,on_delete=models.CASCADE) # type: ignore
+    level = models.ForeignKey(Level,on_delete=models.CASCADE)
+    created_at = models.DateField(auto_now_add=True)
+    class Meta:
+        db_table = "Program"
+        
+    
+    def __str__(self):
+        return self.name
+    
 
 class Awards(models.Model):
     name = models.CharField(max_length=100)
@@ -44,12 +63,13 @@ class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     gender = models.CharField(choices=GENDER, max_length=20)
     regNo =  models.CharField(unique=True,max_length=14)
-    NTA_Level = models.IntegerField(null=True,blank=True)
-    department = models.ForeignKey(Department,null=True,on_delete=models.CASCADE)
-    academic_year = models.CharField(max_length=12)
+    # level = models.OneToOneField(Level, on_delete=models.CASCADE, null=True,blank=True)
+    # department = models.ForeignKey(Department,null=True,on_delete=models.CASCADE)
+    program = models.ForeignKey(Program, on_delete=models.CASCADE)
+    academic_year = models.OneToOneField(AcademicYear, on_delete=models.CASCADE)
     mobile = models.CharField(max_length=14, null=True,blank=True)
     photo = models.ImageField(upload_to='Images/Profile/Student',default='default.jpg', null=True, blank=True)
-    course = models.CharField(max_length=100)
+    # course = models.CharField(max_length=100)
     
     class Meta:
         db_table = "Student"
@@ -62,7 +82,13 @@ class Staff(models.Model):
         ('Male','Male'),
         ('Female','Female')
     )
+    
+    TYPE = (
+        (1, "Supervisor"),
+        (2, "coordinator")
+    )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    type = models.PositiveIntegerField(choices=TYPE)
     gender = models.CharField(choices=GENDER, max_length=20)
     staff_id =  models.CharField(max_length=10, unique=True)
     department = models.ForeignKey(Department,on_delete=models.CASCADE)
@@ -76,11 +102,15 @@ class Staff(models.Model):
     def __str__(self):
         return self.user.first_name + " " + self.user.last_name
 
+    def get_user_type_display(self):
+        return dict(self.TYPE).get(self.type, 'Unknown')
+
 
 class ProjectType(models.Model):
     name = models.CharField(max_length=30)
     date_created = models.DateField(auto_now_add=True)
-    department= models.ForeignKey(Department,null=True,blank=True,on_delete=models.CASCADE)  
+    department= models.ForeignKey(Department,null=True,blank=True,on_delete=models.CASCADE)
+    mentor = models.ForeignKey(Staff, on_delete=models.CASCADE)
     
     class Meta:
         db_table = "project_type"

@@ -30,7 +30,7 @@
                       <th>Email</th>
                       
                       <th>Course</th>
-                      <th>NTA_Level</th>
+                      <th>level</th>
                       {% comment %} <th>Role</th> {% endcomment %}
                       <th>Status</th>
                       <th>Action</th>
@@ -44,7 +44,7 @@
                       <td>{{s.user.first_name}}</td>
                       <td>{{s.user.username}}</td>
                       <td>{{s.course | title}}</td>
-                      <td>{{s.NTA_Level}}</td>
+                      <td>{{s.level}}</td>
                       {% comment %} <td>
                         
                         
@@ -210,9 +210,9 @@
                                                     <div class="col-4 text-muted active">{{s.department.name | title}}</div>
                                                 </div><hr>
                                                 <div class="row text-center">
-                                                    <div class="col-3 text-muted active">NTA_Level</div>
+                                                    <div class="col-3 text-muted active">level</div>
                                                     <div class="col-2 text-muted active"></div>
-                                                    <div class="col-4 text-muted active">{{s.NTA_Level}}</div>
+                                                    <div class="col-4 text-muted active">{{s.level}}</div>
                                                 </div><hr>
                                                 <div class="row text-center">
                                                     <div class="col-3 text-muted active">Gender</div>
@@ -279,8 +279,8 @@
                             </div>
                             <div class="col col-md-6">
                                 <label>NAT Level</label>
-                                <input type="number" min="4" max="6" name="NTA_Level" class="form-control"
-                                value="{{s.NTA_Level}}">
+                                <input type="number" min="4" max="6" name="level" class="form-control"
+                                value="{{s.level}}">
                             </div>
                             <div class="col col-md-6">
                                 <label>Course</label>
@@ -417,7 +417,7 @@
                             </div>
                             <div class="col col-md-6">
                                 <label>NAT Level</label>
-                                <input type="number" min="4" max="6" name="NTA_Level" class="form-control"
+                                <input type="number" min="4" max="6" name="level" class="form-control"
                                     placeholder="NTA Level">
                             </div>
                             <div class="col col-md-6">
