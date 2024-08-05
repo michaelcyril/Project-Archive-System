@@ -376,8 +376,8 @@ class ManageProjectView(LoginRequiredView, ListView):
                     department_id=self.request.user.staff.department.id
                 )
             elif hasattr(self.request.user, 'student') and self.request.user.student:
-                return ProjectDocument.objects.filter(
-                    project__student_id=self.request.user.student.id
+                return Project.objects.filter(
+                    student_id=self.request.user.student.id
                 )
             else:
                 # Handle the case where the user is neither staff nor student
@@ -389,27 +389,6 @@ class ManageProjectView(LoginRequiredView, ListView):
         except Exception as e:
             messages.error(self.request, str(e))
             return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
-
-
-    # def get_queryset(self):
-    #     try:
-    #         if self.request.user.is_superuser:
-    #             # return only project and not project documents under that project
-    #             return Project.objects.all()
-    #             # return ProjectDocument.objects.all()
-    #         elif self.request.user.staff:
-    #             return Project.objects.filter(
-    #                 department_id=self.request.user.staff.department.id
-    #             )
-
-    #             # return ProjectDocument.objects.filter(project__department_id=self.request.user.staff.department.id)
-    #         else:
-    #             return ProjectDocument.objects.filter(
-    #                 project__student_id=self.request.user.student.id
-    #             )
-    #     except Exception as e:
-    #         messages.error(self.request, e)
-    #         return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -426,6 +405,8 @@ class ManageProjectView(LoginRequiredView, ListView):
                 # print the url of the cover
                 print(cover[0].cover.url)
                 context["cover"] = cover[0].cover.url
+                context["project_types"] = ProjectType.objects.filter(department=self.request.user.student.program.department)
+                
             except Exception as e:
                 print(e)
                 pass
@@ -440,7 +421,7 @@ class ManageProjectView(LoginRequiredView, ListView):
 
         context["upvotes"] = all_upvotes
         context["f"] = Department.objects.all()
-        context["project_types"] = ProjectType.objects.filter(department=self.request.user.student.program.department)
+        
         context["document_types"] = ProjectDocument.DOCUMENT_TYPE
         context["s"] = list(
             Student.objects.values_list("academic_year", flat=True).distinct()
@@ -469,7 +450,7 @@ class ManageProjectView(LoginRequiredView, ListView):
                 return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
             except Exception as e:
                 print(e)
-                messages.error(request, "Something went wrong")
+                messages.error(request, e)
                 return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
             
          
@@ -772,7 +753,7 @@ class CommentListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         if self.request.user.is_superuser:
             return Comment.objects.all()
-        elif self.request.user.is_staff:
+        elif hasattr(self.request.user, "staff") and self.request.user.staff:
             return Comment.objects.filter(supervisor__user=self.request.user)
         else:
             return Comment.objects.filter(

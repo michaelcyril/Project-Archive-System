@@ -62,41 +62,41 @@
                     <tbody>
                         
                         {% for t in d %}
-                        {% if request.user.student %}
-                          <td>{{t.project.student.user.first_name}} {{t.project.student.user.last_name}}</td>
-                            <td>{{t.project.student.regNo}}</td>
-                            <td>{{t.project.title| title}}</td>
-                            <td>{{t.project.project_type}}</td>
+                        {% comment %} {% if request.user.student %}
+                          <td>{{t.student.user.first_name}} {{t.project.student.user.last_name}}</td>
+                            <td>{{t.student.regNo}}</td>
+                            <td>{{t.title| title}}</td>
+                            <td>{{t.project_type}}</td>
                             {% for upvote in upvotes %}
                             {% if t.project.title == upvote.title %}
                             <td>{{ upvote.upvotes }}</td>
-                            {% endif %}
-                            {% endfor %}
-                        {% else %}
+                        {% endif %}
+                        {% endfor %}
+                        {% else %} {% endcomment %}
                         <tr>
                             <td>{{t.student.user.first_name}} {{t.student.user.last_name}}</td>
                             <td>{{t.student.regNo}}</td>
                             <td>{{t.title| title}}</td>
                             <td>{{t.project_type}}</td>
                             {% for upvote in upvotes %}
-                            {% if t.title == upvote.title %}
-                            <td>{{ upvote.upvotes }}</td>
-                            {% endif %}
-                            {% endfor %}
-                            {% endif %}
-                            <td class="px-2 ">
-                                {% if request.user.is_staff %}
-                                <button class="btn">
-                                    <a href="{% url "student_projects" t.id %}"><i class="fa fa-eye font-14"></i></a>
-                                </button>
+                                {% if t.title == upvote.title %}
+                                    <td>{{ upvote.upvotes }}</td>
                                 {% endif %}
-                                {% if request.user.is_superadmin or request.user.student %}
-                                <button class="btn" data-toggle="modal" data-target="#modal-edit{{t.id}}">
-                                    <i class="fa fa-pencil font-14"></i>
-                                </button>
-                                <button class="btn" data-toggle="modal" data-target="#modal-dangerv{{t.id}}">
-                                    <i class="fa fa-trash font-14"></i>
-                                </button>
+                            {% endfor %}
+                            {% comment %} {% endif %} {% endcomment %}
+                            <td class="px-2 ">
+                                {% if request.user.staff %}
+                                    <button class="btn">
+                                        <a href="{% url "student_projects" t.student.id %}"><i class="fa fa-eye font-14"></i></a>
+                                    </button>
+                                {% endif %}
+                                {% if request.user.is_superadmin or request.user.student or request.user.staff.type == 2 %}
+                                    <button class="btn" data-toggle="modal" data-target="#modal-edit{{t.id}}">
+                                        <i class="fa fa-pencil font-14"></i>
+                                    </button>
+                                    <button class="btn" data-toggle="modal" data-target="#modal-dangerv{{t.id}}">
+                                        <i class="fa fa-trash font-14"></i>
+                                    </button>
                                 {% endif %}
                             </td>
                         </tr>
@@ -117,7 +117,7 @@
                         <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
                     </div>
                     <div class="modal-body">
-                        Delete {{t.project.title}} ?
+                        Delete {{t.title}} ?
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -127,6 +127,47 @@
             </div>
         </div>
     </form>
+
+    <form method="POST" action="" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal fade" id="modal-edit{{t.id}}" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel">Edit Document</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col col-md-6">
+                                <label for="document_type">Document Type</label>
+                                <input type="hidden" name="_type" value="document">
+                                <select name="document_type" class="form-control">
+                                    <option value="" disabled selected>Select a document type</option>
+                                    {% for value, display in document_types %}
+                                        <option value="{{ value }}">{{ display }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col col-md-6">
+                                <label for="file">File</label>
+                                <input type="file" name="file" class="form-control">
+                            </div>
+                            <div class="col col-md-12">
+                                <label for="cover">Cover</label>
+                                <input type="file" name="cover" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
     {% endfor %}
     <form method="post" action="{% url 'manage_project' request.user.id %}" enctype="multipart/form-data">
     {% csrf_token %}
@@ -153,7 +194,7 @@
                             <label for="file">File</label>
                             <input type="file" name="file" class="form-control">
                         </div>
-                        <div class="col col-md-6">
+                        <div class="col col-md-12">
                             <label for="cover">Cover</label>
                             <input type="file" name="cover" class="form-control">
                         </div>
@@ -194,7 +235,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col col-md-6">
+                        <div class="col col-md-12">
                             <label for="note">Note</label>
                             <textarea name="note" class="form-control">{{ project.note }}</textarea>
                         </div>

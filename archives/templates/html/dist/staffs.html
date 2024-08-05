@@ -28,6 +28,7 @@
             <th>Staff ID</th>
             <th>Name</th>
             <th>Email</th>
+            <th>Mobile</th>
             <th>Department</th>
             <th>Role</th>
             <th>Status</th>
@@ -39,8 +40,9 @@
           <tr>
             <td><input type="checkbox" id="checkbox1" value="{{s.staff_id}}"></td>
             <td>{{s.staff_id}}</td>
-            <td>{{s.user.first_name}}</td>
-            <td>{{s.user.username}}</td>
+            <td>{{s.user.first_name}} {{s.user.last_name}}</td>
+            <td>{{s.user.email}}</td>
+            <td>{{s.mobile }}</td>
             <td>{{s.department.name | title}}</td>
             <td>{{s.get_user_type_display}}</td>
             <td>
