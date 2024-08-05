@@ -2,6 +2,11 @@ from pathlib import Path
 import os
 from django.contrib.messages import constants as messages
 
+# Configure Django App for Heroku.
+import django_on_heroku
+
+django_on_heroku.settings(locals())
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 DATABASES = {
