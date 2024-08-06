@@ -57,6 +57,7 @@ urlpatterns = [
     ),
     path("project-comment/", CommentListView.as_view(), name="project_comment"),
     path("program/", ProgramView.as_view(), name="program"),
+    path("academic-year/", AcademicYearView.as_view(), name="academic_year"),
     
     ######################## ROLES URLS ############################
     path("manage-roles/", views.manageroles, name="manageroles"),

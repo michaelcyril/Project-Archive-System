@@ -425,13 +425,13 @@ class ManageProjectView(LoginRequiredView, ListView):
         context["s"] = list(
             Student.objects.values_list("academic_year", flat=True).distinct()
         )
-
         name = self.request.POST.get("department")
         context["g"] = ProjectType.objects.filter(department__name=name)
         context["side"] = "manage_project"
-        context["documents"] = ProjectDocument.objects.filter(
-            project__student=self.request.user.student
-        )
+        if hasattr(self.request.user, 'student') and self.request.user.student:
+            context["documents"] = ProjectDocument.objects.filter(
+                project__student=self.request.user.student
+            )
         return context
 
     # fuction to add new project document
@@ -831,6 +831,43 @@ class ProgramView(LoginRequiredView, TemplateView):
 
             except Exception as e:
                 messages.error(request, f"An error occurred: {e}")
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+
+class AcademicYearView(LoginRequiredView, TemplateView):
+    template_name = "html/dist/academic_year.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["academic_years"] = AcademicYear.objects.all()
+        context["side"] = "academic_year"
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if request.user.is_superuser or request.user.staff.type == 2:
+            try:
+                if request.POST.get("_method") == "DELETE":
+                    academic_year_id = request.POST.get("academic_year_id")
+                    academic_year = get_object_or_404(AcademicYear, pk=academic_year_id)
+                    academic_year.delete()
+                    messages.success(request, "Academic Year deleted successfully")
+
+                if request.POST.get("_method") == "PUT":
+                    academic_year_id = request.POST.get("academic_year_id")
+                    academic_year = request.POST.get("academic_year")
+                    academic_year_object = get_object_or_404(AcademicYear, pk=academic_year_id)
+                    academic_year_object.academic_year = academic_year
+                    academic_year_object.save()
+                    messages.success(request, "Academic Year updated successfully")
+
+                if request.POST.get("_method") == "POST":
+                    academic_year = request.POST.get("academic_year")
+                    AcademicYear.objects.create(academic_year=academic_year)
+                    messages.success(request, "Academic Year added successfully")
+
+            except Exception as e:
+                messages.error(request, f"An error occurred: {e}")
+                print(e)
             return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 

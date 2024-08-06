@@ -76,7 +76,7 @@
                 {% comment %} <label>Program</label> {% endcomment %}
                 {% comment %} <input type="text" name="program" pattern="[A-Za-z]{1,}" title="Text only required" class="form-control" placeholder="Program" required> {% endcomment %}
                 <select class="form-control" name="department">
-                  <option disabled selected value>Program</option>
+                  <option disabled selected value>Department</option>
                   {% for department in departments %}
                   <option value="{{ department.id }}" selected>{{ department.name }}</option>
                   {% endfor %}

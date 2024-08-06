@@ -74,7 +74,7 @@
                                     </button>
                                 {% endif %}
                                 {% if request.user.is_superadmin or request.user.student or request.user.staff.type == 2 %}
-                                    <button class="btn" data-toggle="modal" data-target="#modal-edit{{t.id}}">
+                                    <button class="btn" data-toggle="modal" data-target="#modal-edit-project{{t.id}}">
                                         <i class="fa fa-pencil font-14"></i>
                                     </button>
                                     <button class="btn" data-toggle="modal" data-target="#modal-dangerv{{t.id}}">
@@ -134,9 +134,9 @@
                         <button
                             class="btn btn-outline-primary"
                             data-toggle="modal"
-                            data-target="#modal-comment"
+                            data-target="#modal-edit{{document.id}}"
                         >
-                            Give Comment
+                            Edit Document
                         </button>
                         </div>
                     </div>
@@ -164,64 +164,14 @@
                         <button
                             class="btn btn-outline-warning"
                             data-toggle="modal"
-                            data-target="#modal-comment"
+                            data-target="#modal-edit{{document.id}}"
                         >
-                            Give Comment
+                            Edit Document
                         </button>
                         </div>
                     </div>
                     {% endif %}
                     </div>
-             
-                    <!-- Modal -->
-                    <div class="modal fade" id="modal-comment">
-                    <div class="modal-dialog modal-xl">
-                        <div class="modal-content">
-                        <div class="modal-body">
-                            <div class="row">
-                            <div class="col-12">
-                                <div class="ibox">
-                                <div class="ibox-body">
-                                    <form method="post">
-                                    {% csrf_token %}
-                                    <div class="mb-3">
-                                        <input
-                                        type="hidden"
-                                        name="document"
-                                        value="{{document.id}}"
-                                        />
-                                        <input
-                                        type="hidden"
-                                        name="supervisor"
-                                        value="{{request.user.staff.id}}"
-                                        />
-                                        <label for="message-text" class="col-form-label"
-                                        >Comment:</label
-                                        >
-                                        <textarea
-                                        class="form-control"
-                                        id="message-text"
-                                        name="comment"
-                                        rows="4"
-                                        ></textarea>
-                                    </div>
-                                    <button
-                                        type="submit"
-                                        class="btn btn-outline-success"
-                                    >
-                                        Submit
-                                    </button>
-                                    </form>
-                                </div>
-                                </div>
-                            </div>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
-                    </div>
-                    <!-- Modal -->
-
                     {% endfor %}
                 </div>
                 </div>
@@ -251,10 +201,12 @@
             </div>
         </div>
     </form>
+    {% endfor %}
 
+    {% for document in documents %}
     <form method="POST" action="" enctype="multipart/form-data">
         {% csrf_token %}
-        <div class="modal fade" id="modal-edit{{t.id}}" aria-hidden="true">
+        <div class="modal fade" id="modal-edit{{document.id}}" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">

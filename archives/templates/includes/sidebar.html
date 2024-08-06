@@ -87,8 +87,14 @@
             </li>
             <li>
                 <a href="{% url 'level' %}" class="{% if side == 'level' %} active {% endif %}">
-                    <i class="sidebar-item-icon fa fa-university"></i>
+                    <i class="sidebar-item-icon fa fa-level-up"></i>
                     <span class="nav-label">Levels</span>
+                </a>
+            </li>
+             <li>
+                <a href="{% url 'academic_year' %}" class="{% if side == 'academic_year' %} active {% endif %}">
+                    <i class="sidebar-item-icon fa fa-calendar"></i>
+                    <span class="nav-label">Academic Year</span>
                 </a>
             </li>
             <li>
@@ -99,7 +105,7 @@
             </li>
             <li>
                 <a href="{% url 'program' %}" class="{% if side == 'program' %} active {% endif %}">
-                    <i class="sidebar-item-icon fa fa-university"></i>
+                    <i class="sidebar-item-icon fa fa-tasks"></i>
                     <span class="nav-label">Programs</span>
                 </a>
             </li>
