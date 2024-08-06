@@ -473,6 +473,27 @@ class ManageProjectView(LoginRequiredView, ListView):
             except Exception as e:
                 print(e)
                 messages.error(request, e)
+                return HttpResponseRedirect(request.META.get("HTTP_REFERER"))   
+            
+        if request.POST.get("_method") == "PUT":
+            document_id = request.POST.get("document_id")
+            
+            try:
+                document = ProjectDocument.objects.get(pk=document_id)
+                document_type = request.POST.get("document_type")
+                file = request.FILES.get("file")
+                cover = request.FILES.get("cover")
+                document.document_type = document_type
+                if file:
+                    document.file = file
+                if cover:
+                    document.cover = cover
+                document.save()
+                messages.success(request, "Document updated successfully")
+                return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+            except Exception as e:
+                print(e)
+                messages.error(request, e)
                 return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 
@@ -967,7 +988,6 @@ def deleteprojecttype(request, pk):
 
 @login_required(login_url="/login/")
 def level(request):
-
     levels = Level.objects.all().order_by("id")
     return render(request, "html/dist/level.html", {"side": "level", "level": levels})
 
@@ -978,8 +998,8 @@ def deletelevel(request, pk):
         Level.objects.filter(id=pk).delete()
         messages.success(request, "deleted successful")
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-    except:
-        messages.error(request, "something went wrong")
+    except Exception as e:
+        messages.error(request, e)
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 
@@ -1004,8 +1024,9 @@ def addlevel(request):
             Level.objects.create(name=name)
             messages.success(request, "level created successful")
             return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-    except:
-        messages.error(request, "something went wrong")
+    except Exception as e:
+        print(e)
+        messages.error(request, e)
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 
@@ -1016,14 +1037,14 @@ def deletestudent(request, pk):
     return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 
-@login_required(login_url="/login/")
-def delete_level(request, pk):
-    try:
-        Level.objects.filter(id=pk).delete()
-        messages.success(request, "deleted successful")
-        return redirect("/level")
-    except:
-        messages.error(request, "something went wrong")
+# @login_required(login_url="/login/")
+# def delete_level(request, pk):
+#     try:
+#         Level.objects.filter(id=pk).delete()
+#         messages.success(request, "deleted successful")
+#         return redirect("/level")
+#     except:
+#         messages.error(request, "something went wrong")
 
 
 @login_required(login_url="/login/")

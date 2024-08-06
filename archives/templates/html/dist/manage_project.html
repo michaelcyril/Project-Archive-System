@@ -170,6 +170,9 @@
                         </button>
                         </div>
                     </div>
+                    <div class="text-center border-warning">
+                    <i class="fa fa-heart-o" aria-hidden="true"></i>
+                    </div>
                     {% endif %}
                     </div>
                     {% endfor %}
@@ -216,7 +219,8 @@
                         <div class="row">
                             <div class="col col-md-6">
                                 <label for="document_type">Document Type</label>
-                                <input type="hidden" name="_type" value="document">
+                                <input type="hidden" name="_method" value="PUT">
+                                <input type="hidden" name="document_id" value="{{ document.id }}">
                                 <select name="document_type" class="form-control">
                                     <option value="" disabled selected>Select a document type</option>
                                     {% for value, display in document_types %}

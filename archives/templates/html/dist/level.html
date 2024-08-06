@@ -2,16 +2,7 @@
 {% load static %}
 {% include "includes/header.html" %}
 {% include "includes/sidebar.html" %}
-  <!-- START PAGE CONTENT-->
-  {% comment %} <div class="page-heading">
-    <h1 class="page-title">DataTables</h1>
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="index.html"><i class="la la-home font-20"></i></a>
-        </li>
-        <li class="breadcrumb-item">DataTables</li>
-    </ol>
-</div> {% endcomment %}
+
 {% include "includes/messages.html" %}
 <div class="page-content fade-in-up">
     <div class="ibox">
@@ -28,11 +19,8 @@
                 <table id="data-tabler" class="table table-striped table-bordered" style="width:100%">
                 <thead>
                   <tr>
-                    
                     <th>Name</th>
-                    {% if perms.archives.edit_project_type and perms.archives.delete_project_type%}
                     <th>Action</th>
-                    {% endif %}
                   </tr>
                 </thead>
                 <tbody>
@@ -42,17 +30,11 @@
                     
                     <td>{{t.name}}</td>
                     
-                    {% if perms.archives.edit_project_type and perms.archives.delete_project_type%}
                     <td>
-                      {% if perms.archives.edit_project_type %}
                       <button class="btn btn-default" data-toggle="modal"
-                      data-target="#modal-lg16{{t.id}}"><i class="fa fa-pencil font-14"></i></button>
-                      {% endif %}
-                      {% if perms.archives.delete_project_type%}
-                      <button class="btn btn-default"data-toggle="modal" data-target="#modal-dangerv{{t.id}}"><i class="fa fa-trash font-14"></i></button>
-                      {% endif %}
-                                  </td>
-                                  {% endif %}
+                      data-target="#modal-lg2{{t.id}}"><i class="fa fa-pencil font-14"></i></button>
+                      <button class="btn btn-default"data-toggle="modal" data-target="#modal-dangerx{{t.id}}"><i class="fa fa-trash font-14"></i></button>
+                    </td>
                   </tr>
                   {% endfor %}
                  
@@ -65,7 +47,7 @@
 </div>
     {% for d in level %}
 <div>
-    <form method="POST" action="/deletelevel/{{d.id}}">
+    <form method="POST" action="{% url "delete_level" d.id %}">
         {% csrf_token %}
     <div class="modal fade" id="modal-dangerx{{d.id}}" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -74,7 +56,7 @@
               <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
             </div>
             <div class="modal-body">
-              Are you sure you want to delete this record?
+              Are you sure you want to delete level {{ d.name }} ?
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -87,30 +69,27 @@
 </form>
 </div>     
 <div>
-    <form method="post" action="editlevel/{{d.id}}">
+    <form method="post" action="{% url "edit_level" d.id %}">
         {% csrf_token %}
         <div class="modal fade" id="modal-lg2{{d.id}}">
             <div class="modal-dialog modal-lg1">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Edit Department</h4>
-                        {% comment %} <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button> {% endcomment %}
+                        <h4 class="modal-title">Edit NTA Level</h4>
                     </div>
                     <div class="modal-body">
                         <p>
                         <div class="row">
                             <div class="col col-md-12">
-                                <label>Name</label>
+                                <label>Level</label>
                                 <input type="text" name="name" class="form-control"
-                                    placeholder="Department Name" value="{{d.name}}">
+                                    placeholder="Level" value="{{d.name}}">
                             </div>
                         </div>
                         
                         </p>
                     </div>
-                    <div class="modal-footer justify-content-between">
+                    <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                         <button name="addproduct" class="btn btn-primary ">Submit</button>
                         
@@ -129,16 +108,13 @@
     {% endfor %}
 
 
-    <form method="post" action="/addlevel">
+    <form method="post" action="{% url "add_level" %}">
         {% csrf_token %}
         <div class="modal fade" id="modal-lg1">
             <div class="modal-dialog modal-lg1">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h4 class="modal-title">Add Level</h4>
-                        {% comment %} <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button> {% endcomment %}
                     </div>
                     <div class="modal-body">
                         <p>
@@ -146,20 +122,18 @@
                             <div class="col col-md-12">
                                 <label>Name</label>
                                 <input type="text" name="name" class="form-control"
-                                    placeholder="Level Name">
+                                    placeholder="Level">
                             </div>
                         </div>
                         
                         </p>
                     </div>
-                    <div class="modal-footer justify-content-between">
+                    <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                         <button name="addproduct" class="btn btn-primary ">Submit</button>
-                        
                     </div>
                     
                 </div>
-
                 
                 <!-- /.modal-content -->
             </div>

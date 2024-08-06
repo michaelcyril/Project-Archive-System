@@ -80,7 +80,7 @@ urlpatterns = [
     # ),
     # path("subtime/", views.submissionTime, name="subtime"),
     path("level/", views.level, name="level"),
-    path("delete-level/<str:pk>/", views.delete_level, name="delete_level"),
+    path("delete-level/<str:pk>/", views.deletelevel, name="delete_level"),
     path("update-level/<str:pk>/", views.update_level, name="update_level"),
     # path("pdf_upload/", views.pdf_upload, name="pdf_upload"),
     path("add-level/", views.addlevel, name="add_level"),
