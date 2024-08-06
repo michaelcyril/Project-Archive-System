@@ -68,6 +68,27 @@ def preview_pdf(request, pk):
         messages.error(request, "Something went wrong")
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
+def upvote(request):
+    try:
+        if request.method == "POST":
+            project_id = request.POST.get("project_id")
+            project = Project.objects.get(pk=project_id)
+            supervisor = Staff.objects.get(user=request.user)
+            
+            # if supervisor upvote already exists, delete it
+            if Upvote.objects.filter(project=project, supervisor=supervisor).exists():
+                upvote = Upvote.objects.get(project=project, supervisor=supervisor)
+                upvote.delete()
+                messages.success(request, "Upvote removed successfully")
+            else:
+                upvote = Upvote.objects.create(project=project, supervisor=supervisor)
+                messages.success(request, "Upvote added successfully")
+            
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+          
+    except Exception as e:
+        messages.error(request, "Something went wrong")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 ######################################### CCBV #########################################
 
@@ -748,6 +769,14 @@ class StudentProjectCommentView(LoginRequiredMixin, TemplateView):
             project__student_id=self.kwargs.get("pk")
         ).count()
         # context["side"] = "student_projects"
+        # if requested user has upvote to project, return yes
+        if Upvote.objects.filter(
+            supervisor__user=self.request.user, project__student_id=self.kwargs.get("pk")
+        ).exists():
+            context["upvoted"] = True
+        else:
+            context["upvoted"] = False
+            
         return context
 
     def post(self, request, *args, **kwargs):

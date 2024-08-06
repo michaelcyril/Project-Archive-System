@@ -1,4 +1,4 @@
-# PAMS
+# SFYPMS
 
 ## Project Archives Management System
 
