@@ -66,7 +66,7 @@ class Student(models.Model):
     # level = models.OneToOneField(Level, on_delete=models.CASCADE, null=True,blank=True)
     # department = models.ForeignKey(Department,null=True,on_delete=models.CASCADE)
     program = models.ForeignKey(Program, on_delete=models.CASCADE)
-    academic_year = models.OneToOneField(AcademicYear, on_delete=models.CASCADE)
+    academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE)
     mobile = models.CharField(max_length=14, null=True,blank=True)
     photo = models.ImageField(upload_to='Images/Profile/Student',default='default.jpg', null=True, blank=True)
     # course = models.CharField(max_length=100)
