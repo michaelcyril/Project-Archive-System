@@ -37,6 +37,7 @@ urlpatterns = [
         name="deleteprojecttype",
     ),
     path("delete-pdf/<str:pk>/", views.deletepdf, name="deletepdf"),
+    path("delete-document/<str:pk>/", views.delete_document, name="delete_document"),
     path("completed_projects/", CompletedProjectView.as_view(), name="projects"),
     path(
         "manage-project/<str:user_id>/",

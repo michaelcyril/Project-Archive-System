@@ -133,10 +133,22 @@
                         </p>
                         <button
                             class="btn btn-outline-primary"
+                        >
+                             <a href="{% url "preview_pdf" document.id %}"> View</a>
+                        </button>
+                         <button
+                            class="btn btn-outline-warning"
                             data-toggle="modal"
                             data-target="#modal-edit{{document.id}}"
                         >
-                            Edit Document
+                            Edit
+                        </button>
+                         <button
+                            class="btn btn-outline-warning"
+                            data-toggle="modal"
+                            data-target="#modal-delete{{document.id}}"
+                        >
+                            Delete
                         </button>
                         </div>
                     </div>
@@ -163,16 +175,26 @@
                         </p>
                         <button
                             class="btn btn-outline-warning"
+                        >
+                            <a href="{% url "preview_pdf" document.id %}"> View</a>
+                        </button>
+                         <button
+                            class="btn btn-outline-warning"
                             data-toggle="modal"
                             data-target="#modal-edit{{document.id}}"
                         >
-                            Edit Document
+                            Edit
+                        </button>
+                         <button
+                            class="btn btn-outline-warning"
+                            data-toggle="modal"
+                            data-target="#modal-delete{{document.id}}"
+                        >
+                            Delete
                         </button>
                         </div>
                     </div>
-                    <div class="text-center border-warning">
-                    <i class="fa fa-heart-o" aria-hidden="true"></i>
-                    </div>
+                    
                     {% endif %}
                     </div>
                     {% endfor %}
@@ -184,17 +206,17 @@
     </div>
     
     {% endif %}
-    {% for t in d %}
-    <form method="POST" action="{% url "deletepdf" t.id %}">
+    {% for doc in documents %}
+    <form method="POST" action="{% url "delete_document" doc.id %}">
         {% csrf_token %}
-        <div class="modal fade" id="modal-dangerv{{t.id}}" aria-hidden="true">
+        <div class="modal fade" id="modal-delete{{doc.id}}" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
                     </div>
                     <div class="modal-body">
-                        Delete {{t.title}} ?
+                        Delete {{doc.document_type}} ?
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

@@ -404,7 +404,6 @@ class ManageProjectView(LoginRequiredView, ListView):
                 # print the url of the cover
                 print(cover[0].cover.url)
                 context["cover"] = cover[0].cover.url
-                context["project_types"] = ProjectType.objects.filter(department=self.request.user.student.program.department)
 
             except Exception as e:
                 print(e)
@@ -432,6 +431,8 @@ class ManageProjectView(LoginRequiredView, ListView):
             context["documents"] = ProjectDocument.objects.filter(
                 project__student=self.request.user.student
             )
+            context["project_types"] = ProjectType.objects.filter(department=self.request.user.student.program.department)
+            
         return context
 
     # fuction to add new project document
@@ -1035,16 +1036,6 @@ def deletestudent(request, pk):
     User.objects.filter(id=pk).delete()
     messages.success(request, "User deleted successful")
     return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-
-
-# @login_required(login_url="/login/")
-# def delete_level(request, pk):
-#     try:
-#         Level.objects.filter(id=pk).delete()
-#         messages.success(request, "deleted successful")
-#         return redirect("/level")
-#     except:
-#         messages.error(request, "something went wrong")
 
 
 @login_required(login_url="/login/")
@@ -1883,6 +1874,14 @@ def deletepdf(request, pk):
         messages.error(request, "something went wrong")
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
+def delete_document(request, pk):
+    try:
+        ProjectDocument.objects.get(id=pk).delete()
+        messages.success(request, "data deleted successful")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+    except:
+        messages.error(request, "something went wrong")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 def progress(request):
     try:
