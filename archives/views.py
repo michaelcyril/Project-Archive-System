@@ -67,8 +67,8 @@ def preview_pdf(request, pk):
         return render(
             request, "html/dist/preview-document.html", {"side": "a", "d": d, "id": pk}
         )
-    except:
-        messages.error(request, "Something went wrong")
+    except Exception as e:
+        messages.error(request, e)
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 def upvote(request):
@@ -336,33 +336,49 @@ class CompletedProjectView(LoginRequiredView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         try:
-            if self.request.user.is_superuser:
-                cover = ProjectDocument.objects.filter(cover__isnull=False)
-            elif self.request.user.is_staff:
-                cover = ProjectDocument.objects.filter(
-                    cover__isnull=False,
-                    project__department_id=self.request.user.staff.department.id,
+            if self.request.user.is_superuser or hasattr(self.request.user, 'staff') and self.request.user.staff == 2:
+                cover = ProjectDocument.objects.filter(cover__isnull=False).exclude(cover='').first()
+            elif hasattr(self.request.user, 'staff') and self.request.user.staff == 1:
+                cover = (
+                    ProjectDocument.objects.filter(
+                        cover__isnull=False,
+                        project__department_id=self.request.user.staff.department.id,
+                    )
+                    .exclude(cover="")
+                    .first()
                 )
-                print(cover[0].cover.url)
             else:
-                cover = ProjectDocument.objects.filter(cover__isnull=False)
+                cover = ProjectDocument.objects.filter(cover__isnull=False).exclude(cover='').first()
 
-            context["cover"] = cover[0].cover.url
-            context["d"] = ProjectDocument.objects.filter(document_type="Final")
+            # Retrieve final documents and proposal documents
+            final_documents = ProjectDocument.objects.filter(document_type="Final")
+            proposal_documents = ProjectDocument.objects.filter(
+                project__in=final_documents.values_list('project', flat=True),
+                document_type="Proposal"
+            )
+
+            
+            # for doc in final_documents:
+            #     for prop in proposal_documents:
+            #         if prop.project.title == doc.project.title:
+            #             print(doc.id, prop.id)
+
+            # Populate context with required data
+            context["cover"] = cover.cover.url if cover else None
+            context["d"] = final_documents
+            context["proposal_documents"] = proposal_documents
             context["l"] = ProjectDocument.objects.all().count()
             context["f"] = Department.objects.all()
-            context["s"] = list(
-                Student.objects.values_list("academic_year", flat=True).distinct()
-            )
+            context["s"] = list(Student.objects.values_list("academic_year", flat=True).distinct())
             context["g"] = ProjectType.objects.all()
             context["level"] = Level.objects.all()
             name = self.request.POST.get("department")
             context["g"] = ProjectType.objects.filter(department__name=name)
             context["side"] = "projects"
             return context
-        except:
-            messages.error(self.request, "Something went wrong")
-            # return HttpResponseRedirect(self.request.META.get("HTTP_REFERER"))
+        except Exception as e:
+            print(e)
+            messages.error(self.request, e)
 
     def post(self, request, *args, **kwargs):
         try:
@@ -456,7 +472,12 @@ class ManageProjectView(LoginRequiredView, ListView):
                 project__student=self.request.user.student
             )
             context["project_types"] = ProjectType.objects.filter(department=self.request.user.student.program.department)
-            context["project_file_id"] = UploadedProject.objects.filter(student_id=self.request.user.student.id).first().id
+            uploaded_project = UploadedProject.objects.filter(student_id=self.request.user.student.id).first()
+
+            if uploaded_project:
+                context["project_file_id"] = uploaded_project.id
+            else:
+                context["project_file_id"] = None 
         
         return context
 
@@ -717,18 +738,21 @@ class StudentRequestView(LoginRequiredView, ListView):
     template_name = "html/dist/student_request.html"
     context_object_name = "requests"
 
-
     def get_queryset(self):
         if self.request.user.is_superuser:
             return StudentRequest.objects.all()
-        
+
         if hasattr(self.request.user, "staff") and self.request.user.staff:
             if self.request.user.staff.type == 2:
                 if self.request.user.staff.department:
                     department_id = self.request.user.staff.department.id
-                    return StudentRequest.objects.filter(project__department_id=department_id)
+                    return StudentRequest.objects.filter(project__department_id=department_id, project__project_type__mentor_id=self.request.user.staff.id)
                 else:
                     return StudentRequest.objects.none()
+            return StudentRequest.objects.filter(
+                project__project_type__mentor_id=self.request.user.staff.id
+            )
+
         elif hasattr(self.request.user, "student") and self.request.user.student:
             student = self.request.user.student
             return StudentRequest.objects.filter(student=student)

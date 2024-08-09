@@ -103,20 +103,27 @@
                     <span class="nav-label">Departments</span>
                 </a>
             </li>
+             <li>
+                <a href="{% url 'student_request' %}" class="{% if side == 'department' %} active {% endif %}">
+                    <i class="sidebar-item-icon fa fa-hourglass-end"></i>
+                    <span class="nav-label">Student Requests</span>
+                </a>
+            </li>
             <li>
                 <a href="{% url 'program' %}" class="{% if side == 'program' %} active {% endif %}">
                     <i class="sidebar-item-icon fa fa-tasks"></i>
                     <span class="nav-label">Programs</span>
                 </a>
             </li>
+          
+            {% endif %}
+            {% if request.user.staff and not request.user.staff.type == 2 %}
             <li>
                 <a href="{% url 'student_request' %}" class="{% if side == 'department' %} active {% endif %}">
                     <i class="sidebar-item-icon fa fa-hourglass-end"></i>
                     <span class="nav-label">Student Requests</span>
                 </a>
             </li>
-            {% endif %}
-            {% if request.user.is_staff and not request.user.is_superuser %}
             <li class="ac">
                 <a class="" href="{% url "manage_project" request.user.id %}">
                     <i class="sidebar-item-icon fa fa-list"></i>

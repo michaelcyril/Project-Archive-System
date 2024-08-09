@@ -107,7 +107,7 @@ class Staff(models.Model):
 
 
 class ProjectType(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=100)
     date_created = models.DateField(auto_now_add=True)
     department= models.ForeignKey(Department,null=True,blank=True,on_delete=models.CASCADE)
     mentor = models.ForeignKey(Staff, on_delete=models.CASCADE)

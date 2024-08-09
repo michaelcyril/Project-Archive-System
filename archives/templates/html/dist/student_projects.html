@@ -103,6 +103,11 @@
                   >
                     Give Comment
                   </button>
+                   <button
+                            class="btn btn-outline-primary"
+                        >
+                             <a href="{% url "preview_pdf" document.id %}"> View</a>
+                        </button>
                 </div>
               </div>
               {% else %}
@@ -132,6 +137,11 @@
                     data-target="#modal-comment"
                   >
                     Give Comment
+                  </button>
+                   <button
+                            class="btn btn-outline-warning"
+                        >
+                             <a href="{% url "preview_pdf" document.id %}"> View</a>
                   </button>
                 </div>
               </div>

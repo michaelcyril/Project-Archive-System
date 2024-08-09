@@ -16,9 +16,13 @@
             {% for d in d %}
               <div class="col-lg-3 col-md-6 col-sm-6 mt-2 mb-2">
                 <div class="card h-100">
-                  <a href="{% url "preview_pdf" d.id %}">
+                  {% for proposal in proposal_documents %}
+                  {% if proposal.project.title == d.project.title %}
+                  <a href="{% url "preview_pdf" proposal.id %}">
                     <img src="{{cover}}" class="card-img-top rounded-bottom" alt="project cover image">
                   </a>
+                  {% endif %}
+                  {% endfor %}
                   <div class="card-body">
                     <h5 class="card-title">{{d.project.title}}</h5>
                     <p class="card-text">Some quick example text to build ake up the bulk of the card's content.</p>
@@ -26,10 +30,10 @@
                   <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                       {{d.project.project_type.name | title}}
-                      <span class="float-right">
+                      {% comment %} <span class="float-right">
                         9
                         <i class="fa fa-heart-o" aria-hidden="true"></i>
-                      </span>
+                      </span> {% endcomment %}
                     </li>
                     {% if request.user.student %}
                     <li class="list-group-item">
