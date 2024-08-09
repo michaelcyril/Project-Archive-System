@@ -19,11 +19,15 @@ urlpatterns = [
     path("staff/", StaffView.as_view(), name="staff"),
     path("add-staff/", AddStaffView.as_view(), name="addstaff"),
     path("edit-staff/<str:pk>/", views.editstaff, name="editstaff"),
-    path("upload-addstaff/", views.upload_addstaff, name="upload_addstaff"),
+    path("upload-staff/", views.upload_staff, name="upload_staff"),
+    path(
+        "download-student-sample-excel/", download_student_excel, name="student_excel"
+    ),
+    path("download-staff-sample-excel/", download_staff_excel, name="staff_excel"),
     # path("blockuser/<str:pk>/", views.blockuser, name="blockuser"),
     ########################### DEPARTMENT URLS #############################
     path("department/", views.department, name="department"),
-    path("edit-department/<str:pk>/", views.editdepartment, name="editdepartment"),
+    path("edit-department/<str:pk>/", views.editdepartment, name="edit_department"),
     path(
         "delete_department/<str:pk>/", views.deletedepartment, name="deletedepartment"
     ),
@@ -60,6 +64,8 @@ urlpatterns = [
     path("program/", ProgramView.as_view(), name="program"),
     path("academic-year/", AcademicYearView.as_view(), name="academic_year"),
     path("upvote/", views.upvote, name="upvote"),
+    path("upload-project/", upload_project, name="upload_project"),
+    path("download-project/<int:file_id>/", download_project, name="download_project"),
     
     ######################## ROLES URLS ############################
     path("manage-roles/", views.manageroles, name="manageroles"),

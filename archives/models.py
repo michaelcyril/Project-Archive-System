@@ -15,13 +15,13 @@ class Level(models.Model):
     
     def __str__(self):
         return self.name
-    
+
 class AcademicYear(models.Model):
     academic_year = models.CharField(max_length=20)
     
     def __str__(self):
         return self.academic_year
-    
+
 
 class Department(models.Model):
     name = models.CharField(max_length=100)
@@ -44,7 +44,7 @@ class Program(models.Model):
     
     def __str__(self):
         return self.name
-    
+
 
 class Awards(models.Model):
     name = models.CharField(max_length=100)
@@ -218,3 +218,14 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.supervisor.user.username} on {self.document.project.title}"
+
+
+class UploadedProject(models.Model):
+    student = models.OneToOneField(Student, on_delete=models.CASCADE)
+    project = models.FileField(upload_to="projects/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+    def __str__(self):
+        return f"{self.project.name} uploaded by {self.student.user.first_name} {self.student.user.last_name}"
+

@@ -5,7 +5,7 @@ import os
 import datetime
 from django.shortcuts import HttpResponseRedirect
 from django.contrib.auth.decorators import *
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from fuzzywuzzy import fuzz
 import PyPDF2
@@ -33,6 +33,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import *
 from django.db.models import Sum
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import FileResponse
+import os
+from django.conf import settings
 
 
 # CCBV
@@ -453,10 +456,11 @@ class ManageProjectView(LoginRequiredView, ListView):
                 project__student=self.request.user.student
             )
             context["project_types"] = ProjectType.objects.filter(department=self.request.user.student.program.department)
-            
+            context["project_file_id"] = UploadedProject.objects.filter(student_id=self.request.user.student.id).first().id
+        
         return context
 
-    # fuction to add new project document
+    # function to add new project document
     def post(self, request, *args, **kwargs):
         if request.POST.get("_type") == "project":
             # create new projet
@@ -768,7 +772,12 @@ class StudentProjectCommentView(LoginRequiredMixin, TemplateView):
         context["upvotes"] = Upvote.objects.filter(
             project__student_id=self.kwargs.get("pk")
         ).count()
-        # context["side"] = "student_projects"
+        context["project_file_id"] = UploadedProject.objects.filter(
+            student_id=self.kwargs.get("pk")
+        ).first().id
+        # print(context["project_file_id"])
+        
+        context["side"] = "student_projects"
         # if requested user has upvote to project, return yes
         if Upvote.objects.filter(
             supervisor__user=self.request.user, project__student_id=self.kwargs.get("pk")
@@ -1238,106 +1247,206 @@ def editstaff(request, pk):
 
 
 @login_required(login_url="/login/")
-def upload_addstaff(request):
-    try:
-        if request.method == "POST":
-            file_data = request.FILES["file"]
-            path = str(file_data)
-            if path.endswith(".xlsx"):
-                df = pd.read_excel(file_data)
-
-                for index, row in df.iterrows():
-                    dept_id = Department.objects.get(name=row["department"])
-                    role_id = Group.objects.get(name=row["role"])
-                    if User.objects.filter(email=row["email"]).exists():
-                        continue
-                    else:
-                        user = User.objects.create(
-                            first_name=row["name"],
-                            email=row["email"],
-                            username=row["username"],
-                            is_staff=True,
-                            password=make_password("@DIT123"),
-                        )
-
-                        u = User.objects.get(username=row["email"])
-                        u.groups.add(
-                            role_id,
-                        )
-                        Staffs = Staff.objects.create(
-                            user=user,
-                            gender=row["gender"],
-                            staff_id=row["staff_id"],
-                            mobile=row["mobile"],
-                            department=dept_id,
-                        )
-
-                messages.success(request, "Staff created successful")
-                return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-            else:
-                messages.error(request, "Upload excel file only")
-                return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-    except:
-        messages.error(request, "something went wrong")
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+def download_student_excel(request):
+    file_path = os.path.join(
+        settings.STATIC_ROOT, "student sample excel.xlsx"
+    )
+    if os.path.exists(file_path):
+        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename='sample_students.xlsx')
+    else:
+        # Handle the case where the file does not exist
+        return HttpResponse(status=404)
 
 
 @login_required(login_url="/login/")
 def upload_student(request):
+    if request.method != "POST":
+        messages.error(request, "Invalid request method.")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+    file_data = request.FILES.get("file")
+    if not file_data or not str(file_data).endswith(".xlsx"):
+        messages.error(request, "Please upload an Excel (.xlsx) file.")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
     try:
-        if request.method == "POST":
-            file_data = request.FILES["file"]
-
-            path = str(file_data)
-            if path.endswith(".xlsx"):
-                df = pd.read_excel(file_data)
-                for index, row in df.iterrows():
-
-                    dept_id = Department.objects.get(name=row["Department"])
-                    role_id = Group.objects.get(name="Student")
-                    users = User.objects.filter(username=row["Email"]).exists()
-                    user = Student.objects.filter(
-                        regNo=row["Registration Number"]
-                    ).exists()
-                    if user or users or (user and users):
-                        continue
-                    else:
-
-                        user = User.objects.create(
-                            first_name=row["Name"],
-                            email=row["Email"],
-                            username=row["Email"],
-                            password=make_password("@DIT123"),
-                        )
-
-                        u = User.objects.get(username=row["email"])
-                        u.groups.add(
-                            role_id,
-                        )
-                        Student.objects.create(
-                            user=user,
-                            gender=row["Gender"],
-                            regNo=row["Registration Number"],
-                            course=row["Course"],
-                            mobile=row["Mobile"],
-                            department=dept_id,
-                            academic_year=row["Academic Year"],
-                            level=int(row["level"]),
-                        )
-
-                        messages.success(request, "Student created successful")
-
-                        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-
-            else:
-                messages.error(request, "Exel file only required")
-
-                return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-    except:
-        messages.success(
-            request,
-            "The csv should contain Department,Registration Number, Name, Course, Academic Year,Gender,Mobile,level,Email",
+        df = pd.read_excel(file_data)
+    except Exception as e:
+        messages.error(
+            request, "Error reading the Excel file. Please ensure it's valid."
         )
+        print(e)
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+    for _, row in df.iterrows():
+        try:
+            program = Program.objects.get(name=row["Program"])
+        except Exception as e:
+            messages.error(request, f"Program '{row['Program']}' does not exist.")
+            print(e)
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+        try:
+            academic_year = AcademicYear.objects.get(academic_year=row["Academic Year"])
+        except Exception as e:
+            messages.error(request, f"Academic Year '{row['Academic Year']}' does not exist.")
+            print(e)
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+        if Student.objects.filter(regNo=row["Registration Number"]).exists():
+            messages.error(
+                request,
+                f"Student with Registration Number '{row['Registration Number']}' already exists.",
+            )
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+        if User.objects.filter(username=row["Last Name"]).exists():
+            messages.error(
+                request, f"User with username '{row['Last Name']}' already exists."
+            )
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+        try:
+            user = User.objects.create(
+                first_name=row["First Name"],
+                last_name=row["Last Name"],
+                email=row["Email"],
+                username=row["Last Name"],
+                password=make_password(str(row["Registration Number"])),
+            )
+
+            Student.objects.create(
+                user=user,
+                gender=row["Gender"],
+                regNo=row["Registration Number"],
+                mobile=row["Mobile"],
+                program=program,
+                academic_year=academic_year,
+            )
+            messages.success(request, "Student created successfully.")
+        except Exception as e:
+            messages.error(request, f"Error creating student for {row['Last Name']}.")
+            print(e)
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+
+@login_required(login_url="/login/")
+def download_staff_excel(request):
+    file_path = os.path.join(settings.STATIC_ROOT, "staff sample excel.xlsx")
+    if os.path.exists(file_path):
+        return FileResponse(
+            open(file_path, "rb"), as_attachment=True, filename="sample_staff.xlsx"
+        )
+    else:
+        # Handle the case where the file does not exist
+        return HttpResponse(status=404)
+
+
+@login_required(login_url="/login/")
+def upload_staff(request):
+    if request.method != "POST":
+        messages.error(request, "Invalid request method.")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+    file_data = request.FILES.get("file")
+    if not file_data or not str(file_data).endswith(".xlsx"):
+        messages.error(request, "Please upload an Excel (.xlsx) file.")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+    try:
+        df = pd.read_excel(file_data)
+    except Exception as e:
+        messages.error(
+            request, "Error reading the Excel file. Please ensure it's valid."
+        )
+        print(e)
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+    for _, row in df.iterrows():
+        try:
+            department = Department.objects.get(name=row["Department"])
+        except Exception as e:
+            messages.error(request, f"Department '{row['Department']}' does not exist.")
+            print(e)
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+        valid_type_names = [t[1] for t in Staff.TYPE]
+        staff_type = row["Staff Type"]
+        if staff_type not in valid_type_names:
+            messages.error(request, f"Invalid staff type '{staff_type}'.")
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+        else:
+            staff_type = [t[0] for t in Staff.TYPE if t[1] == staff_type][0]
+
+        if Staff.objects.filter(staff_id=row["Staff ID"]).exists():
+            messages.error(
+                request,
+                f"Staff with ID '{row['Staff ID']}' already exists.",
+            )
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+        if User.objects.filter(username=row["Last Name"]).exists():
+            messages.error(
+                request, f"User with username '{row['Last Name']}' already exists."
+            )
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+        try:
+            user = User.objects.create(
+                first_name=row["First Name"],
+                last_name=row["Last Name"],
+                email=row["Email"],
+                username=row["Last Name"],
+                password=make_password(str(row["Staff ID"] + "@DIT123")),
+            )
+
+            Staff.objects.create(
+                user=user,
+                gender=row["Gender"],
+                staff_id=row["Staff ID"],
+                type=staff_type,
+                mobile=row["Mobile"],
+                department=department,
+            )
+            messages.success(request, "Staff created successfully.")
+        except Exception as e:
+            messages.error(request, f"Error creating staff for {row['Last Name']}.")
+            print(e)
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+@login_required(login_url="/login/")
+def upload_project(request):
+    if request.method == "POST":
+        file = request.FILES.get("file")
+        if not file:
+            messages.error(request, "No file uploaded.")
+            return redirect("upload_file")
+
+        # Save the uploaded file
+        student = Student.objects.get(user=request.user)
+        uploaded_file = UploadedProject(student=student, project=file)
+        uploaded_file.save()
+
+        messages.success(request, "Project uploaded successfully.")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+@login_required(login_url="/login/")
+def download_project(request, file_id):
+    uploaded_file = get_object_or_404(UploadedProject, id=file_id)
+
+    # Check if the user is allowed to download the file (e.g., staff or related to the file)
+    is_staff = False
+    if hasattr(request.user, "staff"):
+        is_staff = request.user.staff.type == 2
+
+    # Allow the uploader or staff with appropriate role
+    if is_staff or request.user.student == uploaded_file.student:
+        return FileResponse(open(uploaded_file.project.path, "rb"), as_attachment=True)
+    else:
+        messages.error(request, "You are not authorized to download this file.")
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 
@@ -1415,7 +1524,7 @@ y = "table of content"
 ab = "ABSTRACT"
 t = "TITLE"
 g = "DAR ES SALAAM"
-d = "DARESSALAAMINSTITUTEOFTECHNOLOGY"
+d = "DAR ES SALAAM INSTITUTE OF TECHNOLOGY"
 objectives = [ab, t, k]
 
 dsm = [g]

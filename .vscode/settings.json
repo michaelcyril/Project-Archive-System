@@ -19,6 +19,8 @@
     "editroles",
     "editstaff",
     "editstudent",
+    "Exel",
+    "iterrows",
     "manageroles",
     "poppler",
     "projectlist",
